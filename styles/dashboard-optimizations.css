@@ -1,0 +1,72 @@
+/* 
+  Dashboard-specific optimizations for theme transitions
+  These styles ensure smooth transitions for dashboard elements
+*/
+
+/* Card transitions */
+.property-card {
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
+  transition-property: transform, box-shadow, background-color, border-color, color;
+  transition-duration: 0.4s;
+  transition-timing-function: cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Content transitions */
+.dashboard-content * {
+  backface-visibility: hidden;
+}
+
+/* Button transitions */
+.dashboard button, 
+.dashboard a[role="button"],
+.dashboard .btn-luxury,
+.dashboard .btn-luxury-outline {
+  will-change: background-color, color, border-color;
+  transition-property: background-color, color, border-color, box-shadow, transform;
+  transition-duration: 0.3s;
+  transition-timing-function: ease-in-out;
+}
+
+/* Link transitions */
+.dashboard a, 
+.dashboard .link, 
+.dashboard .clickable {
+  transition-property: color, opacity;
+  transition-duration: 0.35s;
+  transform: translateZ(0);
+}
+
+/* Dashboard alerts */
+.dashboard .alert {
+  will-change: background-color, border-color;
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.4s;
+}
+
+/* Text elements with forced hardware acceleration */
+.dashboard h1,
+.dashboard h2,
+.dashboard h3,
+.dashboard p,
+.dashboard span,
+.dashboard .text {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Special optimization for theme indicator elements */
+.theme-indicator {
+  will-change: opacity, transform;
+  transition-property: opacity, transform, color, background-color;
+  transition-duration: 0.45s;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateZ(0);
+}
+
+/* Smooth border transitions */
+.border-transition {
+  will-change: border-color;
+  transition: border-color 0.35s cubic-bezier(0.2, 0, 0, 1);
+  transform: translateZ(0);
+}

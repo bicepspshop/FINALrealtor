@@ -1,0 +1,371 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Theme Transition Styles */
+@import '../styles/theme-transition.css';
+@import '../styles/dashboard-optimizations.css';
+@import '../styles/card-expand-effect.css';
+
+/* Google Fonts Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap');
+
+/* Custom Fonts */
+@font-face {
+  font-family: 'NTSomic';
+  src: url('/fonts/NTSomic.woff2') format('woff2'),
+       url('/fonts/NTSomic.woff') format('woff'),
+       url('/fonts/NTSomic.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'LTSuperior';
+  src: url('/fonts/LTSuperior.woff2') format('woff2'),
+       url('/fonts/LTSuperior.woff') format('woff'),
+       url('/fonts/LTSuperior.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
+
+  --primary: 210 100% 50%;
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 0 0% 95%;
+  --secondary-foreground: 0 0% 10%;
+
+  --muted: 0 0% 95%;
+  --muted-foreground: 0 0% 45%;
+
+  --accent: 210 100% 50%;
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 210 100% 50%;
+
+  --radius: 0.5rem;
+}
+
+/* Force NT Somic on all headings and titles */
+h1, h2, h3, h4, h5, h6,
+.title, .heading, [class*="title"], [class*="heading"],
+.font-serif, .font-display {
+  font-family: 'NTSomic', 'Playfair Display', serif !important;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    /* Add a smooth transition effect for theme changes */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  html * {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  body {
+    @apply bg-background text-foreground font-sans; /* LTSuperior font */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-medium tracking-tight; /* NTSomic font */
+  }
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+  .serif-text {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-elegant;
+  }
+
+  .icon-button-hover {
+    @apply transition-all duration-200 hover:scale-105 hover:shadow-glow;
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 8px 2px rgba(67, 112, 255, 0.3);
+  }
+
+  .shadow-card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-blue-800;
+  }
+
+  .bg-gradient-subtle {
+    background: linear-gradient(to right, #f8f9fa, #e9ecef);
+  }
+  
+  .bg-gradient-luxury {
+    background: linear-gradient(135deg, #FFFFFF 0%, #F5EDD7 100%);
+  }
+
+  .dark .bg-gradient-luxury {
+    background: linear-gradient(135deg, #1E1E1E 0%, #292929 100%);
+  }
+  
+  .bg-gradient-silver {
+    background: linear-gradient(135deg, #E8E8E8 0%, #D3D4D9 100%);
+  }
+  
+  /* Royal blue elements for dark mode */
+  .dark .gold-accent {
+    color: #4169E1; /* Royal blue */
+  }
+  
+  .dark .royal-accent {
+    color: #4169E1; /* Royal blue */
+  }
+  
+  .moonstone-text {
+    color: #FFFFF0; /* Ivory */
+  }
+  
+  /* Theme transition specific classes */
+  .theme-fade-in {
+    opacity: 0;
+    animation: fadeIn 0.3s ease-in-out forwards;
+  }
+  
+  .dark-only {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .light-only {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  
+  .dark .dark-only {
+    opacity: 1;
+    visibility: visible;
+  }
+  
+  .dark .light-only {
+    opacity: 0;
+    visibility: hidden;
+  }
+  
+  .btn-luxury {
+    @apply bg-luxury-black text-white px-6 py-3 rounded-sm font-medium transition-all duration-300 hover:bg-black hover:shadow-elegant;
+  }
+  
+  .btn-luxury-outline {
+    @apply bg-transparent text-luxury-black border border-luxury-black px-6 py-3 rounded-sm font-medium transition-all duration-300 hover:bg-luxury-black hover:text-white;
+  }
+  
+  .card-luxury {
+    @apply bg-white rounded-md shadow-subtle transition-all duration-300 hover:shadow-elegant;
+  }
+  
+  .section-padding {
+    @apply py-16 md:py-24;
+  }
+  
+  .container-luxury {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .animate-slide-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUp 0.5s ease-out forwards;
+    will-change: opacity, transform;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-in-right {
+    opacity: 0;
+    transform: translateX(20px);
+    animation: slideInRight 300ms ease-in-out forwards;
+    will-change: opacity, transform;
+  }
+
+  .animate-slide-in-left {
+    opacity: 0;
+    transform: translateX(-20px);
+    animation: slideInLeft 300ms ease-in-out forwards;
+    will-change: opacity, transform;
+  }
+}
+
+@layer utilities {
+  .theme-transition {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
+  }
+
+  .animate-fade-in {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out forwards;
+  }
+
+  .animate-fade-in-up {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.7s ease-out forwards;
+    will-change: opacity, transform;
+  }
+  
+  .animate-fade-in-down {
+    opacity: 0;
+    transform: translateY(-20px);
+    animation: fadeInDown 0.7s ease-out forwards;
+    will-change: opacity, transform;
+  }
+  
+  .animate-scale-in {
+    opacity: 0;
+    transform: scale(0.95);
+    animation: scaleIn 0.5s ease-in-out forwards;
+    will-change: opacity, transform;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  
+  .text-shadow-md {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  }
+  
+  .bg-blur {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .grid-auto-fit {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+
+  /* Rose mask effect classes */
+  .rose-mask {
+    background-size: 0% 0%;
+  }
+  
+  .rose-mask-hover {
+    background-size: 200% 200% !important;
+  }
+}
