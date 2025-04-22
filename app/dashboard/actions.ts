@@ -8,15 +8,20 @@ export async function logoutUser() {
   cookies().delete("auth-token")
 }
 
-export async function createCollection(name: string, userId: string) {
+export async function createCollection(name: string, userId: string, coverImageUrl?: string | null) {
   try {
     const supabase = getServerClient()
+    
+    // Generate a share_id immediately for this collection
+    const shareId = nanoid(10)
 
     const { data, error } = await supabase
       .from("collections")
       .insert({
         name,
         user_id: userId,
+        share_id: shareId,
+        cover_image: coverImageUrl || null,
       })
       .select("id")
       .single()
@@ -26,7 +31,7 @@ export async function createCollection(name: string, userId: string) {
       return { error: "Failed to create collection" }
     }
 
-    return { success: true, collectionId: data.id }
+    return { success: true, collectionId: data.id, shareId }
   } catch (error) {
     console.error("Unexpected error creating collection:", error)
     return { error: "An unexpected error occurred" }

@@ -15,7 +15,7 @@ interface ImageUploadProps {
   initialImages?: string[]
 }
 
-export function ImageUpload({ onImagesChange, maxFiles = 5, initialImages = [] }: ImageUploadProps) {
+export function ImageUpload({ onImagesChange, maxFiles = 10, initialImages = [] }: ImageUploadProps) {
   const [files, setFiles] = useState<Array<{ file?: File; preview: string; uploading: boolean; url?: string }>>([])
   const [error, setError] = useState<string | null>(null)
   const { toast } = useToast()

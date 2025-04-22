@@ -114,7 +114,7 @@ export default function LoginPage() {
                         <Input 
                           type="email" 
                           placeholder="ivan@example.com" 
-                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-moonstone focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 py-5 theme-transition"
+                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 py-5 theme-transition"
                           {...field} 
                         />
                       </FormControl>
@@ -137,7 +137,7 @@ export default function LoginPage() {
                         <Input 
                           type="password" 
                           placeholder="********" 
-                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-moonstone focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 py-5 theme-transition"
+                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 py-5 theme-transition"
                           {...field} 
                         />
                       </FormControl>

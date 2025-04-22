@@ -25,6 +25,16 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
     }
   }, [isOpen, initialIndex])
 
+  // Track fullscreen changes made externally (like Escape key)
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
   const nextImage = () => {
     if (images.length <= 1 || isTransitioning) return
     
@@ -51,11 +61,16 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
 
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => {
-        setIsFullscreen(true)
-      }).catch(err => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`)
-      })
+      // Get the dialog content element
+      const dialogContent = document.querySelector('.gallery-dialog-content') as HTMLElement
+      
+      if (dialogContent) {
+        dialogContent.requestFullscreen().then(() => {
+          setIsFullscreen(true)
+        }).catch(err => {
+          console.error(`Error attempting to enable fullscreen: ${err.message}`)
+        })
+      }
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen().then(() => {
@@ -72,7 +87,7 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
       nextImage()
     } else if (e.key === 'ArrowLeft') {
       prevImage()
-    } else if (e.key === 'Escape') {
+    } else if (e.key === 'Escape' && !isFullscreen) {
       onClose()
     }
   }
@@ -85,7 +100,7 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
       <DialogTitle className="sr-only">Просмотр изображений</DialogTitle>
       
       <DialogContent 
-        className="max-w-7xl w-full p-0 bg-[#121212]/95 border-none rounded-none md:rounded-sm overflow-hidden" 
+        className="max-w-7xl w-full p-0 bg-[#121212]/95 border-none rounded-none md:rounded-sm overflow-hidden gallery-dialog-content" 
         onKeyDown={handleKeyDown}
       >
         <div className="relative h-[85vh] w-full">
@@ -125,20 +140,25 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
           </div>
 
           {/* Main image display */}
-          <div className="relative h-full w-full flex items-center justify-center">
+          <div 
+            className="relative h-full w-full flex items-center justify-center cursor-pointer"
+            onClick={(e) => {
+              // Only trigger if clicking the background, not on controls
+              if (e.currentTarget === e.target) {
+                nextImage();
+              }
+            }}
+          >
             {images.map((image, idx) => (
               <div
                 key={idx}
                 className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-in-out
                   ${idx === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
               >
-                <Image
+                <img
                   src={image || "/placeholder.svg"}
                   alt={`Изображение ${idx + 1}`}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 1200px) 100vw, 1200px"
-                  priority={idx === currentIndex}
+                  className="object-contain max-h-full max-w-full h-auto w-auto"
                 />
               </div>
             ))}
@@ -150,7 +170,10 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
                   className="absolute left-4 md:left-8 z-20 bg-white/90 backdrop-blur-sm text-[#2C2C2C] rounded-full p-3 
                     transition-all duration-300 hover:shadow-md hover:scale-105 active:scale-95 
                     focus:outline-none focus:ring-2 focus:ring-[#CBA135]/50"
-                  onClick={prevImage}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevImage();
+                  }}
                   disabled={isTransitioning}
                 >
                   <ChevronLeft className="h-6 w-6" />
@@ -159,7 +182,10 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
                   className="absolute right-4 md:right-8 z-20 bg-white/90 backdrop-blur-sm text-[#2C2C2C] rounded-full p-3 
                     transition-all duration-300 hover:shadow-md hover:scale-105 active:scale-95
                     focus:outline-none focus:ring-2 focus:ring-[#CBA135]/50"
-                  onClick={nextImage}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextImage();
+                  }}
                   disabled={isTransitioning}
                 >
                   <ChevronRight className="h-6 w-6" />
@@ -180,13 +206,15 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
                     ${idx === currentIndex 
                       ? 'border-[#CBA135] shadow-[0_0_10px_rgba(203,161,53,0.5)]' 
                       : 'border-white/30 opacity-70 hover:opacity-100'}`}
-                  onClick={() => setCurrentIndex(idx)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentIndex(idx);
+                  }}
                 >
-                  <Image
+                  <img
                     src={image}
                     alt={`Миниатюра ${idx + 1}`}
-                    fill
-                    className="object-cover"
+                    className="object-cover w-full h-full"
                   />
                 </button>
               ))}

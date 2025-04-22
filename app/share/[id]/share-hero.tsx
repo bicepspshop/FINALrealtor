@@ -10,6 +10,10 @@ interface ShareHeroProps {
   }
   agent?: {
     name?: string
+    email?: string
+    phone?: string
+    description?: string
+    avatar_url?: string
   }
 }
 

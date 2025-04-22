@@ -1,12 +1,12 @@
 import { getServerClient } from "./supabase"
 
-// Initialize storage bucket
+// Initialize storage buckets
 export async function initializeStorage() {
   try {
     console.log("Инициализация хранилища Supabase...")
     const supabase = getServerClient()
 
-    // Проверяем существование бакета
+    // Проверяем существование бакетов
     const { data: buckets, error } = await supabase.storage.listBuckets()
 
     if (error) {
@@ -14,50 +14,71 @@ export async function initializeStorage() {
       return
     }
 
-    const bucketExists = buckets?.find((bucket) => bucket.name === "property-images")
+    // Определяем все необходимые бакеты и их настройки
+    const requiredBuckets = [
+      { name: "property-images", public: true, fileSizeLimit: 10485760 }, // 10MB
+      { name: "collection-covers", public: true, fileSizeLimit: 5242880 }, // 5MB
+      { name: "avatars", public: true, fileSizeLimit: 5242880 } // 5MB
+    ]
 
-    if (!bucketExists) {
-      console.log("Создание бакета 'property-images'...")
+    // Создаем отсутствующие бакеты
+    for (const bucketConfig of requiredBuckets) {
+      const bucketExists = buckets?.find((bucket) => bucket.name === bucketConfig.name)
 
-      // Создаем бакет, если он не существует
-      const { error: createError } = await supabase.storage.createBucket("property-images", {
-        public: true,
-        fileSizeLimit: 10485760, // 10MB
-      })
+      if (!bucketExists) {
+        console.log(`Создание бакета '${bucketConfig.name}'...`)
 
-      if (createError) {
-        console.error("Ошибка при создании бакета:", createError)
-        return
-      }
+        // Создаем бакет, если он не существует
+        const { error: createError } = await supabase.storage.createBucket(bucketConfig.name, {
+          public: bucketConfig.public,
+          fileSizeLimit: bucketConfig.fileSizeLimit,
+        })
 
-      console.log("Бакет 'property-images' успешно создан")
-    } else {
-      console.log("Бакет 'property-images' уже существует")
-    }
+        if (createError) {
+          console.error(`Ошибка при создании бакета '${bucketConfig.name}':`, createError)
+          continue
+        }
 
-    // Проверяем доступность бакета
-    try {
-      const testFileName = `test-${Date.now()}.txt`
-      const testContent = new Blob(["test"], { type: "text/plain" })
+        // Устанавливаем политики доступа для бакета
+        // Разрешаем публичный доступ для чтения и загрузки
+        try {
+          const { error: policyError } = await supabase.storage.from(bucketConfig.name).createSignedUploadUrl('test.txt')
+          if (policyError) {
+            console.error(`Ошибка при настройке политик для бакета '${bucketConfig.name}':`, policyError)
+          }
+        } catch (policyError) {
+          console.error(`Ошибка при настройке политик для бакета '${bucketConfig.name}':`, policyError)
+        }
 
-      console.log("Тестирование доступа к хранилищу...")
-
-      // Пробуем загрузить тестовый файл
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from("property-images")
-        .upload(testFileName, testContent)
-
-      if (uploadError) {
-        console.error("Тест загрузки не удался:", uploadError)
+        console.log(`Бакет '${bucketConfig.name}' успешно создан`)
       } else {
-        console.log("Тест загрузки успешен")
-
-        // Удаляем тестовый файл
-        await supabase.storage.from("property-images").remove([testFileName])
-        console.log("Тестовый файл удален")
+        console.log(`Бакет '${bucketConfig.name}' уже существует`)
       }
-    } catch (testError) {
-      console.error("Ошибка при тестировании хранилища:", testError)
+
+      // Проверяем доступность бакета для загрузки
+      try {
+        const testFileName = `test-${Date.now()}.txt`
+        const testContent = new Blob(["test"], { type: "text/plain" })
+
+        console.log(`Тестирование доступа к хранилищу '${bucketConfig.name}'...`)
+
+        // Пробуем загрузить тестовый файл
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from(bucketConfig.name)
+          .upload(testFileName, testContent)
+
+        if (uploadError) {
+          console.error(`Тест загрузки в '${bucketConfig.name}' не удался:`, uploadError)
+        } else {
+          console.log(`Тест загрузки в '${bucketConfig.name}' успешен`)
+
+          // Удаляем тестовый файл
+          await supabase.storage.from(bucketConfig.name).remove([testFileName])
+          console.log(`Тестовый файл из '${bucketConfig.name}' удален`)
+        }
+      } catch (testError) {
+        console.error(`Ошибка при тестировании хранилища '${bucketConfig.name}':`, testError)
+      }
     }
   } catch (error) {
     console.error("Непредвиденная ошибка при инициализации хранилища:", error)

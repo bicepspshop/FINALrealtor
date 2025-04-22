@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -28,6 +28,8 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
   const { toast } = useToast()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [localShareId, setLocalShareId] = useState(shareId)
+  const [localHasShareLink, setLocalHasShareLink] = useState(hasShareLink)
 
   const handleDelete = async () => {
     setIsLoading(true)
@@ -72,7 +74,7 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
         })
       } else {
         const link = `${window.location.origin}/share/${result.shareId}`
-
+        
         // Копируем ссылку в буфер обмена
         await navigator.clipboard.writeText(link)
 
@@ -80,6 +82,10 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
           title: "Ссылка скопирована",
           description: "Ссылка скопирована в буфер обмена",
         })
+        
+        // Update local state to show the Copy/Go buttons immediately
+        setLocalShareId(result.shareId)
+        setLocalHasShareLink(true)
       }
     } catch (error) {
       toast({
@@ -94,20 +100,20 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
 
   const copyToClipboard = async () => {
     try {
-      // Если у нас уже есть shareId, формируем ссылку
-      if (shareId) {
-        const link = `${window.location.origin}/share/${shareId}`
+      // Use local state for share link status
+      if (localShareId) {
+        const link = `${window.location.origin}/share/${localShareId}`
         await navigator.clipboard.writeText(link)
         toast({
           title: "Ссылка скопирована",
           description: "Ссылка скопирована в буфер обмена",
         })
       }
-      // Если нет shareId, но есть флаг hasShareLink, генерируем ссылку
-      else if (hasShareLink) {
+      // If no shareId, but has flag hasShareLink, generate link
+      else if (localHasShareLink) {
         handleGenerateShareLink()
       }
-      // Если нет ни shareId, ни флага hasShareLink, создаем новую ссылку
+      // If no shareId or hasShareLink flag, create new link
       else {
         handleGenerateShareLink()
       }
@@ -130,7 +136,7 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
           disabled={isLoading}
           className="bg-black dark:bg-[#4A6FA5] text-white hover:bg-black/80 dark:hover:bg-[#3B5B8C] flex items-center gap-1.5 px-2.5 py-1 transition-colors duration-300"
         >
-          {hasShareLink ? (
+          {localHasShareLink ? (
             <>
               <Copy className="h-4 w-4" />
               <span className="hidden md:inline">Копировать</span>
@@ -143,11 +149,11 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
           )}
         </Button>
 
-        {hasShareLink && (
+        {localHasShareLink && localShareId && (
           <Button 
             variant="minimal" 
             size="sm" 
-            onClick={() => router.push(`/share/${shareId}`)} 
+            onClick={() => router.push(`/share/${localShareId}`)} 
             disabled={isLoading}
             className="bg-black dark:bg-[#4A6FA5] text-white hover:bg-black/80 dark:hover:bg-[#3B5B8C] flex items-center gap-1.5 px-2.5 py-1 transition-colors duration-300"
           >

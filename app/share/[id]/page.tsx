@@ -27,8 +27,8 @@ export default async function SharePage({ params }: SharePageProps) {
     notFound()
   }
 
-  // Get agent info
-  const { data: agent } = await supabase.from("users").select("name, email").eq("id", collection.user_id).single()
+  // Get agent info with phone number, description and avatar
+  const { data: agent } = await supabase.from("users").select("name, email, phone, description, avatar_url").eq("id", collection.user_id).single()
 
   // Fetch properties in this collection
   const { data: properties, error: propertiesError } = await supabase
@@ -67,7 +67,7 @@ export default async function SharePage({ params }: SharePageProps) {
         <main className="container mx-auto px-6 md:px-12 py-8 md:py-12">
           {/* Agent Info Card - Redesigned with glass effect */}
           <div className="mb-10 animate-fade-in-up">
-            <AgentInfo name={agent?.name || "Агент недвижимости"} email={agent?.email} />
+            <AgentInfo name={agent?.name || "Агент недвижимости"} email={agent?.email} phone={agent?.phone} description={agent?.description} avatarUrl={agent?.avatar_url} />
           </div>
 
           {properties.length === 0 ? (

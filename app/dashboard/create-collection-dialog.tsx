@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -19,7 +20,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 import { createCollection } from "./actions"
-import { PlusCircle } from "lucide-react"
+import { PlusCircle, Upload, X } from "lucide-react"
+import { getBrowserClient } from "@/lib/supabase"
+import { uploadCollectionCover } from "@/lib/upload"
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -37,6 +40,9 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [coverImage, setCoverImage] = useState<File | null>(null)
+  const [coverPreview, setCoverPreview] = useState<string | null>(null)
+  const supabase = getBrowserClient()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,10 +51,95 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
     },
   })
 
+  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      
+      // Check file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          variant: "destructive",
+          title: "Ошибка",
+          description: "Размер файла не должен превышать 5MB",
+        });
+        return;
+      }
+      
+      // Check file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          variant: "destructive",
+          title: "Ошибка",
+          description: "Поддерживаются только JPEG, PNG, WEBP и GIF",
+        });
+        return;
+      }
+      
+      setCoverImage(file);
+      setCoverPreview(URL.createObjectURL(file));
+      console.log("Cover image selected:", file.name, file.type, file.size);
+    }
+  }
+
+  const removeCoverImage = () => {
+    setCoverImage(null)
+    if (coverPreview) {
+      URL.revokeObjectURL(coverPreview)
+      setCoverPreview(null)
+    }
+  }
+
+  // Function to handle cover image upload using server-side API
+  async function handleCoverImageUpload(file: File): Promise<string | null> {
+    try {
+      // Create form data for upload
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('bucket', 'collection-covers');
+      
+      // Send to server-side API
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const result = await response.json();
+      
+      if (!result.success) {
+        console.error("Server upload failed:", result.error);
+        toast({
+          variant: "destructive",
+          title: "Ошибка загрузки",
+          description: `Не удалось загрузить изображение: ${result.error}`,
+        });
+        return null;
+      }
+      
+      console.log("Cover image upload successful via server:", result.url);
+      return result.url;
+    } catch (error) {
+      console.error("Ошибка при загрузке обложки:", error);
+      toast({
+        variant: "destructive",
+        title: "Ошибка загрузки",
+        description: "Произошла непредвиденная ошибка при загрузке изображения",
+      });
+      return null;
+    }
+  }
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
+    
     try {
-      const result = await createCollection(values.name, userId)
+      let coverImageUrl = null
+      
+      if (coverImage) {
+        coverImageUrl = await handleCoverImageUpload(coverImage)
+      }
+      
+      const result = await createCollection(values.name, userId, coverImageUrl)
 
       if (result.error) {
         toast({
@@ -63,6 +154,7 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
         })
         setOpen(false)
         form.reset()
+        removeCoverImage()
         router.refresh()
       }
     } catch (error) {
@@ -114,6 +206,51 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
                 </FormItem>
               )}
             />
+            
+            <div className="space-y-2">
+              <FormLabel className="text-luxury-black/80 font-medium">Обложка коллекции</FormLabel>
+              
+              {coverPreview ? (
+                <div className="relative mt-2 rounded-sm overflow-hidden aspect-[3/2]">
+                  <Image 
+                    src={coverPreview} 
+                    alt="Preview" 
+                    width={400}
+                    height={266}
+                    className="w-full h-full object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 w-8 h-8 rounded-full"
+                    onClick={removeCoverImage}
+                  >
+                    <X size={16} />
+                  </Button>
+                </div>
+              ) : (
+                <div className="relative mt-2">
+                  <label
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-sm cursor-pointer bg-gray-50 hover:bg-gray-100 dark:bg-dark-slate dark:border-dark-slate dark:hover:bg-dark-slate/80 theme-transition"
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="w-10 h-10 mb-3 text-gray-400 dark:text-gray-300 theme-transition" />
+                      <p className="mb-2 text-sm text-gray-500 dark:text-gray-300 theme-transition">
+                        <span className="font-medium">Загрузить обложку</span>
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 theme-transition">PNG, JPG (макс. 5MB)</p>
+                    </div>
+                    <input 
+                      type="file" 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleCoverImageChange}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
             <DialogFooter className="gap-2 mt-6">
               <Button 
                 type="button" 

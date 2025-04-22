@@ -81,7 +81,7 @@ export default async function DashboardPage() {
           () =>
             supabase
               .from("collections")
-              .select("id, name, share_id")
+              .select("id, name, share_id, cover_image")
               .eq("user_id", user.id)
               .order("created_at", { ascending: false }),
           3, // Максимальное количество попыток
@@ -192,7 +192,7 @@ export default async function DashboardPage() {
                   <CardContent className="pt-6 pb-4 dark:bg-dark-graphite theme-transition">
                     <div className="mb-4 aspect-[3/2] overflow-hidden border border-gray-100 dark:border-blue-400/20 hover:dark:border-blue-400/60 property-image theme-transition">
                       <Image 
-                        src={`/images/house${(parseInt(collection.id, 10) % 11) + 1}.png`}
+                        src={collection.cover_image || `/images/house${(parseInt(collection.id, 10) % 11) + 1}.png`}
                         alt="Недвижимость"
                         width={400}
                         height={266}

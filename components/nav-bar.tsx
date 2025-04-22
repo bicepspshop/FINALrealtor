@@ -83,10 +83,12 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
                 Ваш аккаунт
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-gray-700 theme-transition" />
-              <DropdownMenuItem className="cursor-pointer flex items-center gap-2.5 py-2.5 rounded-sm hover:bg-gray-700 focus:bg-gray-700 theme-transition">
-                <Settings size={16} className="text-white opacity-80 theme-transition" />
-                <span className="text-white theme-transition">Настройки</span>
-              </DropdownMenuItem>
+              <Link href="/profile">
+                <DropdownMenuItem className="cursor-pointer flex items-center gap-2.5 py-2.5 rounded-sm hover:bg-gray-700 focus:bg-gray-700 theme-transition">
+                  <User size={16} className="text-white opacity-80 theme-transition" />
+                  <span className="text-white theme-transition">Профиль</span>
+                </DropdownMenuItem>
+              </Link>
               <DropdownMenuItem 
                 onClick={handleLogout} 
                 className="cursor-pointer flex items-center gap-2.5 py-2.5 hover:bg-red-900/30 focus:bg-red-900/30 focus:text-red-400 rounded-sm theme-transition"
