@@ -6,6 +6,7 @@ import { NavBar } from "@/components/nav-bar"
 import { getSession } from "@/lib/auth"
 import { getServerClient, executeWithRetry } from "@/lib/supabase"
 import { CreateCollectionDialog } from "./create-collection-dialog"
+import { EditCollectionDialog } from "./edit-collection-dialog"
 import { CollectionActions } from "./collection-actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, WifiOff, FolderPlus, Home } from "lucide-react"
@@ -170,9 +171,20 @@ export default async function DashboardPage() {
               {collections.map((collection, index) => (
                 <Card 
                   key={collection.id} 
-                  className="overflow-hidden rounded-sm border border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark hover:shadow-elegant dark:hover:shadow-luxury-dark transition-all duration-500 animate-fade-in-up hover:-translate-y-1 property-card theme-transition bg-transparent"
+                  className="overflow-hidden rounded-sm border border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark hover:shadow-elegant dark:hover:shadow-luxury-dark transition-all duration-500 animate-fade-in-up hover:-translate-y-1 property-card theme-transition bg-transparent relative"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
+                  {!isOfflineMode && (
+                    <EditCollectionDialog
+                      userId={user.id}
+                      collection={{
+                        id: collection.id,
+                        name: collection.name,
+                        description: collection.description,
+                        cover_image: collection.cover_image
+                      }}
+                    />
+                  )}
                   <CardHeader className="bg-white dark:bg-dark-graphite border-b border-gray-100 dark:border-dark-slate pb-4 theme-transition">
                     <CardTitle className="font-display dark:text-white theme-transition">{collection.name}</CardTitle>
                     <CardDescription className="flex items-center gap-1.5 text-luxury-black/60 dark:text-white/60 theme-transition">

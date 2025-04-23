@@ -198,7 +198,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
             
             {/* Sidebar */}
             <div className="space-y-8">
-              {/* Agent card */}
+              {/* Agent card with integrated collection link */}
               <div className="bg-white dark:bg-dark-graphite rounded-sm shadow-elegant dark:shadow-elegant-dark p-6 sticky top-6 border border-gray-100 dark:border-dark-slate theme-transition">
                 <div className="flex items-start gap-4 mb-6">
                   <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-[#FAF9F6] to-[#F5EDD7] dark:from-dark-slate dark:to-dark-slate
@@ -224,7 +224,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 
                 <div className="w-full h-0.5 bg-gray-100 dark:bg-dark-slate mb-6 theme-transition"></div>
                 
-                {agent?.description ? null : (
+                {agent?.description ? (
+                  <div className="text-sm text-[#2C2C2C]/70 dark:text-white/70 theme-transition mb-2">
+                    {agent.description}
+                  </div>
+                ) : (
                   <div className="text-sm text-[#2C2C2C]/70 dark:text-white/70 theme-transition italic">
                     Информация о специализации агента не указана
                   </div>
@@ -269,18 +273,20 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                     <span>Скопировать контакты</span>
                   </button>
                 </div>
+                
+                {/* Back to collection */}
+                <div className="border-t border-gray-100 dark:border-dark-slate mt-6 pt-6">
+                  <Link 
+                    href={`/share/${collection?.share_id}`}
+                    className="flex items-center justify-between text-[#2C2C2C]/80 dark:text-white/80 hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors group theme-transition"
+                  >
+                    <span className="font-medium">Вернуться к коллекции</span>
+                    <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
+                  </Link>
+                </div>
               </div>
               
-              {/* Back to collection */}
-              <div className="bg-white dark:bg-dark-graphite rounded-sm p-6 border border-gray-100 dark:border-dark-slate shadow-sm dark:shadow-elegant-dark theme-transition">
-                <Link 
-                  href={`/share/${collection?.share_id}`}
-                  className="flex items-center justify-between text-[#2C2C2C]/80 dark:text-white/80 hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors group theme-transition"
-                >
-                  <span className="font-medium">Вернуться к коллекции</span>
-                  <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
-              </div>
+              {/* Remove separate Back to collection div since it's now included in agent card */}
             </div>
           </div>
         </main>

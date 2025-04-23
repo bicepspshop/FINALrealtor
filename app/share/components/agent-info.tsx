@@ -75,9 +75,7 @@ export function AgentInfo({ name, email, phone, description, avatarUrl }: AgentI
               )}
             </div>
             
-            <p className="text-[#2C2C2C]/80 dark:text-white/80 leading-relaxed max-w-2xl theme-transition">
-              Профессиональный эксперт по недвижимости. Поможет вам найти идеальное решение, соответствующее вашим требованиям и предпочтениям.
-            </p>
+            {/* Добавить здесь другое содержимое при необходимости */}
           </div>
           
           <div className="mt-6 md:mt-0 flex flex-col md:flex-row items-center gap-3">

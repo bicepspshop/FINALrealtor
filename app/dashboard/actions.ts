@@ -106,3 +106,41 @@ export async function generateShareLink(collectionId: string, userId: string) {
     return { error: "An unexpected error occurred" }
   }
 }
+
+export async function updateCollection(collectionId: string, userId: string, name: string, description?: string, coverImageUrl?: string | null) {
+  try {
+    const supabase = getServerClient()
+
+    // Verify ownership
+    const { data: collection } = await supabase
+      .from("collections")
+      .select("id")
+      .eq("id", collectionId)
+      .eq("user_id", userId)
+      .single()
+
+    if (!collection) {
+      return { error: "Collection not found or you don't have permission" }
+    }
+
+    // Update collection
+    const { error } = await supabase
+      .from("collections")
+      .update({
+        name,
+        description: description || null,
+        cover_image: coverImageUrl !== undefined ? coverImageUrl : undefined,
+      })
+      .eq("id", collectionId)
+
+    if (error) {
+      console.error("Update collection error:", error)
+      return { error: "Failed to update collection" }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error("Unexpected error updating collection:", error)
+    return { error: "An unexpected error occurred" }
+  }
+}
