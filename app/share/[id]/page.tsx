@@ -19,7 +19,7 @@ export default async function SharePage({ params }: SharePageProps) {
   // Find collection by share_id
   const { data: collection, error: collectionError } = await supabase
     .from("collections")
-    .select("id, name, user_id")
+    .select("id, name, description, user_id")
     .eq("share_id", shareId)
     .single()
 

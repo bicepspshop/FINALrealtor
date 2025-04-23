@@ -81,7 +81,7 @@ export default async function DashboardPage() {
           () =>
             supabase
               .from("collections")
-              .select("id, name, share_id, cover_image")
+              .select("id, name, description, share_id, cover_image")
               .eq("user_id", user.id)
               .order("created_at", { ascending: false }),
           3, // Максимальное количество попыток
@@ -188,6 +188,11 @@ export default async function DashboardPage() {
                         </>
                       )}
                     </CardDescription>
+                    {collection.description && (
+                      <p className="mt-2 text-sm text-luxury-black/70 dark:text-white/70 theme-transition line-clamp-2">
+                        {collection.description}
+                      </p>
+                    )}
                   </CardHeader>
                   <CardContent className="pt-6 pb-4 dark:bg-dark-graphite theme-transition">
                     <div className="mb-4 aspect-[3/2] overflow-hidden border border-gray-100 dark:border-blue-400/20 hover:dark:border-blue-400/60 property-image theme-transition">

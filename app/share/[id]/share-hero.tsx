@@ -7,6 +7,7 @@ import Image from "next/image"
 interface ShareHeroProps {
   collection: {
     name: string
+    description?: string
   }
   agent?: {
     name?: string
@@ -42,9 +43,15 @@ export function ShareHero({ collection, agent }: ShareHeroProps) {
       <div className="container mx-auto px-6 md:px-12 relative z-10 h-full flex flex-col justify-end pb-10">
         <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-medium text-white mb-4 animate-fade-in-up text-shadow-md">{collection.name}</h1>
         <div className="w-20 h-0.5 bg-[#CBA135] dark:bg-luxury-royalBlue mb-6 animate-fade-in-up theme-transition" style={{animationDelay: '100ms'}}></div>
-        <p className="text-lg md:text-xl text-white/90 max-w-2xl animate-fade-in-up text-shadow-sm" style={{animationDelay: '200ms'}}>
-          Представляем вашему вниманию эксклюзивную подборку премиальной недвижимости от {agent?.name || "Агента недвижимости"}
-        </p>
+        {collection.description ? (
+          <p className="text-lg md:text-xl text-white/90 max-w-3xl animate-fade-in-up text-shadow-sm" style={{animationDelay: '200ms'}}>
+            {collection.description}
+          </p>
+        ) : (
+          <p className="text-lg md:text-xl text-white/90 max-w-2xl animate-fade-in-up text-shadow-sm" style={{animationDelay: '200ms'}}>
+            Представляем вашему вниманию эксклюзивную подборку премиальной недвижимости от {agent?.name || "Агента недвижимости"}
+          </p>
+        )}
       </div>
     </div>
   )

@@ -8,7 +8,7 @@ export async function logoutUser() {
   cookies().delete("auth-token")
 }
 
-export async function createCollection(name: string, userId: string, coverImageUrl?: string | null) {
+export async function createCollection(name: string, userId: string, coverImageUrl?: string | null, description?: string) {
   try {
     const supabase = getServerClient()
     
@@ -22,6 +22,7 @@ export async function createCollection(name: string, userId: string, coverImageU
         user_id: userId,
         share_id: shareId,
         cover_image: coverImageUrl || null,
+        description: description || null,
       })
       .select("id")
       .single()

@@ -37,7 +37,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
     // Получение данных коллекции с проверкой на ошибки
     const { data: collection, error: collectionError } = await supabase
       .from("collections")
-      .select("id, name")
+      .select("id, name, description")
       .eq("id", collectionId)
       .eq("user_id", user.id)
       .single()
@@ -104,6 +104,9 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
               </div>
               <h1 className="text-3xl font-serif font-medium text-luxury-black dark:text-white theme-transition">{collection.name}</h1>
               <div className="w-20 h-0.5 bg-luxury-gold dark:bg-blue-400 mt-2 mb-3 theme-transition"></div>
+              {collection.description ? (
+                <p className="text-luxury-black/70 dark:text-white/70 mb-3 theme-transition">{collection.description}</p>
+              ) : null}
               <p className="text-luxury-black/60 dark:text-white/60 theme-transition">Управление объектами недвижимости в этой коллекции</p>
             </div>
             <Link href="/dashboard">

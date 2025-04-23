@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import { useToast } from "@/hooks/use-toast"
 import { createCollection } from "./actions"
 import { PlusCircle, Upload, X } from "lucide-react"
@@ -28,6 +29,7 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: "Название коллекции должно содержать не менее 2 символов.",
   }),
+  description: z.string().optional(),
 })
 
 interface CreateCollectionDialogProps {
@@ -48,6 +50,7 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
+      description: "",
     },
   })
 
@@ -139,7 +142,7 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
         coverImageUrl = await handleCoverImageUpload(coverImage)
       }
       
-      const result = await createCollection(values.name, userId, coverImageUrl)
+      const result = await createCollection(values.name, userId, coverImageUrl, values.description)
 
       if (result.error) {
         toast({
@@ -199,6 +202,24 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
                     <Input 
                       placeholder="Элитные квартиры" 
                       className="rounded-sm border-gray-200 focus-visible:ring-luxury-gold/50 py-5" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500" />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-luxury-black/80 font-medium">Описание коллекции</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Опишите коллекцию (необязательно)" 
+                      className="rounded-sm border-gray-200 focus-visible:ring-luxury-gold/50 py-2 min-h-[100px]" 
                       {...field} 
                     />
                   </FormControl>
