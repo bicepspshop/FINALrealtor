@@ -15,11 +15,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { ImageUpload } from "@/components/image-upload"
 import { FloorPlanUpload } from "@/components/floor-plan-upload"
+import { WindowViewUpload } from "@/components/window-view-upload"  // New import
+import { InteriorFinishUpload } from "@/components/interior-finish-upload"  // New import
 import { updateProperty, getPropertyById } from "./actions"
 import { YandexMap } from "@/components/yandex-map"
 import { AddressSuggest } from "@/components/address-suggest"
 
 const formSchema = z.object({
+  residentialComplex: z.string().optional(),
   propertyType: z.enum(["apartment", "house", "land"]),
   address: z.string().min(5, "Адрес должен содержать не менее 5 символов"),
   rooms: z.coerce.number().int().min(0).optional(),
@@ -49,12 +52,15 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
   const [isLoading, setIsLoading] = useState(false)
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(null)
+  const [windowViewUrl, setWindowViewUrl] = useState<string | null>(null)  // New state
+  const [interiorFinishUrl, setInteriorFinishUrl] = useState<string | null>(null)  // New state
   const [isLoadingProperty, setIsLoadingProperty] = useState(true)
   const [mapCoordinates, setMapCoordinates] = useState<[number, number] | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      residentialComplex: "",
       propertyType: "apartment",
       address: "",
       rooms: undefined,
@@ -95,6 +101,7 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
 
           // Установка значений формы
           form.reset({
+            residentialComplex: property.residential_complex || "",
             propertyType: property.property_type,
             address: property.address,
             rooms: property.rooms || undefined,
@@ -116,8 +123,10 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
           const urls = property.property_images.map((img) => img.image_url)
           setImageUrls(urls)
 
-          // Установка URL планировки
+          // Установка URL планировки и других изображений
           setFloorPlanUrl(property.floor_plan_url)
+          setWindowViewUrl(property.window_view_url)  // Устанавливаем вид из окна
+          setInteriorFinishUrl(property.interior_finish_url)  // Устанавливаем интерьер
         } catch (error) {
           console.error("Ошибка при загрузке объекта:", error)
           toast({
@@ -140,6 +149,7 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
 
     try {
       const result = await updateProperty(propertyId, {
+        residentialComplex: values.residentialComplex,
         propertyType: values.propertyType,
         address: values.address,
         rooms: values.rooms || null,
@@ -149,6 +159,8 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
         description: values.description || "",
         imageUrls,
         floorPlanUrl,
+        window_view_url: windowViewUrl,  // Добавляем вид из окна
+        interior_finish_url: interiorFinishUrl,  // Добавляем интерьер
         floor: values.floor,
         totalFloors: values.totalFloors,
         balcony: values.balcony,
@@ -190,6 +202,14 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
 
   const handleFloorPlanChange = (url: string | null) => {
     setFloorPlanUrl(url)
+  }
+
+  const handleWindowViewChange = (url: string | null) => {
+    setWindowViewUrl(url)
+  }
+
+  const handleInteriorFinishChange = (url: string | null) => {
+    setInteriorFinishUrl(url)
   }
 
   const handleAddressSelect = (address: string, coordinates?: [number, number]) => {
@@ -236,6 +256,20 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="residentialComplex"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Жилой комплекс</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Название ЖК" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="propertyType"
@@ -507,9 +541,21 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
               </div>
 
               {/* Новое поле для загрузки планировки */}
+              {/* Планировка */}
               <div>
                 <FormLabel className="block mb-2">Планировка</FormLabel>
                 <FloorPlanUpload onImageChange={handleFloorPlanChange} initialImage={floorPlanUrl} />
+              </div>
+
+              {/* Новые поля для изображений */}
+              <div>
+                <FormLabel className="block mb-2">Вид из окна</FormLabel>
+                <WindowViewUpload onImageChange={handleWindowViewChange} initialImage={windowViewUrl} />
+              </div>
+
+              <div>
+                <FormLabel className="block mb-2">Интерьер</FormLabel>
+                <InteriorFinishUpload onImageChange={handleInteriorFinishChange} initialImage={interiorFinishUrl} />
               </div>
 
               <DialogFooter>

@@ -4,6 +4,7 @@ import { getServerClient } from "@/lib/supabase"
 
 interface PropertyData {
   collectionId: string
+  residentialComplex?: string
   propertyType: string
   address: string
   rooms: number | null
@@ -22,6 +23,8 @@ interface PropertyData {
   bathroomCount?: number | null
   hasParking?: boolean
   propertyStatus?: string
+  window_view_url?: string | null
+  interior_finish_url?: string | null
 }
 
 export async function addProperty(data: PropertyData) {
@@ -53,6 +56,7 @@ export async function addProperty(data: PropertyData) {
       .from("properties")
       .insert({
         collection_id: data.collectionId,
+        residential_complex: data.residentialComplex || null,
         property_type: data.propertyType,
         address: data.address,
         rooms: data.rooms,
@@ -70,6 +74,8 @@ export async function addProperty(data: PropertyData) {
         bathroom_count: data.bathroomCount || null,
         has_parking: data.hasParking || false,
         property_status: data.propertyStatus || "available",
+        window_view_url: data.window_view_url || null,
+        interior_finish_url: data.interior_finish_url || null,
       })
       .select("id")
       .single()
@@ -135,6 +141,7 @@ export async function updateProperty(propertyId: string, data: Omit<PropertyData
     const { error: propertyError } = await supabase
       .from("properties")
       .update({
+        residential_complex: data.residentialComplex || null,
         property_type: data.propertyType,
         address: data.address,
         rooms: data.rooms,
@@ -152,6 +159,8 @@ export async function updateProperty(propertyId: string, data: Omit<PropertyData
         bathroom_count: data.bathroomCount || null,
         has_parking: data.hasParking || false,
         property_status: data.propertyStatus || "available",
+        window_view_url: data.window_view_url || null,
+        interior_finish_url: data.interior_finish_url || null,
       })
       .eq("id", propertyId)
 
@@ -251,6 +260,7 @@ export async function getPropertyById(propertyId: string) {
       .from("properties")
       .select(`
         id, 
+        residential_complex,
         property_type, 
         address, 
         rooms, 
@@ -267,6 +277,8 @@ export async function getPropertyById(propertyId: string) {
         bathroom_count,
         has_parking,
         property_status,
+        window_view_url,
+        interior_finish_url,
         property_images (id, image_url)
       `)
       .eq("id", propertyId)

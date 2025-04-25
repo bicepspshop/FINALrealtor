@@ -48,6 +48,7 @@ export default async function SharePageV2({ params }: SharePageProps) {
       floor,
       total_floors,
       bathroom_count,
+      residential_complex,
       property_images (id, image_url)
     `)
     .eq("collection_id", collection.id)
@@ -307,7 +308,10 @@ export default async function SharePageV2({ params }: SharePageProps) {
                     </div>
                     
                     <div className="relative z-10">
-                      <h3 className="text-xl font-serif mb-2 leading-tight luxury-property-title">{property.address}</h3>
+                      <h3 className="text-xl font-serif mb-2 leading-tight luxury-property-title">
+                        {property.residential_complex && <span className="font-bold mr-1">{property.residential_complex}, </span>}
+                        {property.address}
+                      </h3>
                       <div className="w-12 h-px bg-gradient-to-r from-gold via-gold/70 to-transparent mb-3 transition-all duration-700 group-hover:w-24 luxury-property-divider"></div>
                     
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-4 luxury-property-details">

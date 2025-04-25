@@ -7,16 +7,23 @@ import { getSession } from "@/lib/auth"
 import { getServerClient } from "@/lib/supabase"
 import { PropertyCard } from "./property-card"
 import { AddPropertyForm } from "./add-property-form"
-import { ArrowLeft, Plus, HomeIcon } from "lucide-react"
+import { InlineCommentList } from "./comments/inline-comment-list"
+import { ArrowLeft, Plus, HomeIcon, MessageSquare } from "lucide-react"
 
 interface CollectionPageProps {
   params: {
     id: string
+  },
+  searchParams: {
+    tab?: string
   }
 }
 
-export default async function CollectionPage({ params }: CollectionPageProps) {
+export default async function CollectionPage({ params, searchParams }: CollectionPageProps) {
   console.log("CollectionPage: Начало загрузки страницы для коллекции ID:", params.id)
+  
+  // Get the active tab from URL parameters or default to "properties"
+  const activeTab = searchParams.tab || "properties"
 
   try {
     const session = await getSession()
@@ -75,6 +82,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         bathroom_count,
         has_parking,
         property_status,
+        residential_complex,
         property_images (id, image_url)
       `)
       .eq("collection_id", collectionId)
@@ -85,7 +93,31 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
       throw new Error(`Не удалось получить объекты недвижимости: ${propertiesError.message}`)
     }
 
+    // Получение комментариев для этой коллекции
+    const { data: comments, error: commentsError } = await supabase
+      .from("property_comments")
+      .select(`
+        id, 
+        author_name, 
+        author_email, 
+        content, 
+        position_x, 
+        position_y, 
+        created_at, 
+        is_approved,
+        property_id,
+        properties (id, address, property_type)
+      `)
+      .eq("collection_id", collectionId)
+      .order("created_at", { ascending: false })
+
+    if (commentsError) {
+      console.error("CollectionPage: Ошибка при получении комментариев:", commentsError)
+      // Не прерываем выполнение, просто отображаем пустой массив комментариев
+    }
+
     console.log(`CollectionPage: Получено ${properties?.length || 0} объектов`)
+    console.log(`CollectionPage: Получено ${comments?.length || 0} комментариев`)
 
     return (
       <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-gray-100 dark:from-dark-charcoal dark:to-dark-slate theme-transition">
@@ -117,7 +149,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
             </Link>
           </div>
 
-          <Tabs defaultValue="properties" className="w-full">
+          <Tabs defaultValue={activeTab} className="w-full">
             <TabsList className="mb-8 bg-white dark:bg-dark-graphite border border-luxury-black/10 dark:border-dark-slate p-1 rounded-sm theme-transition">
               <TabsTrigger 
                 value="properties" 
@@ -131,6 +163,13 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
               >
                 <Plus size={16} className="mr-1" />
                 Добавить объект
+              </TabsTrigger>
+              <TabsTrigger 
+                value="comments" 
+                className="data-[state=active]:bg-luxury-black data-[state=active]:text-white rounded-sm py-2.5 px-4"
+              >
+                <MessageSquare size={16} className="mr-1" />
+                Комментарии {comments && comments.length > 0 ? `(${comments.length})` : ''}
               </TabsTrigger>
             </TabsList>
 
@@ -163,6 +202,11 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
             <TabsContent value="add" className="relative animate-fade-in w-full">
               <AddPropertyForm collectionId={collectionId} />
+            </TabsContent>
+
+            <TabsContent value="comments" className="relative animate-fade-in w-full">
+              {/* Показываем встроенный список комментариев */}
+              <InlineCommentList comments={comments || []} collectionId={collectionId} />
             </TabsContent>
           </Tabs>
         </main>

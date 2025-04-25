@@ -38,6 +38,7 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
       total_floors,
       bathroom_count,
       renovation_type,
+      residential_complex,
       property_images (id, image_url),
       collection_id
     `)
@@ -69,7 +70,7 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
   const images = property.property_images?.map((img) => img.image_url) || []
 
   // Формирование заголовка объекта
-  const propertyTitle = `${property.rooms ? `${property.rooms}-комн. ` : ""}${propertyTypeLabel.toLowerCase()}, ${property.area} м²`
+  const propertyTitle = `${property.residential_complex ? `${property.residential_complex}, ` : ""}${property.rooms ? `${property.rooms}-комн. ` : ""}${propertyTypeLabel.toLowerCase()}, ${property.area} м²`
 
   return (
     <div className="min-h-screen bg-dark-charcoal text-white font-sans overflow-hidden luxury-experience-wrapper">
@@ -140,14 +141,21 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
                   {property.property_type === 'house' ? (
                     <>
                       <ShimmeringText text="Элитный" className="mr-2 text-gold" delay={800} />
-                      {propertyTitle.replace('дом', '')}
+                      {property.residential_complex && <span className="font-bold">{property.residential_complex}, </span>}
+                      {propertyTitle.replace('дом', '').replace(property.residential_complex ? `${property.residential_complex} ` : "", "")}
                     </>
                   ) : property.price > 15000000 ? (
                     <>
                       <ShimmeringText text="Премиум" className="mr-2 text-gold" delay={800} />
-                      {propertyTitle}
+                      {property.residential_complex && <span className="font-bold">{property.residential_complex}, </span>}
+                      {propertyTitle.replace(property.residential_complex ? `${property.residential_complex} ` : "", "")}
                     </>
-                  ) : propertyTitle}
+                  ) : (
+                    <>
+                      {property.residential_complex && <span className="font-bold">{property.residential_complex}, </span>}
+                      {propertyTitle.replace(property.residential_complex ? `${property.residential_complex} ` : "", "")}
+                    </>
+                  )}
                   <span className="absolute -bottom-3 left-0 w-0 h-0.5 bg-gradient-to-r from-gold via-gold/70 to-transparent luxury-heading-underline"></span>
                 </span>
               </h1>

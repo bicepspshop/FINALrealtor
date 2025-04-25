@@ -26,6 +26,7 @@ interface PropertyImage {
 
 interface Property {
   id: string
+  residential_complex?: string | null
   property_type: string
   address: string
   rooms: number | null
@@ -42,6 +43,8 @@ interface Property {
   bathroom_count?: number | null
   has_parking?: boolean
   property_status?: string
+  window_view_url?: string | null
+  interior_finish_url?: string | null
 }
 
 interface PropertyCardProps {
@@ -99,9 +102,9 @@ export function PropertyCard({ property, collectionId, userId }: PropertyCardPro
 
   const propertyTypeLabel =
     {
-      apartment: "Квартира",
-      house: "Дом",
-      land: "Земельный участок",
+      apartment: "квартира",
+      house: "дом",
+      land: "участок",
     }[property.property_type] || "Объект"
 
   return (
@@ -110,8 +113,13 @@ export function PropertyCard({ property, collectionId, userId }: PropertyCardPro
         <CardHeader className="bg-luxury-black/5 dark:bg-dark-slate border-b border-luxury-black/10 dark:border-dark-slate pb-3 px-4 pt-4 theme-transition">
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-lg font-display text-luxury-black dark:text-white theme-transition">{property.address}</CardTitle>
-              <CardDescription className="text-luxury-black/60 dark:text-white/60 theme-transition">{propertyTypeLabel}</CardDescription>
+              <CardTitle className="text-lg font-display text-luxury-black dark:text-white theme-transition">
+                {property.residential_complex ? `${property.residential_complex}, ` : ""}
+                {property.rooms ? `${property.rooms}-комн. ` : ""}
+                {propertyTypeLabel}
+                {property.area ? `, ${property.area} м²` : ""}
+              </CardTitle>
+              <CardDescription className="text-luxury-black/60 dark:text-white/60 theme-transition">{property.address}</CardDescription>
             </div>
             <div className="flex gap-1.5">
               <Button 
