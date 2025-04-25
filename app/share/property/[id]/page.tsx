@@ -39,7 +39,8 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
       bathroom_count,
       renovation_type,
       residential_complex,
-      property_images (id, image_url),
+      agent_comment,
+    property_images (id, image_url),
       collection_id
     `)
     .eq("id", propertyId)
@@ -121,15 +122,32 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 
                 {/* Description */}
                 <div className="mb-10">
-                  <h2 className="text-xl font-serif font-medium mb-4 dark:text-white theme-transition">Описание</h2>
-                  <div className="w-12 h-0.5 bg-[#CBA135] dark:bg-luxury-royalBlue mb-6 theme-transition"></div>
-                  <div className="text-[#2C2C2C]/80 dark:text-white/80 leading-relaxed theme-transition">
-                    {property.description ? (
-                      <p>{property.description}</p>
-                    ) : (
-                      <p>Описание объекта недвижимости не представлено агентом.</p>
+                  <ElegantTabs defaultValue="description">
+                    <ElegantTabsList className="w-full" indicatorClassName="bg-[#CBA135] dark:bg-luxury-royalBlue">
+                      <ElegantTabsTrigger value="description" className="text-xl font-serif font-medium dark:text-white theme-transition">Описание</ElegantTabsTrigger>
+                      {property.agent_comment && (
+                        <ElegantTabsTrigger value="agent_comment" className="text-xl font-serif font-medium dark:text-white theme-transition">Комментарий риелтора</ElegantTabsTrigger>
+                      )}
+                    </ElegantTabsList>
+
+                    <ElegantTabsContent value="description">
+                      <div className="text-[#2C2C2C]/80 dark:text-white/80 leading-relaxed theme-transition">
+                        {property.description ? (
+                          <p>{property.description}</p>
+                        ) : (
+                          <p>Описание объекта недвижимости не представлено агентом.</p>
+                        )}
+                      </div>
+                    </ElegantTabsContent>
+
+                    {property.agent_comment && (
+                      <ElegantTabsContent value="agent_comment">
+                        <div className="text-[#2C2C2C]/80 dark:text-white/80 leading-relaxed theme-transition">
+                          <p>{property.agent_comment}</p>
+                        </div>
+                      </ElegantTabsContent>
                     )}
-                  </div>
+                  </ElegantTabs>
                 </div>
                 
                 {/* Features */}
@@ -198,7 +216,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                         )}
                         {property.interior_finish_url && (
                           <ElegantTabsTrigger value="interior-finish">
-                            Интерьер
+                            Отделка
                           </ElegantTabsTrigger>
                         )}
                       </ElegantTabsList>
@@ -212,9 +230,6 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                               className="w-full h-full object-contain"
                             />
                           </div>
-                          <p className="mt-4 text-sm text-[#2C2C2C]/70 dark:text-white/70 theme-transition">
-                            Планировка помещения с указанием размеров и расположения комнат
-                          </p>
                         </ElegantTabsContent>
                       )}
 
@@ -227,9 +242,6 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                               className="w-full h-full object-contain"
                             />
                           </div>
-                          <p className="mt-4 text-sm text-[#2C2C2C]/70 dark:text-white/70 theme-transition">
-                            Панорама, которая открывается из окон данного объекта
-                          </p>
                         </ElegantTabsContent>
                       )}
 
@@ -238,13 +250,10 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                           <div className="relative aspect-[4/3] rounded-sm overflow-hidden border border-gray-100 dark:border-dark-slate theme-transition">
                             <img
                               src={property.interior_finish_url}
-                              alt="Интерьер"
+                              alt="Отделка"
                               className="w-full h-full object-contain"
                             />
                           </div>
-                          <p className="mt-4 text-sm text-[#2C2C2C]/70 dark:text-white/70 theme-transition">
-                            Детальное изображение отделки и материалов интерьера
-                          </p>
                         </ElegantTabsContent>
                       )}
                     </ElegantTabs>
@@ -366,14 +375,12 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
           <div className="container mx-auto px-6 md:px-12">
             <div className="flex flex-col md:flex-row justify-between items-center gap-6">
               <div className="flex flex-col items-center md:items-start">
-                <h3 className="text-xl font-serif font-medium text-[#2C2C2C] dark:text-white mb-2 theme-transition">РиелторПро</h3>
+                <Link href="/" className="text-xl font-serif font-medium text-[#2C2C2C] dark:text-white mb-2 theme-transition hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors">РиелторПро</Link>
                 <div className="w-10 h-0.5 bg-[#CBA135] dark:bg-luxury-royalBlue mb-3 theme-transition"></div>
                 <p className="text-[#2C2C2C]/60 dark:text-white/60 text-sm theme-transition">&copy; {new Date().getFullYear()} Эксклюзивная платформа для риелторов</p>
               </div>
               <div className="flex items-center gap-6">
-                <a href="#" className="text-[#2C2C2C]/60 dark:text-white/60 hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors theme-transition">Правила использования</a>
-                <a href="#" className="text-[#2C2C2C]/60 dark:text-white/60 hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors theme-transition">Конфиденциальность</a>
-                <a href="#" className="text-[#2C2C2C]/60 dark:text-white/60 hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors theme-transition">Контакты</a>
+                {/* Footer links removed as requested */}
               </div>
             </div>
           </div>

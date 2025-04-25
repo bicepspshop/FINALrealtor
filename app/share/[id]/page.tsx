@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation"
+import Link from "next/link"
 import { getServerClient } from "@/lib/supabase"
 import { PropertyList } from "../components/property-list"
 import { AgentInfo } from "../components/agent-info"
@@ -48,6 +49,7 @@ export default async function SharePage({ params }: SharePageProps) {
       bathroom_count,
       floor_plan_url,
       residential_complex,
+      agent_comment,
       property_images (id, image_url)
     `)
     .eq("collection_id", collection.id)
@@ -117,14 +119,12 @@ export default async function SharePage({ params }: SharePageProps) {
               <div className="container mx-auto px-6 md:px-12">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                   <div className="flex flex-col items-center md:items-start">
-                    <h3 className="text-xl font-serif font-medium text-[#2C2C2C] dark:text-white mb-2 theme-transition">РиелторПро</h3>
+                    <Link href="/" className="text-xl font-serif font-medium text-[#2C2C2C] dark:text-white mb-2 theme-transition hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors">РиелторПро</Link>
                     <div className="w-10 h-0.5 bg-[#CBA135] dark:bg-luxury-royalBlue mb-3 theme-transition"></div>
                     <p className="text-[#2C2C2C]/60 dark:text-white/60 text-sm theme-transition">&copy; {new Date().getFullYear()} Эксклюзивная платформа для риелторов</p>
                   </div>
                   <div className="flex items-center gap-6">
-                    <a href="#" className="text-[#2C2C2C]/60 dark:text-white/60 hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors theme-transition">Правила использования</a>
-                    <a href="#" className="text-[#2C2C2C]/60 dark:text-white/60 hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors theme-transition">Конфиденциальность</a>
-                    <a href="#" className="text-[#2C2C2C]/60 dark:text-white/60 hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors theme-transition">Контакты</a>
+                    {/* Footer links removed as requested */}
                   </div>
                 </div>
               </div>

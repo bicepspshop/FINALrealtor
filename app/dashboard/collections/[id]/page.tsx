@@ -83,6 +83,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
         has_parking,
         property_status,
         residential_complex,
+        agent_comment,
         property_images (id, image_url)
       `)
       .eq("collection_id", collectionId)

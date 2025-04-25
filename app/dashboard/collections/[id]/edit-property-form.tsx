@@ -30,6 +30,8 @@ const formSchema = z.object({
   livingArea: z.coerce.number().positive("Жилая площадь должна быть положительным числом").optional(),
   price: z.coerce.number().positive("Цена должна быть положительным числом"),
   description: z.string().optional(),
+  agent_comment: z.string().optional(),
+
   floor: z.coerce.number().int().min(0).optional(),
   totalFloors: z.coerce.number().int().min(0).optional(),
   balcony: z.boolean().optional(),
@@ -68,6 +70,8 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
       livingArea: undefined,
       price: undefined,
       description: "",
+      agent_comment: "",
+
       floor: undefined,
       totalFloors: undefined,
       balcony: false,
@@ -109,6 +113,8 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
             livingArea: property.living_area || undefined,
             price: property.price,
             description: property.description || "",
+            agent_comment: property.agent_comment || "",
+
             floor: property.floor || undefined,
             totalFloors: property.total_floors || undefined,
             balcony: property.balcony || false,
@@ -157,6 +163,8 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
         livingArea: values.livingArea,
         price: values.price!,
         description: values.description || "",
+        agent_comment: values.agent_comment || "",
+
         imageUrls,
         floorPlanUrl,
         window_view_url: windowViewUrl,  // Добавляем вид из окна
@@ -534,6 +542,21 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="agent_comment"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Комментарий риелтора</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Внутренние заметки для риелтора (не видны клиентам)..." className="min-h-[100px]" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
 
               <div>
                 <FormLabel className="block mb-2">Фотографии объекта</FormLabel>

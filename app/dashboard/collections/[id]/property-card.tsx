@@ -45,6 +45,7 @@ interface Property {
   property_status?: string
   window_view_url?: string | null
   interior_finish_url?: string | null
+  agent_comment?: string | null
 }
 
 interface PropertyCardProps {

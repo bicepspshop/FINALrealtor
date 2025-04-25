@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { YandexMap } from "@/components/yandex-map"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 
 interface PropertyImage {
   id: string
@@ -38,6 +38,7 @@ interface Property {
   floor_plan_url?: string | null
   window_view_url?: string | null
   interior_finish_url?: string | null
+  agent_comment?: string | null
 }
 
 interface PropertyDetailsProps {
@@ -48,6 +49,9 @@ interface PropertyDetailsProps {
 
 export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsProps) {
   const [mapError, setMapError] = useState<string | null>(null)
+  const [activeDescriptionTab, setActiveDescriptionTab] = useState<string>("description")
+  const tabsListRef = useRef<HTMLDivElement>(null)
+  const indicatorRef = useRef<HTMLDivElement>(null)
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("ru-RU", {
@@ -89,6 +93,23 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
     property.window_view_url || 
     property.interior_finish_url
   )
+  
+  // Effect to update the indicator position based on the active tab
+  useEffect(() => {
+    if (tabsListRef.current && indicatorRef.current) {
+      const tabsList = tabsListRef.current;
+      const indicator = indicatorRef.current;
+      const activeTab = tabsList.querySelector(`[data-state="active"]`) as HTMLElement;
+      
+      if (activeTab) {
+        const tabLeft = activeTab.offsetLeft;
+        const tabWidth = activeTab.offsetWidth;
+        
+        indicator.style.left = `${tabLeft}px`;
+        indicator.style.width = `${tabWidth}px`;
+      }
+    }
+  }, [activeDescriptionTab, isOpen]); // Re-run when the active tab changes or dialog opens
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -141,7 +162,7 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
                   <TabsList className="mb-4 w-full">
                     {property.floor_plan_url && <TabsTrigger value="floor-plan">Планировка</TabsTrigger>}
                     {property.window_view_url && <TabsTrigger value="window-view">Вид из окна</TabsTrigger>}
-                    {property.interior_finish_url && <TabsTrigger value="interior-finish">Интерьер</TabsTrigger>}
+                    {property.interior_finish_url && <TabsTrigger value="interior-finish">Отделка</TabsTrigger>}
                   </TabsList>
 
                   {property.floor_plan_url && (
@@ -315,12 +336,42 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
             </>
           )}
 
-          {property.description && (
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Описание</h3>
-              <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
-            </div>
-          )}
+          <div className="mt-6 mb-6">
+            <Tabs defaultValue="description">
+              <TabsList className="mb-4 w-full relative" ref={tabsListRef} onValueChange={(value) => setActiveDescriptionTab(value)}>
+                <TabsTrigger value="description" onClick={() => setActiveDescriptionTab("description")}>Описание</TabsTrigger>
+                {property.agent_comment && (
+                  <TabsTrigger value="agent_comment" onClick={() => setActiveDescriptionTab("agent_comment")}>Комментарий риелтора</TabsTrigger>
+                )}
+                <div 
+                  ref={indicatorRef} 
+                  className="absolute h-[2px] bottom-0 bg-blue-500 transition-all duration-300 ease-in-out" 
+                  style={{
+                    left: 0,
+                    width: 100,
+                    transform: 'translateY(1px)'
+                  }}
+                ></div>
+              </TabsList>
+
+              <TabsContent value="description">
+                {property.description ? (
+                  <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
+                ) : (
+                  <p className="text-gray-500 italic">Описание отсутствует</p>
+                )}
+              </TabsContent>
+
+              {property.agent_comment && (
+                <TabsContent value="agent_comment">
+                  <div className="p-4 bg-amber-50 dark:bg-blue-900/20 rounded-md border border-amber-200 dark:border-blue-800">
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">{property.agent_comment}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic">Эта информация видна только вам и не показывается клиентам</p>
+                  </div>
+                </TabsContent>
+              )}
+            </Tabs>
+          </div>
         </div>
 
         <DialogFooter>

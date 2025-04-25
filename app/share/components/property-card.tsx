@@ -21,6 +21,7 @@ interface PropertyCardProps {
     area: number
     rooms: number | null
     description: string | null
+    agent_comment?: string | null
     property_images: PropertyImage[]
     floor_plan_url?: string | null
     living_area?: number | null
@@ -248,10 +249,21 @@ export function PropertyCard({ property, index, isSelected, onSelect }: Property
               )}
             </div>
 
-            {/* Description - limited to 2 lines */}
-            <p className="text-sm text-[#2C2C2C]/70 dark:text-white/70 line-clamp-2 min-h-[2.5rem] theme-transition">
-              {property.description || "Нет описания"}
-            </p>
+            {/* Description and agent comment indicator */}
+            <div className="text-sm text-[#2C2C2C]/70 dark:text-white/70 min-h-[2.5rem] theme-transition">
+              {property.description && (
+                <p className="line-clamp-2">{property.description}</p>
+              )}
+              {!property.description && !property.agent_comment && (
+                <p className="text-[#2C2C2C]/50 dark:text-white/50 italic">Нет описания</p>
+              )}
+              {property.agent_comment && (
+                <div className="flex items-center gap-1 mt-1 text-[#CBA135] dark:text-luxury-royalBlue theme-transition">
+                  <div className="w-2 h-2 rounded-full bg-[#CBA135] dark:bg-luxury-royalBlue theme-transition"></div>
+                  <span className="text-xs font-medium">Есть комментарий риелтора</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

@@ -31,6 +31,8 @@ const formSchema = z.object({
   livingArea: z.coerce.number().positive("Жилая площадь должна быть положительным числом").optional(),
   price: z.coerce.number().positive("Цена должна быть положительным числом"),
   description: z.string().optional(),
+  agent_comment: z.string().optional(),
+
   floor: z.coerce.number().int().min(0).optional(),
   totalFloors: z.coerce.number().int().min(0).optional(),
   balcony: z.boolean().optional(),
@@ -67,6 +69,8 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
       livingArea: undefined,
       price: undefined,
       description: "",
+      agent_comment: "",
+
       floor: undefined,
       totalFloors: undefined,
       balcony: false,
@@ -109,6 +113,8 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
         livingArea: values.livingArea,
         price: values.price!,
         description: values.description || "",
+        agent_comment: values.agent_comment || "",
+
         imageUrls,
         floorPlanUrl, // Планировка
         window_view_url: windowViewUrl, // Вид из окна
@@ -512,6 +518,21 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="agent_comment"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="font-medium text-luxury-black dark:text-white theme-transition">Комментарий риелтора</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Внутренние заметки для риелтора (не видны клиентам)..." className="min-h-[100px] bg-[#FFFFF0] dark:bg-[#E0F7FA] dark:text-black border-gray-200" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+
           <div>
             <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Фотографии объекта</FormLabel>
             <ImageUpload onImagesChange={handleImagesChange} />
@@ -531,7 +552,7 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
 
           {/* Интерьер - новое поле */}
           <div>
-            <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Интерьер</FormLabel>
+            <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Отделка</FormLabel>
             <InteriorFinishUpload onImageChange={handleInteriorFinishChange} />
           </div>
 
