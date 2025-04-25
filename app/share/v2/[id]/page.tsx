@@ -478,12 +478,12 @@ export default async function SharePageV2({ params }: SharePageProps) {
         <div className="container mx-auto px-8 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex flex-col items-center md:items-start">
-              <h3 className="text-2xl font-serif text-white mb-1 luxury-brand">
+              <Link href="/" className="text-2xl font-serif text-white mb-1 luxury-brand hover:text-gold transition-all duration-500">
                 <span className="relative inline-block">
                   РиелторПро
                   <span className="absolute -bottom-1 left-0 w-0 h-px bg-gradient-to-r from-gold via-gold/70 to-transparent luxury-brand-underline"></span>
                 </span>
-              </h3>
+              </Link>
               <div className="w-10 h-px bg-gradient-to-r from-gold/70 to-gold/10 mb-3 luxury-divider"></div>
               <p className="text-white/40 text-sm luxury-copyright">
                 &copy; {new Date().getFullYear()} 
@@ -494,22 +494,7 @@ export default async function SharePageV2({ params }: SharePageProps) {
             </div>
             
             <div className="flex flex-wrap justify-center md:justify-end gap-x-8 gap-y-4">
-              <a href="#" className="relative text-white/60 hover:text-gold transition-all duration-500 text-sm uppercase tracking-wide group luxury-footer-link">
-                <span className="relative z-10">Правила</span>
-                <span className="absolute bottom-0 left-0 w-0 h-px bg-gold group-hover:w-full transition-all duration-500"></span>
-              </a>
-              <a href="#" className="relative text-white/60 hover:text-gold transition-all duration-500 text-sm uppercase tracking-wide group luxury-footer-link">
-                <span className="relative z-10">Конфиденциальность</span>
-                <span className="absolute bottom-0 left-0 w-0 h-px bg-gold group-hover:w-full transition-all duration-500"></span>
-              </a>
-              <a href="#" className="relative text-white/60 hover:text-gold transition-all duration-500 text-sm uppercase tracking-wide group luxury-footer-link">
-                <span className="relative z-10">Контакты</span>
-                <span className="absolute bottom-0 left-0 w-0 h-px bg-gold group-hover:w-full transition-all duration-500"></span>
-              </a>
-              <a href="#" className="relative text-white/60 hover:text-gold transition-all duration-500 text-sm uppercase tracking-wide group luxury-footer-link">
-                <span className="relative z-10">Поддержка</span>
-                <span className="absolute bottom-0 left-0 w-0 h-px bg-gold group-hover:w-full transition-all duration-500"></span>
-              </a>
+              {/* Footer links removed as requested */}
             </div>
           </div>
           

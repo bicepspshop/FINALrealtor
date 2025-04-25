@@ -183,10 +183,10 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
           <span className="text-white">{buttonText}</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] rounded-sm">
+      <DialogContent className="sm:max-w-[425px] rounded-sm bg-white dark:bg-dark-graphite border-gray-100 dark:border-dark-slate theme-transition">
         <DialogHeader>
-          <DialogTitle className="text-xl font-display text-luxury-black">Создать новую коллекцию</DialogTitle>
-          <DialogDescription className="text-luxury-black/70">
+          <DialogTitle className="text-xl font-display text-luxury-black dark:text-white theme-transition">Создать новую коллекцию</DialogTitle>
+          <DialogDescription className="text-luxury-black/70 dark:text-white/70 theme-transition">
             Создайте новую коллекцию для организации объектов недвижимости для ваших клиентов.
           </DialogDescription>
         </DialogHeader>
@@ -197,15 +197,15 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-luxury-black/80 font-medium">Название коллекции</FormLabel>
+                  <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Название коллекции</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Элитные квартиры" 
-                      className="rounded-sm border-gray-200 focus-visible:ring-luxury-gold/50 py-5" 
+                      className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 py-5 theme-transition" 
                       {...field} 
                     />
                   </FormControl>
-                  <FormMessage className="text-red-500" />
+                  <FormMessage className="text-red-500 dark:text-error theme-transition" />
                 </FormItem>
               )}
             />
@@ -215,21 +215,21 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-luxury-black/80 font-medium">Описание коллекции</FormLabel>
+                  <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Описание коллекции</FormLabel>
                   <FormControl>
                     <Textarea 
                       placeholder="Опишите коллекцию (необязательно)" 
-                      className="rounded-sm border-gray-200 focus-visible:ring-luxury-gold/50 py-2 min-h-[100px]" 
+                      className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 py-2 min-h-[100px] theme-transition" 
                       {...field} 
                     />
                   </FormControl>
-                  <FormMessage className="text-red-500" />
+                  <FormMessage className="text-red-500 dark:text-error theme-transition" />
                 </FormItem>
               )}
             />
             
             <div className="space-y-2">
-              <FormLabel className="text-luxury-black/80 font-medium">Обложка коллекции</FormLabel>
+              <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Обложка коллекции</FormLabel>
               
               {coverPreview ? (
                 <div className="relative mt-2 rounded-sm overflow-hidden aspect-[3/2]">
@@ -253,7 +253,7 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
               ) : (
                 <div className="relative mt-2">
                   <label
-                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 rounded-sm cursor-pointer bg-gray-50 hover:bg-gray-100 dark:bg-dark-slate dark:border-dark-slate dark:hover:bg-dark-slate/80 theme-transition"
+                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-300 dark:border-dark-slate/80 rounded-sm cursor-pointer bg-gray-50 dark:bg-dark-slate hover:bg-gray-100 dark:hover:bg-dark-slate/80 theme-transition"
                   >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                       <Upload className="w-10 h-10 mb-3 text-gray-400 dark:text-gray-300 theme-transition" />
@@ -277,7 +277,7 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
                 type="button" 
                 variant="outline" 
                 onClick={() => setOpen(false)} 
-                className="border-luxury-black/20 hover:bg-luxury-black/5 rounded-sm"
+                className="border-luxury-black/20 dark:border-white/20 hover:bg-luxury-black/5 dark:hover:bg-white/5 rounded-sm text-luxury-black dark:text-white theme-transition"
               >
                 Отмена
               </Button>

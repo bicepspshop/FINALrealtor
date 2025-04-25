@@ -25,6 +25,7 @@ interface PropertyData {
   propertyStatus?: string
   window_view_url?: string | null
   interior_finish_url?: string | null
+  agent_comment?: string | null
 }
 
 export async function addProperty(data: PropertyData) {
@@ -53,30 +54,32 @@ export async function addProperty(data: PropertyData) {
 
     // Insert property
     const { data: property, error: propertyError } = await supabase
-      .from("properties")
-      .insert({
-        collection_id: data.collectionId,
-        residential_complex: data.residentialComplex || null,
-        property_type: data.propertyType,
-        address: data.address,
-        rooms: data.rooms,
-        area: data.area,
-        price: data.price,
-        description: data.description,
-        floor_plan_url: data.floorPlanUrl || null, // Добавляем URL планировки
-        // Новые поля
-        living_area: data.livingArea || null,
-        floor: data.floor || null,
-        total_floors: data.totalFloors || null,
-        balcony: data.balcony || false,
-        year_built: data.yearBuilt || null,
-        renovation_type: data.renovationType || null,
-        bathroom_count: data.bathroomCount || null,
-        has_parking: data.hasParking || false,
-        property_status: data.propertyStatus || "available",
-        window_view_url: data.window_view_url || null,
-        interior_finish_url: data.interior_finish_url || null,
-      })
+    .from("properties")
+    .insert({
+    collection_id: data.collectionId,
+    residential_complex: data.residentialComplex || null,
+    property_type: data.propertyType,
+    address: data.address,
+    rooms: data.rooms,
+    area: data.area,
+    price: data.price,
+    description: data.description,
+    floor_plan_url: data.floorPlanUrl || null, // Добавляем URL планировки
+    // Новые поля
+    living_area: data.livingArea || null,
+    floor: data.floor || null,
+    total_floors: data.totalFloors || null,
+    balcony: data.balcony || false,
+    year_built: data.yearBuilt || null,
+    renovation_type: data.renovationType || null,
+    bathroom_count: data.bathroomCount || null,
+    has_parking: data.hasParking || false,
+    property_status: data.propertyStatus || "available",
+    window_view_url: data.window_view_url || null,
+    interior_finish_url: data.interior_finish_url || null,
+    agent_comment: data.agent_comment || null,
+
+    })
       .select("id")
       .single()
 
@@ -161,6 +164,8 @@ export async function updateProperty(propertyId: string, data: Omit<PropertyData
         property_status: data.propertyStatus || "available",
         window_view_url: data.window_view_url || null,
         interior_finish_url: data.interior_finish_url || null,
+        agent_comment: data.agent_comment || null,
+
       })
       .eq("id", propertyId)
 
@@ -279,6 +284,8 @@ export async function getPropertyById(propertyId: string) {
         property_status,
         window_view_url,
         interior_finish_url,
+        agent_comment,
+
         property_images (id, image_url)
       `)
       .eq("id", propertyId)
