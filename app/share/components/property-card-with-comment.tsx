@@ -1,6 +1,7 @@
 "use client"
 
-import { PropertyCardWithComment } from "./property-card-with-comment"
+import { PropertyCard } from "./property-card"
+import { SimpleCommentForm } from "../components/comments"
 
 interface PropertyImage {
   id: string
@@ -24,16 +25,16 @@ interface Property {
   residential_complex?: string | null
 }
 
-interface PropertyListProps {
-  properties: Property[]
+interface PropertyCardWithCommentProps {
+  property: Property
+  index?: number
 }
 
-export function PropertyList({ properties }: PropertyListProps) {
+export function PropertyCardWithComment({ property, index }: PropertyCardWithCommentProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
-      {properties.map((property, index) => (
-        <PropertyCardWithComment key={property.id} property={property} index={index} />
-      ))}
+    <div className="flex flex-col">
+      <PropertyCard property={property} index={index} />
+      <SimpleCommentForm propertyId={property.id} />
     </div>
   )
 }

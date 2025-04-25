@@ -9,7 +9,7 @@ import { CreateCollectionDialog } from "./create-collection-dialog"
 import { EditCollectionDialog } from "./edit-collection-dialog"
 import { CollectionActions } from "./collection-actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, WifiOff, FolderPlus, Home } from "lucide-react"
+import { AlertCircle, WifiOff, FolderPlus, Home, MessageSquare } from "lucide-react"
 
 export default async function DashboardPage() {
   console.log("DashboardPage: Начало загрузки страницы")
@@ -70,6 +70,7 @@ export default async function DashboardPage() {
 
     let collections = []
     let fetchError = null
+    let commentsCountMap = {}
 
     try {
       // Проверяем, находимся ли мы в офлайн-режиме
@@ -95,6 +96,23 @@ export default async function DashboardPage() {
         } else {
           collections = data || []
           console.log(`DashboardPage: Получено ${collections.length} коллекций`)
+          
+          // Получаем количество комментариев для каждой коллекции
+          if (collections.length > 0) {
+            const collectionIds = collections.map(c => c.id)
+            const { data: commentsData } = await supabase
+              .from("property_comments")
+              .select("collection_id, id")
+              .in("collection_id", collectionIds)
+            
+            // Создаем Map с количеством комментариев для каждой коллекции
+            if (commentsData) {
+              commentsCountMap = commentsData.reduce((acc, comment) => {
+                acc[comment.collection_id] = (acc[comment.collection_id] || 0) + 1
+                return acc
+              }, {})
+            }
+          }
         }
       }
     } catch (error) {
@@ -171,9 +189,20 @@ export default async function DashboardPage() {
               {collections.map((collection, index) => (
                 <Card 
                   key={collection.id} 
-                  className="overflow-hidden rounded-sm border border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark hover:shadow-elegant dark:hover:shadow-luxury-dark transition-all duration-500 animate-fade-in-up hover:-translate-y-1 property-card theme-transition bg-transparent relative"
+                  className="overflow-hidden rounded-sm border border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark hover:shadow-elegant dark:hover:shadow-luxury-dark transition-all duration-500 animate-fade-in-up hover:-translate-y-1 property-card theme-transition bg-transparent relative flex flex-col h-full"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
+                  {/* Comment Count Badge - if there are comments */}
+                  {commentsCountMap[collection.id] > 0 && (
+                    <Link 
+                      href={`/dashboard/collections/${collection.id}?tab=comments`}
+                      className="absolute top-3 right-10 z-10 bg-black/80 dark:bg-blue-500/90 text-white rounded-full px-1.5 py-1 flex items-center gap-1.5 text-xs hover:bg-black dark:hover:bg-blue-500 transition-colors duration-200 theme-transition"
+                    >
+                      <MessageSquare size={14} />
+                      <span>{commentsCountMap[collection.id]}</span>
+                    </Link>
+                  )}
+                  
                   {!isOfflineMode && (
                     <EditCollectionDialog
                       userId={user.id}
@@ -206,7 +235,7 @@ export default async function DashboardPage() {
                       </p>
                     )}
                   </CardHeader>
-                  <CardContent className="pt-6 pb-4 dark:bg-dark-graphite theme-transition">
+                  <CardContent className="pt-6 pb-4 dark:bg-dark-graphite theme-transition flex-1">
                     <div className="mb-4 aspect-[3/2] overflow-hidden border border-gray-100 dark:border-blue-400/20 hover:dark:border-blue-400/60 property-image theme-transition">
                       <Image 
                         src={collection.cover_image || `/images/house${(parseInt(collection.id, 10) % 11) + 1}.png`}
@@ -216,18 +245,39 @@ export default async function DashboardPage() {
                         className="w-full h-full object-cover transition-all duration-700 hover:scale-105"
                       />
                     </div>
-                    <Link href={`/dashboard/collections/${collection.id}`}>
-                      <Button 
-                        variant="outline" 
-                        className="w-full border-luxury-black/20 dark:border-blue-400/60 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 hover:border-luxury-black/30 dark:hover:border-blue-400 rounded-sm flex items-center justify-center gap-2 py-5 dark:text-white dark:border-2 theme-transition" 
-                        animation="scale"
-                      >
-                        <Home size={16} className="dark:text-blue-400 theme-transition" />
-                        <span className="dark:text-white theme-transition">Просмотр объектов</span>
-                      </Button>
-                    </Link>
+                    <div className="grid grid-cols-2 gap-3">
+                      <Link href={`/dashboard/collections/${collection.id}`}>
+                        <Button 
+                          variant="outline" 
+                          className="w-full border-luxury-black/20 dark:border-blue-400/60 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 hover:border-luxury-black/30 dark:hover:border-blue-400 rounded-sm flex items-center justify-center gap-2 py-5 dark:text-white dark:border-2 theme-transition" 
+                          animation="scale"
+                        >
+                          <Home size={16} className="dark:text-blue-400 theme-transition" />
+                          <span className="dark:text-white theme-transition">Объекты</span>
+                        </Button>
+                      </Link>
+                      
+                      <Link href={`/dashboard/collections/${collection.id}?tab=comments`}>
+                        <Button 
+                          variant={commentsCountMap[collection.id] > 0 ? "default" : "outline"}
+                          className={`w-full rounded-sm flex items-center justify-center gap-2 py-5 theme-transition
+                            ${commentsCountMap[collection.id] > 0 
+                              ? "bg-black text-white dark:bg-blue-500 dark:text-white hover:bg-black/90 dark:hover:bg-blue-600" 
+                              : "border-luxury-black/20 dark:border-blue-400/40 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 dark:text-white"
+                            }`}
+                          animation="scale"
+                        >
+                          <MessageSquare size={16} className={commentsCountMap[collection.id] > 0 ? "" : "dark:text-blue-400"} />
+                          <span className="dark:text-white theme-transition">
+                            {commentsCountMap[collection.id] > 0 
+                              ? `Комментарии (${commentsCountMap[collection.id]})` 
+                              : "Комментарии"}
+                          </span>
+                        </Button>
+                      </Link>
+                    </div>
                   </CardContent>
-                  <CardFooter className="bg-gray-50 dark:bg-dark-slate pt-4 border-t border-gray-100 dark:border-dark-slate theme-transition">
+                  <CardFooter className="bg-gray-50 dark:bg-dark-slate pt-4 border-t border-gray-100 dark:border-dark-slate theme-transition mt-auto">
                     {!isOfflineMode && (
                       <CollectionActions
                         collectionId={collection.id}

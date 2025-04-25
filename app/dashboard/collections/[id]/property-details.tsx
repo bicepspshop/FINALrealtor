@@ -18,6 +18,7 @@ interface PropertyImage {
 
 interface Property {
   id: string
+  residential_complex?: string | null
   property_type: string
   address: string
   rooms: number | null
@@ -34,6 +35,9 @@ interface Property {
   bathroom_count?: number | null
   has_parking?: boolean
   property_status?: string
+  floor_plan_url?: string | null
+  window_view_url?: string | null
+  interior_finish_url?: string | null
 }
 
 interface PropertyDetailsProps {
@@ -79,11 +83,21 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
     setMapError(error)
   }
 
+    // Function to determine if we should show the images tab section
+  const hasAdditionalImages = Boolean(
+    property.floor_plan_url || 
+    property.window_view_url || 
+    property.interior_finish_url
+  )
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{property.address}</DialogTitle>
+          <DialogTitle>
+            {property.residential_complex ? `${property.residential_complex} ` : ""}
+            {property.address}
+          </DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="photos">
@@ -119,6 +133,55 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
                 <p className="text-gray-500">Нет изображений</p>
               </div>
             )}
+
+            {/* Additional image types in tabs */}
+            {hasAdditionalImages && (
+              <div className="mt-6 mb-6">
+                <Tabs defaultValue={property.floor_plan_url ? "floor-plan" : property.window_view_url ? "window-view" : "interior-finish"}>
+                  <TabsList className="mb-4 w-full">
+                    {property.floor_plan_url && <TabsTrigger value="floor-plan">Планировка</TabsTrigger>}
+                    {property.window_view_url && <TabsTrigger value="window-view">Вид из окна</TabsTrigger>}
+                    {property.interior_finish_url && <TabsTrigger value="interior-finish">Интерьер</TabsTrigger>}
+                  </TabsList>
+
+                  {property.floor_plan_url && (
+                    <TabsContent value="floor-plan">
+                      <div className="relative aspect-[4/3] rounded-md overflow-hidden">
+                        <img
+                          src={property.floor_plan_url}
+                          alt="Планировка"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </TabsContent>
+                  )}
+
+                  {property.window_view_url && (
+                    <TabsContent value="window-view">
+                      <div className="relative aspect-[4/3] rounded-md overflow-hidden">
+                        <img
+                          src={property.window_view_url}
+                          alt="Вид из окна"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </TabsContent>
+                  )}
+
+                  {property.interior_finish_url && (
+                    <TabsContent value="interior-finish">
+                      <div className="relative aspect-[4/3] rounded-md overflow-hidden">
+                        <img
+                          src={property.interior_finish_url}
+                          alt="Внутренняя отделка"
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </TabsContent>
+                  )}
+                </Tabs>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="map">
@@ -146,6 +209,12 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
           <div>
             <h3 className="text-lg font-semibold mb-2">Основная информация</h3>
             <div className="grid grid-cols-2 gap-4">
+              {property.residential_complex && (
+                <div>
+                  <p className="text-sm text-gray-500">Жилой комплекс</p>
+                  <p className="font-medium">{property.residential_complex}</p>
+                </div>
+              )}
               <div>
                 <p className="text-sm text-gray-500">Тип объекта</p>
                 <p className="font-medium">{propertyTypeLabel}</p>

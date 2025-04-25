@@ -13,6 +13,7 @@ interface PropertyDetailsProps {
     floor?: number | null
     total_floors?: number | null
     bathroom_count?: number | null
+    residential_complex?: string | null
   }
 }
 
@@ -34,7 +35,10 @@ export function PropertyDetails({ property }: PropertyDetailsProps) {
   return (
     <div className="p-6 border-l">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold mb-1">{property.address}</h2>
+        <h2 className="text-xl font-semibold mb-1">
+          {property.residential_complex && <span className="font-bold">{property.residential_complex}, </span>}
+          {property.address}
+        </h2>
         <p className="text-gray-500">{propertyTypeLabels[property.property_type] || "Объект недвижимости"}</p>
       </div>
 

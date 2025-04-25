@@ -4,6 +4,8 @@ import { getServerClient } from "@/lib/supabase"
 import { PropertyCarousel } from "./property-carousel"
 import { YandexMap } from "@/components/yandex-map"
 import { ChevronRight, Home, MapPin, Phone, Mail, MessageSquare, Copy, Star, Globe } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ElegantTabs, ElegantTabsList, ElegantTabsTrigger, ElegantTabsContent } from "@/components/ui/tabs-elegant"
 import { ShareThemeProvider } from "../../components/share-theme-provider"
 import { PropertyHero } from "./property-hero"
 
@@ -17,7 +19,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
   const propertyId = params.id
   const supabase = getServerClient()
 
-  // Получаем данные объекта недвижимости
+  // Получаем данные объекта недвижимости с новыми полями
   const { data: property, error } = await supabase
     .from("properties")
     .select(`
@@ -29,11 +31,14 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
       price, 
       description,
       floor_plan_url,
+      window_view_url,
+      interior_finish_url,
       living_area,
       floor,
       total_floors,
       bathroom_count,
       renovation_type,
+      residential_complex,
       property_images (id, image_url),
       collection_id
     `)
@@ -66,13 +71,20 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
       apartment: "Квартира",
       house: "Дом",
       land: "Земельный участок",
-    }[property.property_type] || "Объект"
+    }[property.property_type as 'apartment' | 'house' | 'land'] || "Объект"
 
   // Получаем изображения объекта
   const images = property.property_images?.map((img) => img.image_url) || []
 
   // Формирование заголовка объекта
-  const propertyTitle = `${property.rooms ? `${property.rooms}-комн. ` : ""}${propertyTypeLabel.toLowerCase()}, ${property.area} м²`
+  const propertyTitle = `${property.residential_complex ? `${property.residential_complex}, ` : ""}${property.rooms ? `${property.rooms}-комн. ` : ""}${propertyTypeLabel.toLowerCase()}, ${property.area} м²`
+  
+  // Проверка наличия дополнительных изображений
+  const hasAdditionalImages = Boolean(
+    property.floor_plan_url || 
+    property.window_view_url || 
+    property.interior_finish_url
+  )
 
   return (
     <ShareThemeProvider>
@@ -88,7 +100,10 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
               <div className="bg-white dark:bg-dark-graphite rounded-sm shadow-elegant dark:shadow-elegant-dark p-8 md:p-10 mb-10 border border-gray-100 dark:border-dark-slate theme-transition">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-6">
                   <div>
-                    <h1 className="text-2xl md:text-3xl font-serif font-medium text-[#2C2C2C] dark:text-white leading-tight theme-transition">{propertyTitle}</h1>
+                    <h1 className="text-2xl md:text-3xl font-serif font-medium text-[#2C2C2C] dark:text-white leading-tight theme-transition">
+                      {property.residential_complex && <span className="font-bold">{property.residential_complex}, </span>}
+                      {property.rooms ? `${property.rooms}-комн. ` : ""}{propertyTypeLabel.toLowerCase()}, {property.area} м²
+                    </h1>
                     <div className="flex items-center gap-2 text-[#2C2C2C]/70 dark:text-white/70 mt-2 theme-transition">
                       <MapPin size={16} className="text-[#CBA135] dark:text-luxury-royalBlue theme-transition" />
                       <span>{property.address}</span>
@@ -166,18 +181,73 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                   </div>
                 </div>
                 
-                {/* Floor plan */}
-                {property.floor_plan_url && (
+                {/* Дополнительные изображения с вкладками */}
+                {hasAdditionalImages && (
                   <div className="mb-10">
-                    <h2 className="text-xl font-serif font-medium mb-4 dark:text-white theme-transition">Планировка</h2>
-                    <div className="w-12 h-0.5 bg-[#CBA135] dark:bg-luxury-royalBlue mb-6 theme-transition"></div>
-                    <div className="relative aspect-[4/3] rounded-sm overflow-hidden border border-gray-100 dark:border-dark-slate theme-transition">
-                      <img
-                        src={property.floor_plan_url}
-                        alt="Планировка"
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
+                    <ElegantTabs defaultValue={property.floor_plan_url ? "floor-plan" : property.window_view_url ? "window-view" : "interior-finish"}>
+                      <ElegantTabsList className="w-full" indicatorClassName="bg-[#0066CC] dark:bg-[#0066CC]">
+                        {property.floor_plan_url && (
+                          <ElegantTabsTrigger value="floor-plan">
+                            Планировка
+                          </ElegantTabsTrigger>
+                        )}
+                        {property.window_view_url && (
+                          <ElegantTabsTrigger value="window-view">
+                            Вид из окна
+                          </ElegantTabsTrigger>
+                        )}
+                        {property.interior_finish_url && (
+                          <ElegantTabsTrigger value="interior-finish">
+                            Интерьер
+                          </ElegantTabsTrigger>
+                        )}
+                      </ElegantTabsList>
+
+                      {property.floor_plan_url && (
+                        <ElegantTabsContent value="floor-plan">
+                          <div className="relative aspect-[4/3] rounded-sm overflow-hidden border border-gray-100 dark:border-dark-slate theme-transition">
+                            <img
+                              src={property.floor_plan_url}
+                              alt="Планировка"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <p className="mt-4 text-sm text-[#2C2C2C]/70 dark:text-white/70 theme-transition">
+                            Планировка помещения с указанием размеров и расположения комнат
+                          </p>
+                        </ElegantTabsContent>
+                      )}
+
+                      {property.window_view_url && (
+                        <ElegantTabsContent value="window-view">
+                          <div className="relative aspect-[4/3] rounded-sm overflow-hidden border border-gray-100 dark:border-dark-slate theme-transition">
+                            <img
+                              src={property.window_view_url}
+                              alt="Вид из окна"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <p className="mt-4 text-sm text-[#2C2C2C]/70 dark:text-white/70 theme-transition">
+                            Панорама, которая открывается из окон данного объекта
+                          </p>
+                        </ElegantTabsContent>
+                      )}
+
+                      {property.interior_finish_url && (
+                        <ElegantTabsContent value="interior-finish">
+                          <div className="relative aspect-[4/3] rounded-sm overflow-hidden border border-gray-100 dark:border-dark-slate theme-transition">
+                            <img
+                              src={property.interior_finish_url}
+                              alt="Интерьер"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                          <p className="mt-4 text-sm text-[#2C2C2C]/70 dark:text-white/70 theme-transition">
+                            Детальное изображение отделки и материалов интерьера
+                          </p>
+                        </ElegantTabsContent>
+                      )}
+                    </ElegantTabs>
                   </div>
                 )}
               </div>

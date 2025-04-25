@@ -14,6 +14,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { ImageUpload } from "@/components/image-upload"
 import { FloorPlanUpload } from "@/components/floor-plan-upload"
+import { WindowViewUpload } from "@/components/window-view-upload"  // New import
+import { InteriorFinishUpload } from "@/components/interior-finish-upload"  // New import
 import { addProperty } from "./actions"
 import { YandexMap } from "@/components/yandex-map"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -21,6 +23,7 @@ import { AlertCircle } from "lucide-react"
 import { AddressSuggest } from "@/components/address-suggest"
 
 const formSchema = z.object({
+  residentialComplex: z.string().optional(),
   propertyType: z.enum(["apartment", "house", "land"]),
   address: z.string().min(5, "Адрес должен содержать не менее 5 символов"),
   rooms: z.coerce.number().int().min(0).optional(),
@@ -48,12 +51,15 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [imageUrls, setImageUrls] = useState<string[]>([])
   const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(null)
+  const [windowViewUrl, setWindowViewUrl] = useState<string | null>(null)  // New state
+  const [interiorFinishUrl, setInteriorFinishUrl] = useState<string | null>(null)  // New state
   const [mapError, setMapError] = useState<string | null>(null)
   const [mapCoordinates, setMapCoordinates] = useState<[number, number] | null>(null)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      residentialComplex: "",
       propertyType: "apartment",
       address: "",
       rooms: undefined,
@@ -78,6 +84,8 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
     setIsLoading(true)
     console.log("Отправка формы с изображениями:", imageUrls)
     console.log("Отправка формы с планировкой:", floorPlanUrl)
+    console.log("Отправка формы с видом из окна:", windowViewUrl)
+    console.log("Отправка формы с интерьером:", interiorFinishUrl)
 
     try {
       // Проверяем, что все изображения загружены
@@ -93,6 +101,7 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
 
       const result = await addProperty({
         collectionId,
+        residentialComplex: values.residentialComplex,
         propertyType: values.propertyType,
         address: values.address,
         rooms: values.rooms || null,
@@ -101,7 +110,9 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
         price: values.price!,
         description: values.description || "",
         imageUrls,
-        floorPlanUrl, // Добавляем URL планировки
+        floorPlanUrl, // Планировка
+        window_view_url: windowViewUrl, // Вид из окна
+        interior_finish_url: interiorFinishUrl, // Интерьер
         floor: values.floor,
         totalFloors: values.totalFloors,
         balcony: values.balcony,
@@ -126,6 +137,8 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
         form.reset()
         setImageUrls([])
         setFloorPlanUrl(null)
+        setWindowViewUrl(null)
+        setInteriorFinishUrl(null)
 
         // Перенаправляем на страницу коллекции после успешного добавления
         router.push(`/dashboard/collections/${collectionId}`)
@@ -150,6 +163,16 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
   const handleFloorPlanChange = (url: string | null) => {
     console.log("Получен URL планировки:", url)
     setFloorPlanUrl(url)
+  }
+
+  const handleWindowViewChange = (url: string | null) => {
+    console.log("Получен URL вида из окна:", url)
+    setWindowViewUrl(url)
+  }
+
+  const handleInteriorFinishChange = (url: string | null) => {
+    console.log("Получен URL интерьера:", url)
+    setInteriorFinishUrl(url)
   }
 
   const handleAddressSelect = (address: string, coordinates?: [number, number]) => {
@@ -199,6 +222,20 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="residentialComplex"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium text-luxury-black dark:text-white theme-transition">Жилой комплекс</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Название ЖК" className="bg-[#FFFFF0] dark:bg-[#E0F7FA] dark:text-black border-gray-200" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="propertyType"
@@ -480,10 +517,22 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
             <ImageUpload onImagesChange={handleImagesChange} />
           </div>
 
-          {/* Новое поле для загрузки планировки */}
+          {/* Планировка */}
           <div>
             <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Планировка</FormLabel>
             <FloorPlanUpload onImageChange={handleFloorPlanChange} />
+          </div>
+
+          {/* Вид из окна - новое поле */}
+          <div>
+            <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Вид из окна</FormLabel>
+            <WindowViewUpload onImageChange={handleWindowViewChange} />
+          </div>
+
+          {/* Интерьер - новое поле */}
+          <div>
+            <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Интерьер</FormLabel>
+            <InteriorFinishUpload onImageChange={handleInteriorFinishChange} />
           </div>
 
           <div className="flex gap-4 mt-8">

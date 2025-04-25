@@ -43,7 +43,10 @@ export function PropertyHero({ images, propertyTitle, collection }: PropertyHero
               <span>К списку объектов</span>
             </Link>
             <ChevronRight size={14} />
-            <span className="text-white font-medium">{propertyTitle}</span>
+            <span className="text-white font-medium">
+              {/* The propertyTitle may already contain the residential_complex, so we don't modify it here */}
+              {propertyTitle}
+            </span>
           </div>
         </div>
       </div>

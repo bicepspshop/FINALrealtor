@@ -4,7 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Copy, ArrowRight, ChevronLeft, ChevronRight, LayoutIcon as LayoutPlan } from "lucide-react"
+import { Copy, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react"
 import { PropertyGallery } from "./property-gallery"
 
 interface PropertyImage {
@@ -27,6 +27,7 @@ interface PropertyCardProps {
     floor?: number | null
     total_floors?: number | null
     bathroom_count?: number | null
+    residential_complex?: string | null
   }
   index?: number
   isSelected?: boolean
@@ -211,7 +212,7 @@ export function PropertyCard({ property, index, isSelected, onSelect }: Property
             <div>
               <div className="flex justify-between items-start">
                 <h3 className="text-xl font-serif font-medium text-[#2C2C2C] dark:text-white leading-tight theme-transition">
-                  {roomsText}, {property.area} м²
+                  {property.residential_complex ? <span className="font-bold">{property.residential_complex}, </span> : ""}{roomsText}, {property.area} м²
                 </h3>
                 <div className="text-lg font-bold text-[#CBA135] dark:text-luxury-royalBlue theme-transition">{formatPrice(property.price)}</div>
               </div>
@@ -253,29 +254,6 @@ export function PropertyCard({ property, index, isSelected, onSelect }: Property
             </p>
           </div>
         </div>
-
-        {/* Floor Plan Section - only show if floor_plan_url exists */}
-        {property.floor_plan_url && (
-          <div className="px-6 pb-4 dark:bg-dark-graphite theme-transition">
-            <div 
-              className="relative rounded-sm overflow-hidden h-24 group border border-gray-100 dark:border-dark-slate cursor-pointer theme-transition" 
-              onClick={(e) => openGallery(e, true)}
-            >
-              <Image
-                src={property.floor_plan_url}
-                alt="Планировка"
-                fill
-                className="object-contain opacity-60 group-hover:opacity-80 transition-opacity duration-300"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-dark-slate/50 group-hover:bg-transparent transition-all duration-300 theme-transition">
-                <div className="flex items-center gap-2 bg-white/80 dark:bg-dark-charcoal/80 px-3 py-1.5 rounded-sm shadow-sm theme-transition">
-                  <LayoutPlan className="text-[#CBA135] dark:text-luxury-royalBlue theme-transition" size={16} />
-                  <span className="text-xs font-medium text-[#2C2C2C] dark:text-white theme-transition">Планировка</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Button and actions */}
         <div className="px-6 pb-6 mt-auto dark:bg-dark-graphite theme-transition">

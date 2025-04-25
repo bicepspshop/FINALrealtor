@@ -172,6 +172,8 @@ const config: Config = {
         "luxury-float": "luxury-float 3s ease-in-out infinite",
         "width-change": "width 4s ease-in-out infinite",
         "spin-slow": "spin 8s linear infinite",
+        "ping-slow": "ping 3s cubic-bezier(0, 0, 0.2, 1) infinite",
+        "pulse-highlight": "pulse-highlight 2s ease-in-out",
       },
       keyframes: {
         "accordion-down": {
@@ -230,6 +232,11 @@ const config: Config = {
         "luxury-float": {
           '0%, 100%': { transform: 'translateY(0px)' },
           '50%': { transform: 'translateY(-10px)' },
+        },
+        "pulse-highlight": {
+          '0%': { transform: 'scale(0.5)', opacity: '1' },
+          '80%': { transform: 'scale(2.5)', opacity: '0' },
+          '100%': { transform: 'scale(3)', opacity: '0' },
         },
       },
     },
