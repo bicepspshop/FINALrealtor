@@ -15,6 +15,7 @@ import {
 import { Trash, Copy, ExternalLink, Share2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { deleteCollection, generateShareLink } from "./actions"
+import { toHumanReadableUrl } from "@/lib/utils"
 
 interface CollectionActionsProps {
   collectionId: string
@@ -74,9 +75,10 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
         })
       } else {
         const link = `${window.location.origin}/share/${result.shareId}`
+        const humanReadableLink = toHumanReadableUrl(link)
         
-        // Копируем ссылку в буфер обмена
-        await navigator.clipboard.writeText(link)
+        // Копируем человекочитаемую ссылку в буфер обмена
+        await navigator.clipboard.writeText(humanReadableLink)
 
         toast({
           title: "Ссылка скопирована",
@@ -103,7 +105,8 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
       // Use local state for share link status
       if (localShareId) {
         const link = `${window.location.origin}/share/${localShareId}`
-        await navigator.clipboard.writeText(link)
+        const humanReadableLink = toHumanReadableUrl(link)
+        await navigator.clipboard.writeText(humanReadableLink)
         toast({
           title: "Ссылка скопирована",
           description: "Ссылка скопирована в буфер обмена",
