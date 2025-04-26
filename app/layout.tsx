@@ -8,7 +8,7 @@ import { ThemeScript } from "@/components/theme-script"
 import { initializeStorage } from "@/lib/storage"
 
 export const metadata = {
-  title: "Real Estate Agent Platform",
+  title: "РиелторПро",
   description: "Manage and share property collections with clients",
     generator: 'v0.dev'
 }
