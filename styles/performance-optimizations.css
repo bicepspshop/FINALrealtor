@@ -1,0 +1,39 @@
+/* Performance optimizations for animations and transitions */
+
+/* Use GPU acceleration for all animations */
+.animate-fade-in-up,
+.animate-fade-in,
+.animate-scale-in,
+.animate-slide-in-right,
+.animate-slide-in-left,
+.animate-golden-pulse,
+.animate-royal-pulse,
+.animate-shine,
+.animate-border-flow,
+.animate-luxury-float,
+.animate-pulse-highlight,
+.hover\:scale-105,
+.hover\:scale-110,
+.group-hover\:scale-105,
+.group-hover\:scale-110,
+.theme-transition {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize property image transforms */
+.property-image img,
+.ThemeImage img {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+/* Add GPU acceleration for theme transitions */
+.theme-transition {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+  will-change: transform, opacity, background, color;
+  backface-visibility: hidden;
+}

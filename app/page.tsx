@@ -67,6 +67,8 @@ export default function Home() {
               className="object-cover dark:hero-backnight-image filter contrast-[1.1] saturate-[1.1]"
               brightnessFactor={1.5}
               priority
+              sizes="100vw"
+              fetchPriority="high"
             />
           </div>
           
@@ -194,6 +196,9 @@ export default function Home() {
                     alt="Современный дом" 
                     fill 
                     className="object-cover transition-all duration-700 group-hover:scale-110"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    quality={80}
                   />
                 </div>
                 <div className="p-6 bg-white dark:bg-dark-graphite theme-transition border-t border-gray-100 dark:border-dark-slate group-hover:border-luxury-gold/20 dark:group-hover:border-luxury-royalBlue/20 relative">
@@ -220,6 +225,9 @@ export default function Home() {
                     alt="Классический особняк" 
                     fill 
                     className="object-cover transition-all duration-700 group-hover:scale-110"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    quality={80}
                   />
                 </div>
                 <div className="p-6 bg-white dark:bg-dark-graphite theme-transition border-t border-gray-100 dark:border-dark-slate group-hover:border-luxury-gold/20 dark:group-hover:border-luxury-royalBlue/20 relative">
@@ -246,6 +254,9 @@ export default function Home() {
                     alt="Люкс-апартаменты" 
                     fill 
                     className="object-cover transition-all duration-700 group-hover:scale-110"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    quality={80}
                   />
                 </div>
                 <div className="p-6 bg-white dark:bg-dark-graphite theme-transition border-t border-gray-100 dark:border-dark-slate group-hover:border-luxury-gold/20 dark:group-hover:border-luxury-royalBlue/20 relative">
@@ -315,6 +326,9 @@ export default function Home() {
                     alt="Работа на платформе" 
                     fill 
                     className="object-cover transition-all duration-700 hover:scale-105"
+                    loading="lazy"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    quality={80}
                   />
                   <div className="absolute inset-0 bg-gradient-to-tr from-luxury-black/30 to-transparent dark:from-luxury-black/50 theme-transition"></div>
                   {/* Add subtle material texture */}
