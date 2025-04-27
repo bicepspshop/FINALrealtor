@@ -21,6 +21,7 @@ const createBrowserClient = () => {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
+      flowType: 'pkce',
     },
   })
 }

@@ -129,7 +129,7 @@ export default function LoginPage() {
                     <FormItem className="space-y-2">
                       <div className="flex justify-between items-center">
                         <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Пароль</FormLabel>
-                        <Link href="#" className="text-xs text-luxury-black/60 dark:text-moonstone/60 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors theme-transition">
+                        <Link href="/recovery" className="text-xs text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors theme-transition">
                           Забыли пароль?
                         </Link>
                       </div>
