@@ -12,7 +12,9 @@ interface PropertyGalleryProps {
   initialIndex?: number
 }
 
-export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: PropertyGalleryProps) {
+export function PropertyGallery({ images = [], isOpen, onClose, initialIndex = 0 }: PropertyGalleryProps) {
+  // Ensure we always have valid images array
+  const safeImages = Array.isArray(images) && images.length > 0 ? images : ["/placeholder.svg"]
   const [currentIndex, setCurrentIndex] = useState(initialIndex)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [showInfo, setShowInfo] = useState(true)
@@ -36,10 +38,10 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
   }, [])
 
   const nextImage = () => {
-    if (images.length <= 1 || isTransitioning) return
+    if (safeImages.length <= 1 || isTransitioning) return
     
     setIsTransitioning(true)
-    setCurrentIndex((prev) => (prev + 1) % images.length)
+    setCurrentIndex((prev) => (prev + 1) % safeImages.length)
     
     // Reset transitioning state after animation
     setTimeout(() => {
@@ -48,10 +50,10 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
   }
 
   const prevImage = () => {
-    if (images.length <= 1 || isTransitioning) return
+    if (safeImages.length <= 1 || isTransitioning) return
     
     setIsTransitioning(true)
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
+    setCurrentIndex((prev) => (prev - 1 + safeImages.length) % safeImages.length)
     
     // Reset transitioning state after animation
     setTimeout(() => {
@@ -60,25 +62,42 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
   }
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      // Get the dialog content element
-      const dialogContent = document.querySelector('.gallery-dialog-content') as HTMLElement
-      
-      if (dialogContent) {
-        dialogContent.requestFullscreen().then(() => {
-          setIsFullscreen(true)
-        }).catch(err => {
-          console.error(`Error attempting to enable fullscreen: ${err.message}`)
-        })
+    try {
+      if (!document.fullscreenElement) {
+        // Get the dialog content element
+        const dialogContent = document.querySelector('.gallery-dialog-content') as HTMLElement
+        
+        if (dialogContent) {
+          // Use the promise pattern with proper error handling
+          dialogContent.requestFullscreen()
+            .then(() => {
+              setIsFullscreen(true)
+              console.log('Fullscreen mode enabled successfully')
+            })
+            .catch(err => {
+              console.error(`Error attempting to enable fullscreen: ${err.message}`)
+              // Fallback to manual fullscreen state if the API fails
+              setIsFullscreen(true)
+            })
+        }
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen()
+            .then(() => {
+              setIsFullscreen(false)
+              console.log('Fullscreen mode exited successfully')
+            })
+            .catch(err => {
+              console.error(`Error attempting to exit fullscreen: ${err.message}`)
+              // Fallback to manual fullscreen state if the API fails
+              setIsFullscreen(false)
+            })
+        }
       }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().then(() => {
-          setIsFullscreen(false)
-        }).catch(err => {
-          console.error(`Error attempting to exit fullscreen: ${err.message}`)
-        })
-      }
+    } catch (error) {
+      console.error('Error in fullscreen toggle:', error)
+      // Toggle the state manually as a fallback
+      setIsFullscreen(!isFullscreen)
     }
   }
 
@@ -92,7 +111,7 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
     }
   }
 
-  if (images.length === 0) return null
+  // Now we'll never have an empty images array
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -107,9 +126,9 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
           {/* Top controls */}
           <div className="absolute top-0 left-0 right-0 z-50 p-4 md:p-6 flex justify-between items-center bg-gradient-to-b from-black/50 to-transparent">
             <div className="flex items-center gap-2 text-white/90">
-              <span className="text-sm font-medium bg-black/30 px-2 py-1 rounded-sm backdrop-blur-sm">
-                {currentIndex + 1} / {images.length}
-              </span>
+            <span className="text-sm font-medium bg-black/30 px-2 py-1 rounded-sm backdrop-blur-sm">
+            {currentIndex + 1} / {safeImages.length}
+            </span>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -149,7 +168,7 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
               }
             }}
           >
-            {images.map((image, idx) => (
+            {safeImages.map((image, idx) => (
               <div
                 key={idx}
                 className={`absolute inset-0 flex items-center justify-center transition-opacity duration-300 ease-in-out
@@ -164,7 +183,7 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
             ))}
 
             {/* Navigation controls */}
-            {images.length > 1 && (
+            {safeImages.length > 1 && (
               <>
                 <button
                   className="absolute left-4 md:left-8 z-20 bg-white/90 backdrop-blur-sm text-[#2C2C2C] rounded-full p-3 
@@ -194,11 +213,11 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
             )}
           </div>
 
-          {/* Thumbnail navigation - Moved up 100px */}
-          <div className="absolute bottom-24 md:bottom-32 left-0 right-0 px-4 md:px-8">
-            <div className="flex justify-center items-center gap-2 max-w-2xl mx-auto overflow-x-auto py-2 px-4 
-              bg-white/10 backdrop-blur-md rounded-sm scrollbar-hide">
-              {images.map((image, idx) => (
+          {/* Thumbnail navigation */}
+          <div className="absolute bottom-6 md:bottom-8 left-0 right-0 px-4 md:px-8 z-50">
+            <div className="flex justify-center items-center gap-2 max-w-4xl mx-auto overflow-x-auto py-2 px-4 
+              bg-black/70 backdrop-blur-md rounded-sm scrollbar-hide">
+              {safeImages.map((image, idx) => (
                 <button
                   key={idx}
                   className={`relative h-16 w-16 md:h-20 md:w-20 rounded-sm overflow-hidden border-2 
@@ -215,6 +234,7 @@ export function PropertyGallery({ images, isOpen, onClose, initialIndex = 0 }: P
                     src={image}
                     alt={`Миниатюра ${idx + 1}`}
                     className="object-cover w-full h-full"
+                    loading="lazy"
                   />
                 </button>
               ))}

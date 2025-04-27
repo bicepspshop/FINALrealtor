@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { ElegantTabs, ElegantTabsList, ElegantTabsTrigger, ElegantTabsContent } from "@/components/ui/tabs-elegant"
 import { YandexMap } from "@/components/yandex-map"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
@@ -49,9 +49,6 @@ interface PropertyDetailsProps {
 
 export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsProps) {
   const [mapError, setMapError] = useState<string | null>(null)
-  const [activeDescriptionTab, setActiveDescriptionTab] = useState<string>("description")
-  const tabsListRef = useRef<HTMLDivElement>(null)
-  const indicatorRef = useRef<HTMLDivElement>(null)
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("ru-RU", {
@@ -93,23 +90,6 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
     property.window_view_url || 
     property.interior_finish_url
   )
-  
-  // Effect to update the indicator position based on the active tab
-  useEffect(() => {
-    if (tabsListRef.current && indicatorRef.current) {
-      const tabsList = tabsListRef.current;
-      const indicator = indicatorRef.current;
-      const activeTab = tabsList.querySelector(`[data-state="active"]`) as HTMLElement;
-      
-      if (activeTab) {
-        const tabLeft = activeTab.offsetLeft;
-        const tabWidth = activeTab.offsetWidth;
-        
-        indicator.style.left = `${tabLeft}px`;
-        indicator.style.width = `${tabWidth}px`;
-      }
-    }
-  }, [activeDescriptionTab, isOpen]); // Re-run when the active tab changes or dialog opens
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -121,13 +101,13 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="photos">
-          <TabsList className="mb-4">
-            <TabsTrigger value="photos">Фотографии</TabsTrigger>
-            <TabsTrigger value="map">Карта</TabsTrigger>
-          </TabsList>
+        <ElegantTabs defaultValue="photos">
+          <ElegantTabsList className="mb-4" indicatorClassName="bg-blue-500 dark:bg-blue-500">
+            <ElegantTabsTrigger value="photos">Фотографии</ElegantTabsTrigger>
+            <ElegantTabsTrigger value="map">Карта</ElegantTabsTrigger>
+          </ElegantTabsList>
 
-          <TabsContent value="photos">
+          <ElegantTabsContent value="photos">
             {property.property_images.length > 0 ? (
               <div className="mb-6">
                 <Carousel className="w-full">
@@ -158,15 +138,15 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
             {/* Additional image types in tabs */}
             {hasAdditionalImages && (
               <div className="mt-6 mb-6">
-                <Tabs defaultValue={property.floor_plan_url ? "floor-plan" : property.window_view_url ? "window-view" : "interior-finish"}>
-                  <TabsList className="mb-4 w-full">
-                    {property.floor_plan_url && <TabsTrigger value="floor-plan">Планировка</TabsTrigger>}
-                    {property.window_view_url && <TabsTrigger value="window-view">Вид из окна</TabsTrigger>}
-                    {property.interior_finish_url && <TabsTrigger value="interior-finish">Отделка</TabsTrigger>}
-                  </TabsList>
+                <ElegantTabs defaultValue={property.floor_plan_url ? "floor-plan" : property.window_view_url ? "window-view" : "interior-finish"}>
+                  <ElegantTabsList className="mb-4 w-full" indicatorClassName="bg-blue-500 dark:bg-blue-500">
+                    {property.floor_plan_url && <ElegantTabsTrigger value="floor-plan">Планировка</ElegantTabsTrigger>}
+                    {property.window_view_url && <ElegantTabsTrigger value="window-view">Вид из окна</ElegantTabsTrigger>}
+                    {property.interior_finish_url && <ElegantTabsTrigger value="interior-finish">Отделка</ElegantTabsTrigger>}
+                  </ElegantTabsList>
 
                   {property.floor_plan_url && (
-                    <TabsContent value="floor-plan">
+                    <ElegantTabsContent value="floor-plan">
                       <div className="relative aspect-[4/3] rounded-md overflow-hidden">
                         <img
                           src={property.floor_plan_url}
@@ -174,11 +154,11 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
                           className="w-full h-full object-contain"
                         />
                       </div>
-                    </TabsContent>
+                    </ElegantTabsContent>
                   )}
 
                   {property.window_view_url && (
-                    <TabsContent value="window-view">
+                    <ElegantTabsContent value="window-view">
                       <div className="relative aspect-[4/3] rounded-md overflow-hidden">
                         <img
                           src={property.window_view_url}
@@ -186,11 +166,11 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
                           className="w-full h-full object-contain"
                         />
                       </div>
-                    </TabsContent>
+                    </ElegantTabsContent>
                   )}
 
                   {property.interior_finish_url && (
-                    <TabsContent value="interior-finish">
+                    <ElegantTabsContent value="interior-finish">
                       <div className="relative aspect-[4/3] rounded-md overflow-hidden">
                         <img
                           src={property.interior_finish_url}
@@ -198,14 +178,14 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
                           className="w-full h-full object-contain"
                         />
                       </div>
-                    </TabsContent>
+                    </ElegantTabsContent>
                   )}
-                </Tabs>
+                </ElegantTabs>
               </div>
             )}
-          </TabsContent>
+          </ElegantTabsContent>
 
-          <TabsContent value="map">
+          <ElegantTabsContent value="map">
             <div className="aspect-video mb-6 rounded-md overflow-hidden">
               {!property.address || property.address.trim().length < 5 ? (
                 <Alert variant="warning" className="w-full h-full min-h-[200px] flex items-center justify-center">
@@ -223,8 +203,8 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
                 <YandexMap address={property.address} className="w-full h-full min-h-[200px]" />
               )}
             </div>
-          </TabsContent>
-        </Tabs>
+          </ElegantTabsContent>
+        </ElegantTabs>
 
         <div className="space-y-6">
           <div>
@@ -337,40 +317,31 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
           )}
 
           <div className="mt-6 mb-6">
-            <Tabs defaultValue="description">
-              <TabsList className="mb-4 w-full relative" ref={tabsListRef} onValueChange={(value) => setActiveDescriptionTab(value)}>
-                <TabsTrigger value="description" onClick={() => setActiveDescriptionTab("description")}>Описание</TabsTrigger>
+            <ElegantTabs defaultValue="description">
+              <ElegantTabsList className="mb-4 w-full" indicatorClassName="bg-blue-500 dark:bg-blue-500">
+                <ElegantTabsTrigger value="description">Описание</ElegantTabsTrigger>
                 {property.agent_comment && (
-                  <TabsTrigger value="agent_comment" onClick={() => setActiveDescriptionTab("agent_comment")}>Комментарий риелтора</TabsTrigger>
+                  <ElegantTabsTrigger value="agent_comment">Комментарий риелтора</ElegantTabsTrigger>
                 )}
-                <div 
-                  ref={indicatorRef} 
-                  className="absolute h-[2px] bottom-0 bg-blue-500 transition-all duration-300 ease-in-out" 
-                  style={{
-                    left: 0,
-                    width: 100,
-                    transform: 'translateY(1px)'
-                  }}
-                ></div>
-              </TabsList>
+              </ElegantTabsList>
 
-              <TabsContent value="description">
+              <ElegantTabsContent value="description">
                 {property.description ? (
-                  <p className="text-gray-700 whitespace-pre-line">{property.description}</p>
+                  <p className="text-gray-700 whitespace-pre-line dark:text-white/90 theme-transition">{property.description}</p>
                 ) : (
-                  <p className="text-gray-500 italic">Описание отсутствует</p>
+                  <p className="text-gray-500 italic dark:text-white/60 theme-transition">Описание отсутствует</p>
                 )}
-              </TabsContent>
+              </ElegantTabsContent>
 
               {property.agent_comment && (
-                <TabsContent value="agent_comment">
-                  <div className="p-4 bg-amber-50 dark:bg-blue-900/20 rounded-md border border-amber-200 dark:border-blue-800">
-                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line">{property.agent_comment}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic">Эта информация видна только вам и не показывается клиентам</p>
+                <ElegantTabsContent value="agent_comment">
+                  <div className="p-4 bg-amber-50 dark:bg-blue-900/20 rounded-md border border-amber-200 dark:border-blue-800 theme-transition">
+                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line theme-transition">{property.agent_comment}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic theme-transition">Эта информация видна только вам и не показывается клиентам</p>
                   </div>
-                </TabsContent>
+                </ElegantTabsContent>
               )}
-            </Tabs>
+            </ElegantTabs>
           </div>
         </div>
 

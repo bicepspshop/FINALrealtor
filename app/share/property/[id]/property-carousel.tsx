@@ -150,15 +150,19 @@ export function PropertyCarousel({ images, propertyType }: PropertyCarouselProps
         )}
 
         {/* Image counter and full screen button */}
-        <div className="absolute bottom-4 right-4 z-20 flex items-center gap-2">
+        <div className="absolute bottom-4 right-4 z-30 flex items-center gap-2">
           <div className="bg-white/90 dark:bg-dark-charcoal/90 backdrop-blur-sm px-3 py-1.5 text-sm text-[#2C2C2C] dark:text-white rounded-sm font-medium shadow-sm theme-transition">
             {currentIndex + 1} / {imageUrls.length}
           </div>
           
           <button
-            onClick={openGallery}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent event bubbling
+              openGallery();
+            }}
             className="bg-[#CBA135] dark:bg-luxury-royalBlue hover:bg-[#D4AF37] dark:hover:bg-luxury-royalBlueMuted text-white rounded-sm p-1.5
-              transition-all duration-300 hover:shadow-md dark:hover:shadow-elegant-dark hover:scale-105 active:scale-95 focus:outline-none theme-transition"
+              transition-all duration-300 hover:shadow-md dark:hover:shadow-elegant-dark hover:scale-105 active:scale-95 focus:outline-none theme-transition
+              z-30" /* Increase z-index to ensure it's above other elements */
             aria-label="Открыть галерею"
           >
             <Maximize size={18} />
