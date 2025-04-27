@@ -154,13 +154,13 @@ export function EditCollectionDialog({ userId, collection }: EditCollectionDialo
       if (result.error) {
         toast({
           variant: "destructive",
-          title: "Не удалось обновить коллекцию",
+          title: "Не удалось обновить подборку",
           description: result.error,
         })
       } else {
         toast({
-          title: "Коллекция обновлена",
-          description: "Данные коллекции успешно обновлены.",
+          title: "Подборка обновлена",
+          description: "Данные подборки успешно обновлены.",
         })
         setOpen(false)
 
@@ -208,9 +208,9 @@ export function EditCollectionDialog({ userId, collection }: EditCollectionDialo
           </DialogPrimitive.Close>
         </div>
         <DialogHeader>
-          <DialogTitle className="text-xl font-display text-white">Редактировать коллекцию</DialogTitle>
+          <DialogTitle className="text-xl font-display text-white">Редактировать подборку</DialogTitle>
           <DialogDescription className="text-white/70">
-            Измените название, описание или обложку коллекции.
+            Измените название, описание или обложку подборки.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -220,7 +220,7 @@ export function EditCollectionDialog({ userId, collection }: EditCollectionDialo
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white font-medium">Название коллекции</FormLabel>
+                  <FormLabel className="text-white font-medium">Название подборки</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Элитные квартиры" 
@@ -238,10 +238,10 @@ export function EditCollectionDialog({ userId, collection }: EditCollectionDialo
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white font-medium">Описание коллекции</FormLabel>
+                  <FormLabel className="text-white font-medium">Описание подборки</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Описание коллекции (необязательно)" 
+                      placeholder="Описание подборки (необязательно)" 
                       className="rounded-sm border-dark-slate bg-dark-slate text-white focus-visible:ring-luxury-royalBlue/50 py-2 min-h-[100px]" 
                       {...field} 
                     />
@@ -252,7 +252,7 @@ export function EditCollectionDialog({ userId, collection }: EditCollectionDialo
             />
             
             <div className="space-y-2">
-              <FormLabel className="text-white font-medium">Обложка коллекции</FormLabel>
+              <FormLabel className="text-white font-medium">Обложка подборки</FormLabel>
               
               {(coverPreview || currentCoverImage) ? (
                 <div className="relative mt-2 rounded-sm overflow-hidden aspect-[3/2] border border-dark-slate">
