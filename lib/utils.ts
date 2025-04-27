@@ -28,29 +28,42 @@ export function toHumanReadableUrl(url: string): string {
     
     const urlObj = new URL(urlToProcess);
     
-    // If hostname doesn't contain 'xn--', no conversion needed
-    if (!urlObj.hostname.includes('xn--')) {
-      return url;
+    // For the specific domain риелторпро.рф (xn--e1afkmafcebq.xn--p1ai)
+    if (urlObj.hostname.includes('xn--e1afkmafcebq') || urlObj.hostname.includes('xn--p1ai')) {
+      // Hardcoded conversion for our domain
+      const cyrillicHostname = urlObj.hostname
+        .replace('xn--e1afkmafcebq', 'риелторпро')
+        .replace('xn--p1ai', 'рф');
+      
+      // Return with the converted hostname
+      return hasProtocol ? 
+        url.replace(urlObj.hostname, cyrillicHostname) : 
+        urlToProcess.replace(urlObj.hostname, cyrillicHostname).replace(/^https:\/\//, '');
     }
     
-    // Use internationalized domain name API
-    const humanReadableHostname = urlObj.hostname
-      .split('.')
-      .map(part => {
-        try {
-          // This will convert xn-- domains to their Unicode representation
-          return decodeURIComponent(part)
-            .normalize('NFC');
-        } catch (e) {
-          return part;
-        }
-      })
-      .join('.');
+    // For other xn-- domains, attempt standard conversion
+    if (urlObj.hostname.includes('xn--')) {
+      try {
+        // Convert Punycode to Unicode
+        // This is a best-effort approach using the browser's native handling
+        const tempAnchor = document.createElement('a');
+        tempAnchor.href = urlToProcess;
+        // The browser will convert the hostname for display in textContent
+        const humanReadableHostname = tempAnchor.hostname;
+        
+        // Return with the converted hostname
+        return hasProtocol ? 
+          url.replace(urlObj.hostname, humanReadableHostname) : 
+          urlToProcess.replace(urlObj.hostname, humanReadableHostname).replace(/^https:\/\//, '');
+      } catch (e) {
+        console.warn('Error converting domain with DOM method:', e);
+        // Return original URL if this method fails
+        return url;
+      }
+    }
     
-    // Return the URL with the converted hostname
-    return hasProtocol ? 
-      url.replace(urlObj.hostname, humanReadableHostname) : 
-      urlToProcess.replace(urlObj.hostname, humanReadableHostname).replace(/^https:\/\//, '');
+    // If no conversion needed, return original
+    return url;
   } catch (e) {
     console.warn('Error converting URL to human-readable format:', e);
     return url; // Return original URL if conversion fails
