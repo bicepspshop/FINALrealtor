@@ -16,6 +16,7 @@ import { Trash, Copy, ExternalLink, Share2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { deleteCollection, generateShareLink } from "./actions"
 import { toHumanReadableUrl } from "@/lib/utils"
+import { ShareModal } from "@/components/share-modal"
 
 interface CollectionActionsProps {
   collectionId: string
@@ -31,6 +32,7 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
   const [isLoading, setIsLoading] = useState(false)
   const [localShareId, setLocalShareId] = useState(shareId)
   const [localHasShareLink, setLocalHasShareLink] = useState(hasShareLink)
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
 
   const handleDelete = async () => {
     setIsLoading(true)
@@ -74,20 +76,12 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
           description: result.error,
         })
       } else {
-        const link = `${window.location.origin}/share/${result.shareId}`
-        const humanReadableLink = toHumanReadableUrl(link)
-        
-        // Копируем человекочитаемую ссылку в буфер обмена
-        await navigator.clipboard.writeText(humanReadableLink)
-
-        toast({
-          title: "Ссылка скопирована",
-          description: "Ссылка скопирована в буфер обмена",
-        })
-        
         // Update local state to show the Copy/Go buttons immediately
         setLocalShareId(result.shareId)
         setLocalHasShareLink(true)
+        
+        // Open share modal instead of directly copying to clipboard
+        setIsShareModalOpen(true)
       }
     } catch (error) {
       toast({
@@ -104,13 +98,8 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
     try {
       // Use local state for share link status
       if (localShareId) {
-        const link = `${window.location.origin}/share/${localShareId}`
-        const humanReadableLink = toHumanReadableUrl(link)
-        await navigator.clipboard.writeText(humanReadableLink)
-        toast({
-          title: "Ссылка скопирована",
-          description: "Ссылка скопирована в буфер обмена",
-        })
+        // Open share modal instead of directly copying to clipboard
+        setIsShareModalOpen(true)
       }
       // If no shareId, but has flag hasShareLink, generate link
       else if (localHasShareLink) {
@@ -206,6 +195,15 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      {/* Share Modal */}
+      {localShareId && (
+        <ShareModal
+          shareId={localShareId}
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+        />
+      )}
     </div>
   )
 }
