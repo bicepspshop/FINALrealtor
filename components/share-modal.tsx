@@ -27,16 +27,24 @@ export function ShareModal({ shareId, isOpen, onClose }: ShareModalProps) {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
   const machineUrl = `${baseUrl}/share/${shareId}`
   
-  // We get the Cyrillic version by direct string replacement
-  const readableUrl = machineUrl
-    .replace('www.xn--e1afkmafcebq', 'www.риелторпро')
-    .replace('xn--e1afkmafcebq', 'риелторпро')
-    .replace('xn--p1ai', 'рф')
+  // Function to convert the URL to a human-readable form with Cyrillic characters
+  const getReadableUrl = (url: string) => {
+    // Using a more robust regex approach to handle different domain variations
+    return url
+      .replace(/www\.xn--e1afkmafcebq\.xn--p1ai/g, 'www.риелторпро.рф')
+      .replace(/xn--e1afkmafcebq\.xn--p1ai/g, 'риелторпро.рф')
+      .replace(/www\.xn--e1afkmafcebq/g, 'www.риелторпро')
+      .replace(/xn--e1afkmafcebq/g, 'риелторпро')
+      .replace(/\.xn--p1ai/g, '.рф')
+  }
   
-  // Copy full URL (will be in Punycode for security)
+  // Get the human-readable URL with Cyrillic characters
+  const readableUrl = getReadableUrl(machineUrl)
+  
+  // Copy the readable URL with Cyrillic characters
   const copyFullUrl = async () => {
     try {
-      await navigator.clipboard.writeText(machineUrl)
+      await navigator.clipboard.writeText(readableUrl)
       setCopied(true)
       
       toast({
@@ -89,7 +97,7 @@ export function ShareModal({ shareId, isOpen, onClose }: ShareModalProps) {
             animation="scale"
           >
             <Copy className="h-4 w-4" />
-            <span>Копировать полную ссылку</span>
+            <span>Копировать ссылку</span>
           </Button>
           
           {/* WhatsApp sharing */}
