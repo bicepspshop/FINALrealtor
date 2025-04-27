@@ -9,8 +9,8 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Публичные маршруты, не требующие авторизации
-  const publicRoutes = ["/", "/login", "/register", "/debug", "/v0-debug"]
-  const isPublicRoute = publicRoutes.includes(path) || path.startsWith("/share/")
+  const publicRoutes = ["/", "/login", "/register", "/debug", "/v0-debug", "/recovery", "/reset-password"]
+  const isPublicRoute = publicRoutes.includes(path) || path.startsWith("/share/") || path.startsWith("/reset-password")
 
   // API маршруты и статические ресурсы должны быть исключены из проверок авторизации
   const isApiOrStaticRoute =

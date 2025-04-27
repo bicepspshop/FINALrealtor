@@ -4,6 +4,7 @@ import { getServerClient } from "@/lib/supabase"
 
 export async function requestPasswordReset(email: string) {
   try {
+    console.log("requestPasswordReset: Начало обработки для", email)
     const supabase = getServerClient()
     
     // Проверяем, существует ли пользователь с таким email
@@ -21,8 +22,11 @@ export async function requestPasswordReset(email: string) {
     }
     
     // Отправляем ссылку для сброса пароля
+    const redirectUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password`;
+    console.log("requestPasswordReset: Отправка ссылки для сброса пароля с redirectTo:", redirectUrl);
+    
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/reset-password`,
+      redirectTo: redirectUrl,
     })
     
     if (error) {
