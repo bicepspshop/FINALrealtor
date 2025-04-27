@@ -142,16 +142,16 @@ export default async function DashboardPage() {
               <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-500 theme-transition" />
               <AlertTitle className="font-medium text-red-700 dark:text-red-500 theme-transition">Ошибка загрузки данных</AlertTitle>
               <AlertDescription className="text-red-700/80 dark:text-red-500/90 theme-transition">
-                Не удалось загрузить ваши коллекции. Пожалуйста, попробуйте обновить страницу.
+                Не удалось загрузить ваши подборки. Пожалуйста, попробуйте обновить страницу.
               </AlertDescription>
             </Alert>
           )}
           
           <div className="flex justify-between items-center mb-10">
             <div>
-              <h1 className="text-3xl font-serif font-medium text-luxury-black dark:text-white theme-transition">Ваши коллекции</h1>
+              <h1 className="text-3xl font-serif font-medium text-luxury-black dark:text-white theme-transition">Ваши подборки</h1>
               <div className="w-20 h-0.5 bg-luxury-gold dark:bg-luxury-royalBlue mt-2 mb-3 theme-transition"></div>
-              <p className="text-luxury-black/60 dark:text-white/60 theme-transition">Управляйте коллекциями объектов недвижимости для ваших клиентов</p>
+              <p className="text-luxury-black/60 dark:text-white/60 theme-transition">Управляйте подборками объектов недвижимости для ваших клиентов</p>
             </div>
             {!isOfflineMode && !fetchError && <CreateCollectionDialog userId={user.id} />}
           </div>
@@ -177,14 +177,14 @@ export default async function DashboardPage() {
               </div>
               
               <h2 className="text-2xl font-display font-medium mb-4 text-luxury-black dark:text-white theme-transition">
-                {isOfflineMode ? "Коллекции недоступны в режиме офлайн" : "Пока нет коллекций"}
+                {isOfflineMode ? "Подборки недоступны в режиме офлайн" : "Пока нет подборок"}
               </h2>
               <p className="text-luxury-black/70 dark:text-white/70 mb-8 max-w-lg mx-auto leading-relaxed theme-transition">
                 {isOfflineMode
-                  ? "Для доступа к коллекциям необходимо подключение к интернету. Попробуйте обновить страницу позже."
-                  : "Создайте свою первую коллекцию, чтобы начать организацию объектов недвижимости для ваших клиентов."}
+                  ? "Для доступа к подборкам необходимо подключение к интернету. Попробуйте обновить страницу позже."
+                  : "Создайте свою первую подборку, чтобы начать организацию объектов недвижимости для ваших клиентов."}
               </p>
-              {!isOfflineMode && <CreateCollectionDialog userId={user.id} buttonText="Создать первую коллекцию" />}
+              {!isOfflineMode && <CreateCollectionDialog userId={user.id} buttonText="Создать первую подборку" />}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

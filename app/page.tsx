@@ -85,7 +85,7 @@ export default function Home() {
                 <span className="absolute -bottom-5 left-0 h-1 bg-gradient-to-r from-luxury-gold/0 via-luxury-gold to-luxury-gold/0 dark:from-luxury-royalBlue/0 dark:via-luxury-royalBlue dark:to-luxury-royalBlue/0 rounded-full w-1/2 shadow-[0_0_15px_5px_rgba(212,175,55,0.3)] dark:shadow-[0_0_15px_5px_rgba(10,36,114,0.3)] animate-[width_3s_ease-in-out_infinite_alternate] theme-transition"></span>
               </h2>
               <p className="text-xl md:text-2xl text-white/90 dark:text-moonstone/90 mb-10 max-w-2xl leading-relaxed theme-transition">
-                Создавайте элегантные коллекции объектов недвижимости и делитесь ими с клиентами. Простой и профессиональный способ презентации недвижимости.
+                Создавайте элегантные подборки объектов недвижимости и делитесь ими с клиентами. Простой и профессиональный способ презентации недвижимости.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                 <Link href="/register">
@@ -139,8 +139,8 @@ export default function Home() {
                     <path d="M19 11H5M19 11C19.5523 11 20 11.4477 20 12V19C20 19.5523 19.5523 20 19 20H5C4.44772 20 4 19.5523 4 19V12C4 11.4477 4.44772 11 5 11M19 11V9C19 8.44772 18.5523 8 18 8M5 11V9C5 8.44772 5.44772 8 6 8M18 8V7C18 6.44772 17.5523 6 17 6H7C6.44772 6 6 6.44772 6 7V8M18 8H6" stroke="#D4AF37" className="dark:stroke-luxury-royalBlue" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
-                <h3 className="text-xl font-semibold mb-4 transition-all duration-300 group-hover:text-luxury-gold dark:group-hover:text-luxury-royalBlue text-luxury-black dark:text-white theme-transition">Организация коллекций</h3>
-                <p className="text-luxury-black/80 dark:text-white/90 leading-relaxed theme-transition">Создавайте отдельные коллекции для каждого клиента, группируйте объекты по локации, цене или типу недвижимости.</p>
+                <h3 className="text-xl font-semibold mb-4 transition-all duration-300 group-hover:text-luxury-gold dark:group-hover:text-luxury-royalBlue text-luxury-black dark:text-white theme-transition">Организация подборок</h3>
+                <p className="text-luxury-black/80 dark:text-white/90 leading-relaxed theme-transition">Создавайте отдельные подборки для каждого клиента, группируйте объекты по локации, цене или типу недвижимости.</p>
               </div>
               
               {/* Instant Exchange Card */}
@@ -152,7 +152,7 @@ export default function Home() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold mb-4 transition-all duration-300 group-hover:text-luxury-gold dark:group-hover:text-luxury-royalBlue text-luxury-black dark:text-white theme-transition">Мгновенный обмен</h3>
-                <p className="text-luxury-black/80 dark:text-white/90 leading-relaxed theme-transition">Генерируйте уникальные ссылки для обмена коллекциями с клиентами. Одним нажатием отправьте подборку недвижимости.</p>
+                <p className="text-luxury-black/80 dark:text-white/90 leading-relaxed theme-transition">Генерируйте уникальные ссылки для обмена подборками с клиентами. Одним нажатием отправьте подборку недвижимости.</p>
               </div>
               
               {/* Real-time Management Card */}
@@ -281,7 +281,7 @@ export default function Home() {
                 <Link href="/register">
                   <Button size="xl" animation="scale" className="bg-gradient-to-r from-luxury-gold via-luxury-gold/95 to-luxury-gold dark:from-luxury-royalBlue dark:via-luxury-royalBlue/95 dark:to-luxury-royalBlue text-luxury-black dark:text-white hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] dark:hover:shadow-[0_0_30px_rgba(10,36,114,0.6)] transition-all duration-500 backdrop-filter backdrop-blur-sm theme-transition border-2 border-luxury-gold/40 dark:border-luxury-royalBlue/40 hover:border-luxury-gold dark:hover:border-luxury-royalBlue relative overflow-hidden z-10 font-bold py-8 px-12">
                     <span className="relative inline-block overflow-hidden">
-                      <span className="relative z-10">Создать свою коллекцию</span>
+                      <span className="relative z-10">Создать свою подборку</span>
                       <span className="absolute inset-0 bg-gradient-to-r from-luxury-goldMuted to-luxury-gold dark:from-luxury-royalBlueMuted dark:to-luxury-royalBlue opacity-0 group-hover:opacity-100 transition-opacity duration-700 z-0"></span>
                     </span>
                     {/* Shine effect */}

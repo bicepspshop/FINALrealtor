@@ -27,7 +27,7 @@ import { uploadCollectionCover } from "@/lib/upload"
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: "Название коллекции должно содержать не менее 2 символов.",
+    message: "Название подборки должно содержать не менее 2 символов.",
   }),
   description: z.string().optional(),
 })
@@ -37,7 +37,7 @@ interface CreateCollectionDialogProps {
   buttonText?: string
 }
 
-export function CreateCollectionDialog({ userId, buttonText = "Создать коллекцию" }: CreateCollectionDialogProps) {
+export function CreateCollectionDialog({ userId, buttonText = "Создать подборку" }: CreateCollectionDialogProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
@@ -147,13 +147,13 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
       if (result.error) {
         toast({
           variant: "destructive",
-          title: "Не удалось создать коллекцию",
+          title: "Не удалось создать подборку",
           description: result.error,
         })
       } else {
         toast({
-          title: "Коллекция создана",
-          description: "Ваша новая коллекция успешно создана.",
+          title: "Подборка создана",
+          description: "Ваша новая подборка успешно создана.",
         })
         setOpen(false)
         form.reset()
@@ -180,14 +180,14 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
           className="flex items-center gap-2 bg-[#D4AF37] dark:bg-[#1E3A8A] hover:bg-[#C09A2C] dark:hover:bg-[#1E3A8A]/90 text-white transition-colors duration-300"
         >
           <PlusCircle size={18} className="text-white" />
-          <span className="text-white">{buttonText}</span>
+          <span className="text-white">{buttonText || "Создать подборку"}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] rounded-sm bg-white dark:bg-dark-graphite border-gray-100 dark:border-dark-slate theme-transition">
         <DialogHeader>
-          <DialogTitle className="text-xl font-display text-luxury-black dark:text-white theme-transition">Создать новую коллекцию</DialogTitle>
+          <DialogTitle className="text-xl font-display text-luxury-black dark:text-white theme-transition">Создать новую подборку</DialogTitle>
           <DialogDescription className="text-luxury-black/70 dark:text-white/70 theme-transition">
-            Создайте новую коллекцию для организации объектов недвижимости для ваших клиентов.
+            Создайте новую подборку для организации объектов недвижимости для ваших клиентов.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -197,7 +197,7 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Название коллекции</FormLabel>
+                  <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Название подборки</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Элитные квартиры" 
@@ -215,10 +215,10 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Описание коллекции</FormLabel>
+                  <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Описание подборки</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Опишите коллекцию (необязательно)" 
+                      placeholder="Опишите подборку (необязательно)" 
                       className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 py-2 min-h-[100px] theme-transition" 
                       {...field} 
                     />
@@ -229,7 +229,7 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать к
             />
             
             <div className="space-y-2">
-              <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Обложка коллекции</FormLabel>
+              <FormLabel className="text-luxury-black/80 dark:text-white/80 font-medium theme-transition">Обложка подборки</FormLabel>
               
               {coverPreview ? (
                 <div className="relative mt-2 rounded-sm overflow-hidden aspect-[3/2]">

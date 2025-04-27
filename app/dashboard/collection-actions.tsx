@@ -42,13 +42,13 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
       if (result.error) {
         toast({
           variant: "destructive",
-          title: "Не удалось удалить коллекцию",
+          title: "Не удалось удалить подборку",
           description: result.error,
         })
       } else {
         toast({
-          title: "Коллекция удалена",
-          description: "Коллекция была успешно удалена.",
+          title: "Подборка удалена",
+          description: "Подборка была успешно удалена.",
         })
         setIsDeleteDialogOpen(false)
         router.refresh()
@@ -170,9 +170,9 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent className="sm:max-w-[425px] rounded-sm">
           <DialogHeader>
-            <DialogTitle className="text-xl font-display text-luxury-black">Удалить коллекцию</DialogTitle>
+            <DialogTitle className="text-xl font-display text-luxury-black">Удалить подборку</DialogTitle>
             <DialogDescription className="text-luxury-black/70">
-              Вы уверены, что хотите удалить эту коллекцию? Это действие нельзя отменить.
+              Вы уверены, что хотите удалить эту подборку? Это действие нельзя отменить.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 mt-6">

@@ -130,7 +130,7 @@ export default async function CollectionPage({ params, searchParams }: Collectio
               <div className="flex items-center gap-2 text-sm text-luxury-black/60 dark:text-white/60 mb-2 theme-transition">
                 <Link href="/dashboard" className="flex items-center gap-1 hover:text-luxury-gold dark:hover:text-blue-400 transition-colors theme-transition">
                   <HomeIcon size={14} />
-                  Коллекции
+                  Подборки
                 </Link>
                 <span className="px-1">/</span>
                 <span>{collection.name}</span>
@@ -140,12 +140,12 @@ export default async function CollectionPage({ params, searchParams }: Collectio
               {collection.description ? (
                 <p className="text-luxury-black/70 dark:text-white/70 mb-3 theme-transition">{collection.description}</p>
               ) : null}
-              <p className="text-luxury-black/60 dark:text-white/60 theme-transition">Управление объектами недвижимости в этой коллекции</p>
+              <p className="text-luxury-black/60 dark:text-white/60 theme-transition">Управление объектами недвижимости в этой подборке</p>
             </div>
             <Link href="/dashboard">
               <Button variant="outline" className="border-luxury-black/20 dark:border-blue-400/40 hover:bg-luxury-black/5 dark:hover:bg-blue-400/10 hover:border-luxury-black/30 dark:hover:border-blue-400/60 rounded-sm flex items-center gap-2 dark:text-white theme-transition" animation="scale">
                 <ArrowLeft size={16} />
-                Назад к коллекциям
+                Назад к подборкам
               </Button>
             </Link>
           </div>
@@ -192,9 +192,9 @@ export default async function CollectionPage({ params, searchParams }: Collectio
                       <div className="w-16 h-0.5 bg-luxury-gold dark:bg-blue-400 mx-auto mt-4 theme-transition"></div>
                     </div>
                     
-                    <h2 className="text-2xl font-serif font-medium mb-4 text-luxury-black dark:text-white theme-transition">В этой коллекции пока нет объектов</h2>
+                    <h2 className="text-2xl font-serif font-medium mb-4 text-luxury-black dark:text-white theme-transition">В этой подборке пока нет объектов</h2>
                     <p className="text-luxury-black/70 dark:text-white/70 mb-8 max-w-lg mx-auto leading-relaxed theme-transition">
-                      Добавьте объекты недвижимости, чтобы начать формировать коллекцию.
+                      Добавьте объекты недвижимости, чтобы начать формировать подборку.
                     </p>
                   </div>
                 </div>
