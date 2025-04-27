@@ -151,6 +151,10 @@ export function PropertyCard({ property, index, isSelected, onSelect }: Property
                 src={property.property_images[currentImageIndex]?.image_url || "/placeholder.svg"}
                 alt={`${roomsText}, ${property.area} м²`}
                 fill
+                quality={80}
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                decoding="async"
                 className={`object-cover transform transition-transform duration-700 ease-out ${isHovered ? 'scale-110' : 'scale-100'}`}
               />
 

@@ -165,6 +165,8 @@ export default async function DashboardPage() {
                     alt="Изображение недвижимости"
                     width={160}
                     height={160}
+                    loading="lazy"
+                    quality={80}
                     className="w-full h-full object-cover transition-all duration-700"
                   />
                 </div>
@@ -242,6 +244,10 @@ export default async function DashboardPage() {
                         alt="Недвижимость"
                         width={400}
                         height={266}
+                        quality={80}
+                        loading="lazy"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        decoding="async"
                         className="w-full h-full object-cover transition-all duration-700 hover:scale-105"
                       />
                     </div>

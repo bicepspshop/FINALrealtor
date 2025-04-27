@@ -1,3 +1,24 @@
 .hero-backnight-image {
   filter: brightness(1.5);
 }
+
+/* Performance optimizations for animations and transitions */
+
+/* Use GPU acceleration for all animations */
+.animate-fade-in-up,
+.animate-fade-in,
+.animate-scale-in,
+.animate-slide-in-right,
+.animate-slide-in-left,
+.theme-transition {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize property image transforms */
+.property-image img,
+.ThemeImage img {
+  will-change: transform;
+  transform: translateZ(0);
+}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, memo } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -54,7 +54,7 @@ interface PropertyCardProps {
   userId: string
 }
 
-export function PropertyCard({ property, collectionId, userId }: PropertyCardProps) {
+export const PropertyCard = memo(function PropertyCard({ property, collectionId, userId }: PropertyCardProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -156,8 +156,13 @@ export function PropertyCard({ property, collectionId, userId }: PropertyCardPro
               <Image
                 src={property.property_images[0].image_url || "/placeholder.svg"}
                 alt={property.address}
-                fill
-                className="object-cover hover:scale-105 transition-all duration-700"
+                width={600}
+                height={338}
+                quality={80}
+                loading="lazy"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                decoding="async"
+                className="object-cover w-full h-full hover:scale-105 transition-all duration-700"
               />
             </div>
           ) : (
@@ -229,4 +234,4 @@ export function PropertyCard({ property, collectionId, userId }: PropertyCardPro
       <PropertyDetails property={property} isOpen={isDetailsDialogOpen} onClose={() => setIsDetailsDialogOpen(false)} />
     </>
   )
-}
+})

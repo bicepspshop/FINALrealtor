@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes"
 import Image, { ImageProps } from "next/image"
-import { useEffect, useState } from "react"
+import { useEffect, useState, memo } from "react"
 import { cn } from "@/lib/utils"
 
 interface ThemeImageProps extends Omit<ImageProps, 'src' | 'className'> {
@@ -12,7 +12,7 @@ interface ThemeImageProps extends Omit<ImageProps, 'src' | 'className'> {
   brightnessFactor?: number // Optional prop to adjust brightness for dark mode
 }
 
-export function ThemeImage({ 
+export const ThemeImage = memo(function ThemeImage({ 
   lightSrc, 
   darkSrc,
   alt,
@@ -60,8 +60,8 @@ export function ThemeImage({
               "absolute inset-0 transition-all duration-700 ease-in-out",
               resolvedTheme === 'dark' ? 'opacity-0 transform scale-[1.02]' : 'opacity-100 transform scale-100'
             )}
-            priority
             {...rest}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           
           {/* Dark mode image */}
@@ -74,8 +74,8 @@ export function ThemeImage({
               resolvedTheme === 'dark' ? 'opacity-100 transform scale-100' : 'opacity-0 transform scale-[0.98]'
             )}
             style={shouldBoostBrightness ? { filter: `brightness(${actualBrightnessFactor})` } : {}}
-            priority
             {...rest}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </>
       )}
@@ -91,4 +91,4 @@ export function ThemeImage({
       )}
     </div>
   )
-}
+})

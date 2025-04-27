@@ -178,6 +178,8 @@ export function PropertyGallery({ images = [], isOpen, onClose, initialIndex = 0
                   src={image || "/placeholder.svg"}
                   alt={`Изображение ${idx + 1}`}
                   className="object-contain max-h-full max-w-full h-auto w-auto"
+                  loading={idx === currentIndex ? "eager" : "lazy"}
+                  decoding="async"
                 />
               </div>
             ))}
@@ -235,6 +237,9 @@ export function PropertyGallery({ images = [], isOpen, onClose, initialIndex = 0
                     alt={`Миниатюра ${idx + 1}`}
                     className="object-cover w-full h-full"
                     loading="lazy"
+                    decoding="async"
+                    width="80"
+                    height="80"
                   />
                 </button>
               ))}
