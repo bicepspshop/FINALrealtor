@@ -1,72 +1,84 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { checkTrialStatus } from "./lib/subscription"
+import { createClient } from "@supabase/supabase-js"
 
-export function middleware(request: NextRequest) {
-  console.log("Middleware: Обработка запроса для пути:", request.nextUrl.pathname)
+// Create a Supabase client for the middleware
+function getSupabaseForMiddleware(authToken: string) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("Missing Supabase environment variables");
+    throw new Error("Missing required environment variables for Supabase");
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      detectSessionInUrl: false,
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+    global: {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      },
+    },
+  });
+}
 
-  // Получаем токен из cookie
-  const authToken = request.cookies.get("auth-token")
-  const path = request.nextUrl.pathname
-
-  // Публичные маршруты, не требующие авторизации
-  const publicRoutes = ["/", "/login", "/register", "/debug", "/v0-debug", "/recovery", "/reset-password"]
-  const isPublicRoute = publicRoutes.includes(path) || path.startsWith("/share/") || path.startsWith("/reset-password")
-
-  // API маршруты и статические ресурсы должны быть исключены из проверок авторизации
-  const isApiOrStaticRoute =
-    path.startsWith("/api/") ||
-    path.includes("/_next/") ||
-    path.includes("/favicon.ico") ||
-    path.includes(".svg") ||
-    path.includes(".png") ||
-    path.includes(".jpg") ||
-    path.includes(".jpeg") ||
-    path.includes(".gif") ||
-    path.includes(".woff") ||
-    path.includes(".woff2") ||
-    path.includes(".ttf")
-
-  // Пропускаем проверку авторизации для API и статических маршрутов
-  if (isApiOrStaticRoute) {
-    console.log("Middleware: Пропуск проверки для API/статического маршрута:", path)
+export async function middleware(request: NextRequest) {
+  // Skip middleware for non-dashboard routes or subscription page
+  if (!request.nextUrl.pathname.startsWith('/dashboard') || 
+      request.nextUrl.pathname.startsWith('/dashboard/subscription')) {
     return NextResponse.next()
   }
 
-  // Для v0 отладки - всегда пропускаем проверку
-  if (path === "/v0-debug") {
-    console.log("Middleware: Пропуск проверки для страницы отладки v0")
+  // Check if user is authenticated
+  const authToken = request.cookies.get('auth-token')?.value
+  
+  if (!authToken) {
+    // Redirect to login if not authenticated
+    return NextResponse.redirect(new URL('/login', request.url))
+  }
+
+  try {
+    // Make a server call to check subscription status
+    // This allows us to have up-to-date subscription info on every request
+    const subscriptionCheckResponse = await fetch(
+      `${request.nextUrl.origin}/api/check-subscription`, 
+      {
+        headers: {
+          Cookie: `auth-token=${authToken}`
+        }
+      }
+    )
+
+    if (!subscriptionCheckResponse.ok) {
+      // If there's an error checking subscription, allow access but log error
+      console.error('Error checking subscription status in middleware')
+      return NextResponse.next()
+    }
+
+    const { isActive } = await subscriptionCheckResponse.json()
+
+    // If trial is not active, redirect to subscription page
+    if (!isActive) {
+      return NextResponse.redirect(new URL('/dashboard/subscription', request.url))
+    }
+
+    // Continue to the protected route
+    return NextResponse.next()
+  } catch (error) {
+    console.error('Middleware error:', error)
+    // On error, allow access but log error
     return NextResponse.next()
   }
-
-  // Если маршрут не публичный и нет токена авторизации, перенаправляем на страницу входа
-  if (!isPublicRoute && !authToken) {
-    console.log(`Middleware: Перенаправление на страницу входа с ${path} - Нет токена авторизации`)
-    return NextResponse.redirect(new URL(`/login`, request.url))
-  }
-
-  // Если пользователь авторизован и пытается получить доступ к странице входа/регистрации, перенаправляем на панель управления
-  if (authToken && (path === "/login" || path === "/register")) {
-    console.log("Middleware: Перенаправление на панель управления - Пользователь уже авторизован")
-    return NextResponse.redirect(new URL("/dashboard", request.url))
-  }
-
-  // Добавляем заголовок для отладки
-  const response = NextResponse.next()
-  response.headers.set("x-middleware-cache", "no-cache")
-
-  console.log("Middleware: Продолжение запроса для пути:", path)
-  return response
 }
 
 export const config = {
   matcher: [
-    /*
-     * Сопоставление всех путей запросов, кроме:
-     * - _next/static (статические файлы)
-     * - _next/image (файлы оптимизации изображений)
-     * - favicon.ico (файл иконки)
-     * - public files (публичные ресурсы)
-     */
-    "/((?!_next/static|_next/image|favicon.ico).*)",
+    '/dashboard/:path*',
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }

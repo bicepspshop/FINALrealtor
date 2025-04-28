@@ -24,13 +24,19 @@ export async function registerUser(data: RegisterData) {
     // Хеширование пароля
     const hashedPassword = await hashPassword(data.password)
 
-    // Вставка нового пользователя
+    // Get current time for trial start
+    const now = new Date();
+    
+    // Вставка нового пользователя с trial параметрами
     const { data: newUser, error } = await supabase
       .from("users")
       .insert({
         name: data.name,
         email: data.email,
         password_hash: hashedPassword,
+        trial_start_time: now.toISOString(),
+        trial_duration_minutes: 20160, // 14 days in minutes
+        subscription_status: 'trial'
       })
       .select("id")
       .single()
@@ -41,7 +47,8 @@ export async function registerUser(data: RegisterData) {
     }
 
     // Установка cookie с улучшенными параметрами
-    cookies().set({
+    const cookieStore = cookies();
+    cookieStore.set({
       name: "auth-token",
       value: newUser.id,
       path: "/",

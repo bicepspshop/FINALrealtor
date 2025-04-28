@@ -33,6 +33,12 @@ export default async function CollectionPage({ params, searchParams }: Collectio
       redirect("/login")
     }
 
+    // Check subscription status - redirect to subscription page if expired
+    if (session.trialInfo && !session.trialInfo.isActive) {
+      console.log("CollectionPage: Пробный период истек, перенаправление на страницу подписки")
+      redirect("/dashboard/subscription")
+    }
+
     const user = session
     const collectionId = params.id
 
