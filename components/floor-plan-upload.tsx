@@ -2,11 +2,13 @@
 
 import { useState, useCallback } from "react"
 import { useDropzone } from "react-dropzone"
-import Image from "next/image"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { getBrowserClient } from "@/lib/supabase"
+import { OptimizedImage } from "@/components/ui/optimized-image"
+import { uploadFloorPlanImage } from "@/lib/optimized-upload"
+import { isValidImageFile } from "@/lib/image-utils"
 
 interface FloorPlanUploadProps {
   onImageChange: (imageUrl: string | null) => void
@@ -31,34 +33,43 @@ export function FloorPlanUpload({ onImageChange, initialImage = null }: FloorPla
   const uploadFile = useCallback(
     async (file: File) => {
       try {
-        const fileExt = file.name.split(".").pop()
-        const fileName = `floorplan-${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
-
-        console.log(`Начало загрузки планировки: ${fileName}`)
-
-        // Загружаем файл в Supabase Storage
-        const { data, error } = await supabase.storage.from("property-images").upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: false,
-        })
-
-        if (error) {
-          console.error("Ошибка загрузки планировки:", error)
+        // Validate file before upload
+        if (!isValidImageFile(file)) {
           toast({
             variant: "destructive",
             title: "Ошибка загрузки",
-            description: `Не удалось загрузить планировку: ${error.message}`,
+            description: "Поддерживаются только изображения: JPEG, PNG, WEBP, GIF",
           })
           return null
         }
 
-        console.log(`Планировка успешно загружена: ${fileName}`)
+        // Check file size (10MB max)
+        if (file.size > 10 * 1024 * 1024) {
+          toast({
+            variant: "destructive",
+            title: "Ошибка загрузки",
+            description: "Размер файла не должен превышать 10MB",
+          })
+          return null
+        }
 
-        // Получаем публичный URL
-        const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(fileName)
-        console.log(`Получен публичный URL для планировки: ${urlData.publicUrl}`)
+        console.log(`Начало загрузки планировки: ${file.name}`)
 
-        return urlData.publicUrl
+        // Use the optimized upload function
+        const url = await uploadFloorPlanImage(file)
+
+        if (!url) {
+          console.error("Ошибка загрузки планировки")
+          toast({
+            variant: "destructive",
+            title: "Ошибка загрузки",
+            description: "Не удалось загрузить изображение планировки",
+          })
+          return null
+        }
+
+        console.log(`Планировка успешно загружена: ${url}`)
+        return url
       } catch (err) {
         console.error("Непредвиденная ошибка при загрузке планировки:", err)
         toast({
@@ -69,7 +80,7 @@ export function FloorPlanUpload({ onImageChange, initialImage = null }: FloorPla
         return null
       }
     },
-    [toast, supabase],
+    [toast],
   )
 
   const onDrop = useCallback(
@@ -120,7 +131,7 @@ export function FloorPlanUpload({ onImageChange, initialImage = null }: FloorPla
     if (file?.url) {
       try {
         const filePath = file.url.split("/").pop()
-        if (filePath) {
+        if (filePath && supabase) {
           console.log(`Удаление планировки из хранилища: ${filePath}`)
           await supabase.storage.from("property-images").remove([filePath])
         }
@@ -184,7 +195,13 @@ export function FloorPlanUpload({ onImageChange, initialImage = null }: FloorPla
         </div>
       ) : (
         <div className="relative rounded-md overflow-hidden bg-gray-100 border aspect-[4/3]">
-          <Image src={file.preview || "/placeholder.svg"} alt="Планировка" fill className="object-contain" />
+          <OptimizedImage 
+            src={file.preview || "/placeholder.svg"} 
+            alt="Планировка" 
+            fill 
+            objectFit="contain"
+            fallbackSrc="/placeholder.svg"
+          />
           {file.uploading && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <div className="w-8 h-8 border-4 border-t-primary border-r-primary border-b-primary border-l-transparent rounded-full animate-spin" />
