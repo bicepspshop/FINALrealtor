@@ -41,58 +41,114 @@ export async function middleware(request: NextRequest) {
     }
     
     try {
-      // Extract share ID from the URL path
-      const shareId = request.nextUrl.pathname.split('/')[2]
-      
-      if (!shareId || shareId === 'expired' || shareId === 'components' || shareId === 'v2') {
-        return NextResponse.next()
-      }
-
-      const supabase = getSupabaseForMiddleware()
-
-      // Find collection by share_id
-      const { data: collection, error: collectionError } = await supabase
-        .from("collections")
-        .select("id, user_id")
-        .eq("share_id", shareId)
-        .single()
-
-      if (collectionError || !collection) {
-        // If collection not found, let the page handle the 404
-        return NextResponse.next()
-      }
-
-      // Check the subscription status of the collection owner
-      const { data: user, error: userError } = await supabase
-        .from("users")
-        .select("subscription_status, trial_start_time, trial_duration_minutes")
-        .eq("id", collection.user_id)
-        .single()
-
-      if (userError || !user) {
-        // If user not found, let the page handle the 404
-        return NextResponse.next()
-      }
-
-      // Check if subscription is active or trial is valid
-      if (user.subscription_status === 'active') {
-        // Paid subscription, allow access
-        return NextResponse.next()
-      } else if (user.subscription_status === 'trial') {
-        // Check if trial is still valid
-        const trialStartTime = new Date(user.trial_start_time);
-        const trialDurationMs = user.trial_duration_minutes * 60 * 1000;
-        const trialEndTime = new Date(trialStartTime.getTime() + trialDurationMs);
-        const currentTime = new Date();
+      // For the main share pages (collections)
+      if (request.nextUrl.pathname.startsWith('/share/') && !request.nextUrl.pathname.startsWith('/share/property/') && 
+          !request.nextUrl.pathname.startsWith('/share/expired/') && !request.nextUrl.pathname.startsWith('/share/components/') && 
+          !request.nextUrl.pathname.startsWith('/share/v2/property/') && !request.nextUrl.pathname.startsWith('/share/v2/components/')) {
         
-        if (currentTime < trialEndTime) {
-          // Trial still active, allow access
+        // Extract share ID from the URL path
+        const shareId = request.nextUrl.pathname.split('/')[2]
+        
+        if (!shareId) {
           return NextResponse.next()
         }
-      }
 
-      // If subscription is expired or cancelled, redirect to expired page
-      return NextResponse.redirect(new URL('/share/expired', request.url))
+        const supabase = getSupabaseForMiddleware()
+
+        // Find collection by share_id
+        const { data: collection, error: collectionError } = await supabase
+          .from("collections")
+          .select("id, user_id")
+          .eq("share_id", shareId)
+          .single()
+
+        if (collectionError || !collection) {
+          // If collection not found, let the page handle the 404
+          return NextResponse.next()
+        }
+
+        // Check the subscription status
+        return await checkSubscriptionAndRedirect(supabase, collection.user_id, request)
+      }
+      
+      // For individual property pages (v1)
+      else if (request.nextUrl.pathname.startsWith('/share/property/')) {
+        const propertyId = request.nextUrl.pathname.split('/')[3]
+        
+        if (!propertyId) {
+          return NextResponse.next()
+        }
+        
+        const supabase = getSupabaseForMiddleware()
+        
+        // Find property and its collection
+        const { data: property, error: propertyError } = await supabase
+          .from("properties")
+          .select("collection_id")
+          .eq("id", propertyId)
+          .single()
+          
+        if (propertyError || !property) {
+          // If property not found, let the page handle the 404
+          return NextResponse.next()
+        }
+        
+        // Find collection and user
+        const { data: collection, error: collectionError } = await supabase
+          .from("collections")
+          .select("user_id")
+          .eq("id", property.collection_id)
+          .single()
+          
+        if (collectionError || !collection) {
+          // If collection not found, let the page handle the 404
+          return NextResponse.next()
+        }
+        
+        // Check the subscription status
+        return await checkSubscriptionAndRedirect(supabase, collection.user_id, request)
+      }
+      
+      // For v2 property pages
+      else if (request.nextUrl.pathname.startsWith('/share/v2/property/')) {
+        const propertyId = request.nextUrl.pathname.split('/')[4]
+        
+        if (!propertyId) {
+          return NextResponse.next()
+        }
+        
+        const supabase = getSupabaseForMiddleware()
+        
+        // Find property and its collection
+        const { data: property, error: propertyError } = await supabase
+          .from("properties")
+          .select("collection_id")
+          .eq("id", propertyId)
+          .single()
+          
+        if (propertyError || !property) {
+          // If property not found, let the page handle the 404
+          return NextResponse.next()
+        }
+        
+        // Find collection and user
+        const { data: collection, error: collectionError } = await supabase
+          .from("collections")
+          .select("user_id")
+          .eq("id", property.collection_id)
+          .single()
+          
+        if (collectionError || !collection) {
+          // If collection not found, let the page handle the 404
+          return NextResponse.next()
+        }
+        
+        // Check the subscription status
+        return await checkSubscriptionAndRedirect(supabase, collection.user_id, request)
+      }
+      
+      // All other share routes continue normally
+      return NextResponse.next()
     } catch (error) {
       console.error('Share middleware error:', error)
       // On error, allow access but log error
@@ -146,6 +202,41 @@ export async function middleware(request: NextRequest) {
     // On error, allow access but log error
     return NextResponse.next()
   }
+}
+
+// Helper function to check subscription status and redirect if needed
+async function checkSubscriptionAndRedirect(supabase: any, userId: string, request: NextRequest) {
+  // Check the subscription status of the user
+  const { data: user, error: userError } = await supabase
+    .from("users")
+    .select("subscription_status, trial_start_time, trial_duration_minutes")
+    .eq("id", userId)
+    .single()
+
+  if (userError || !user) {
+    // If user not found, let the page handle the 404
+    return NextResponse.next()
+  }
+
+  // Check if subscription is active or trial is valid
+  if (user.subscription_status === 'active') {
+    // Paid subscription, allow access
+    return NextResponse.next()
+  } else if (user.subscription_status === 'trial') {
+    // Check if trial is still valid
+    const trialStartTime = new Date(user.trial_start_time);
+    const trialDurationMs = user.trial_duration_minutes * 60 * 1000;
+    const trialEndTime = new Date(trialStartTime.getTime() + trialDurationMs);
+    const currentTime = new Date();
+    
+    if (currentTime < trialEndTime) {
+      // Trial still active, allow access
+      return NextResponse.next()
+    }
+  }
+
+  // If subscription is expired or cancelled, redirect to expired page
+  return NextResponse.redirect(new URL('/share/expired', request.url))
 }
 
 export const config = {

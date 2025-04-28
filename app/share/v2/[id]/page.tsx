@@ -8,6 +8,7 @@ import Link from "next/link"
 import "@/styles/luxury-experience.css"
 import { LuxuryEffects } from "../components/luxury-effects"
 import { FogTextEffect } from "../components/fog-text-effect"
+import { SubscriptionChecker } from "../../components/subscription-checker"
 
 interface SharePageProps {
   params: {
@@ -66,6 +67,9 @@ export default async function SharePageV2({ params }: SharePageProps) {
 
   return (
     <div className={`min-h-screen bg-dark-charcoal text-white font-sans overflow-hidden luxury-experience-wrapper`}>
+      {/* Real-time subscription checker */}
+      <SubscriptionChecker collectionId={collection.id} userId={collection.user_id} />
+      
       {/* Client-side luxury effects */}
       <LuxuryEffects />
       {/* Version Toggle */}
