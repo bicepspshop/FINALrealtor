@@ -13,6 +13,7 @@ The subscription system provides a 14-day trial period for new users. After this
 - Restricted access after trial expiration
 - Subscription management page
 - Middleware protection for expired subscriptions
+- Automatic deactivation of share links for expired users
 
 ## Implementation Steps
 
@@ -75,6 +76,33 @@ SET trial_duration_minutes = 5, -- 5 minutes
     trial_start_time = NOW()
 WHERE email = 'your-test-email@example.com';
 ```
+
+### 5. Setting Up Scheduled Trial Expiration Updates
+
+To ensure that expired trials are updated in the database automatically, set up a cron job to call the update-expired-trials API endpoint:
+
+```bash
+# Example cron job to run every hour
+0 * * * * curl -X GET https://www.xn--e1afkmafcebq.xn--p1ai/api/update-expired-trials -H "Authorization: Bearer YOUR_CRON_SECRET_KEY"
+```
+
+Add the CRON_SECRET_KEY to your environment variables:
+
+```env
+CRON_SECRET_KEY=your-secure-random-string
+```
+
+This job will find all users whose trial has expired and update their subscription_status to 'expired'.
+
+## Share Links Management
+
+Share links are automatically deactivated when a user's subscription expires. The system works as follows:
+
+1. When a share link is accessed, middleware checks the subscription status of the collection owner
+2. If the owner's trial has expired or subscription is cancelled, visitors are redirected to an expiration page
+3. To reactivate share links, the user must purchase a subscription
+
+This ensures that clients cannot access collections from agents with expired accounts, encouraging agents to maintain an active subscription.
 
 ## Extending The System
 

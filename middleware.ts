@@ -4,7 +4,7 @@ import { checkTrialStatus } from "./lib/subscription"
 import { createClient } from "@supabase/supabase-js"
 
 // Create a Supabase client for the middleware
-function getSupabaseForMiddleware(authToken: string) {
+function getSupabaseForMiddleware(authToken?: string) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY as string;
   
@@ -13,21 +13,93 @@ function getSupabaseForMiddleware(authToken: string) {
     throw new Error("Missing required environment variables for Supabase");
   }
   
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  const options: any = {
     auth: {
       detectSessionInUrl: false,
       persistSession: false,
       autoRefreshToken: false,
-    },
-    global: {
+    }
+  };
+  
+  if (authToken) {
+    options.global = {
       headers: {
         Authorization: `Bearer ${authToken}`,
       },
-    },
-  });
+    };
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey, options);
 }
 
 export async function middleware(request: NextRequest) {
+  // Handle share links separately
+  if (request.nextUrl.pathname.startsWith('/share/')) {
+    // Skip the /share/expired route to avoid redirect loops
+    if (request.nextUrl.pathname === '/share/expired') {
+      return NextResponse.next()
+    }
+    
+    try {
+      // Extract share ID from the URL path
+      const shareId = request.nextUrl.pathname.split('/')[2]
+      
+      if (!shareId || shareId === 'expired' || shareId === 'components' || shareId === 'v2') {
+        return NextResponse.next()
+      }
+
+      const supabase = getSupabaseForMiddleware()
+
+      // Find collection by share_id
+      const { data: collection, error: collectionError } = await supabase
+        .from("collections")
+        .select("id, user_id")
+        .eq("share_id", shareId)
+        .single()
+
+      if (collectionError || !collection) {
+        // If collection not found, let the page handle the 404
+        return NextResponse.next()
+      }
+
+      // Check the subscription status of the collection owner
+      const { data: user, error: userError } = await supabase
+        .from("users")
+        .select("subscription_status, trial_start_time, trial_duration_minutes")
+        .eq("id", collection.user_id)
+        .single()
+
+      if (userError || !user) {
+        // If user not found, let the page handle the 404
+        return NextResponse.next()
+      }
+
+      // Check if subscription is active or trial is valid
+      if (user.subscription_status === 'active') {
+        // Paid subscription, allow access
+        return NextResponse.next()
+      } else if (user.subscription_status === 'trial') {
+        // Check if trial is still valid
+        const trialStartTime = new Date(user.trial_start_time);
+        const trialDurationMs = user.trial_duration_minutes * 60 * 1000;
+        const trialEndTime = new Date(trialStartTime.getTime() + trialDurationMs);
+        const currentTime = new Date();
+        
+        if (currentTime < trialEndTime) {
+          // Trial still active, allow access
+          return NextResponse.next()
+        }
+      }
+
+      // If subscription is expired or cancelled, redirect to expired page
+      return NextResponse.redirect(new URL('/share/expired', request.url))
+    } catch (error) {
+      console.error('Share middleware error:', error)
+      // On error, allow access but log error
+      return NextResponse.next()
+    }
+  }
+  
   // Skip middleware for non-dashboard routes or subscription page
   if (!request.nextUrl.pathname.startsWith('/dashboard') || 
       request.nextUrl.pathname.startsWith('/dashboard/subscription')) {
@@ -79,6 +151,7 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     '/dashboard/:path*',
+    '/share/:path*',
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }
