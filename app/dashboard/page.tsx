@@ -9,7 +9,13 @@ import { CreateCollectionDialog } from "./create-collection-dialog"
 import { EditCollectionDialog } from "./edit-collection-dialog"
 import { CollectionActions } from "./collection-actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, WifiOff, FolderPlus, Home, MessageSquare } from "lucide-react"
+import { AlertCircle, WifiOff, FolderPlus, Home, MessageSquare, Bell, ChevronRight, Plus } from "lucide-react"
+import { SubscriptionBanner } from "@/components/subscription-banner"
+import { Database } from "@/lib/types/database.types"
+
+// Add these type definitions before the DashboardPage function
+type Collection = Database['public']['Tables']['collections']['Row']
+type CommentsCountMap = Record<string, number>
 
 export default async function DashboardPage() {
   console.log("DashboardPage: Начало загрузки страницы")
@@ -70,7 +76,7 @@ export default async function DashboardPage() {
 
     let collections = []
     let fetchError = null
-    let commentsCountMap = {}
+    let commentsCountMap: CommentsCountMap = {}
 
     try {
       // Проверяем, находимся ли мы в офлайн-режиме
@@ -88,7 +94,10 @@ export default async function DashboardPage() {
               .order("created_at", { ascending: false }),
           3, // Максимальное количество попыток
           2000, // Увеличенный таймаут между попытками
-        )
+        ) as { 
+          data: Collection[] | null; 
+          error: Error | null;
+        }
 
         if (error) {
           console.error("DashboardPage: Ошибка при получении коллекций:", error)
@@ -99,18 +108,17 @@ export default async function DashboardPage() {
           
           // Получаем количество комментариев для каждой коллекции
           if (collections.length > 0) {
-            const collectionIds = collections.map(c => c.id)
-            const { data: commentsData } = await supabase
-              .from("property_comments")
-              .select("collection_id, id")
-              .in("collection_id", collectionIds)
-            
-            // Создаем Map с количеством комментариев для каждой коллекции
-            if (commentsData) {
-              commentsCountMap = commentsData.reduce((acc, comment) => {
-                acc[comment.collection_id] = (acc[comment.collection_id] || 0) + 1
+            try {
+              const { data: commentCounts } = await supabase.rpc("get_comments_count_per_collection", {
+                user_id_param: user.id,
+              }) as { data: {collection_id: string, count: number}[] | null }
+
+              commentsCountMap = (commentCounts || []).reduce((acc: CommentsCountMap, c: {collection_id: string, count: number}) => {
+                acc[c.collection_id] = c.count
                 return acc
               }, {})
+            } catch (error) {
+              console.error("Error fetching comment counts:", error)
             }
           }
         }
@@ -126,6 +134,11 @@ export default async function DashboardPage() {
         <NavBar userName={user.name} isOfflineMode={isOfflineMode} />
 
         <main className="flex-1 container-luxury py-8 relative z-10">
+          {/* Subscription Banner */}
+          {user.trialInfo && !isOfflineMode && user.trialInfo.isActive && (
+            <SubscriptionBanner trialInfo={user.trialInfo} />
+          )}
+          
           {isOfflineMode && (
             <Alert variant="warning" className="mb-8 rounded-sm border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800/30 theme-transition">
               <WifiOff className="h-4 w-4 text-amber-600 dark:text-amber-500 theme-transition" />
@@ -153,8 +166,28 @@ export default async function DashboardPage() {
               <div className="w-20 h-0.5 bg-luxury-gold dark:bg-luxury-royalBlue mt-2 mb-3 theme-transition"></div>
               <p className="text-luxury-black/60 dark:text-white/60 theme-transition">Управляйте подборками объектов недвижимости для ваших клиентов</p>
             </div>
-            {!isOfflineMode && !fetchError && <CreateCollectionDialog userId={user.id} />}
+            {!isOfflineMode && !fetchError && user.trialInfo?.isActive && <CreateCollectionDialog userId={user.id} />}
+            {!isOfflineMode && !fetchError && user.trialInfo && !user.trialInfo.isActive && (
+              <Link href="/dashboard/subscription">
+                <Button className="bg-luxury-gold hover:bg-luxury-gold/90 text-white py-5 px-5 rounded-sm">
+                  Оформить подписку
+                </Button>
+              </Link>
+            )}
           </div>
+
+          {!isOfflineMode && !fetchError && user.trialInfo && !user.trialInfo.isActive && (
+            <Alert className="mb-8 rounded-sm border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800/30 theme-transition">
+              <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-500 theme-transition" />
+              <AlertTitle className="font-medium text-amber-700 dark:text-amber-500 theme-transition">Пробный период истек</AlertTitle>
+              <AlertDescription className="text-amber-700/80 dark:text-amber-500/90 theme-transition">
+                Ваш пробный период истек. Для продолжения использования системы необходимо оформить подписку. 
+                <Link href="/dashboard/subscription" className="text-amber-800 dark:text-amber-400 ml-1 underline underline-offset-2">
+                  Оформить подписку
+                </Link>
+              </AlertDescription>
+            </Alert>
+          )}
 
           {(!fetchError || isOfflineMode) && collections.length === 0 ? (
             <div className="bg-white dark:bg-dark-graphite rounded-sm shadow-elegant dark:shadow-elegant-dark p-16 text-center max-w-xl mx-auto mt-12 animate-fade-in-up theme-transition">
@@ -188,7 +221,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {collections.map((collection, index) => (
+              {collections.map((collection: Collection, index: number) => (
                 <Card 
                   key={collection.id} 
                   className="overflow-hidden rounded-sm border border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark hover:shadow-elegant dark:hover:shadow-luxury-dark transition-all duration-500 animate-fade-in-up hover:-translate-y-1 property-card theme-transition bg-transparent relative flex flex-col h-full"
@@ -197,7 +230,7 @@ export default async function DashboardPage() {
                   {/* Comment Count Badge - if there are comments */}
                   {commentsCountMap[collection.id] > 0 && (
                     <Link 
-                      href={`/dashboard/collections/${collection.id}?tab=comments`}
+                      href={user.trialInfo?.isActive ? `/dashboard/collections/${collection.id}?tab=comments` : "/dashboard/subscription"}
                       className="absolute top-3 right-10 z-10 bg-black/80 dark:bg-blue-500/90 text-white rounded-full px-1.5 py-1 flex items-center gap-1.5 text-xs hover:bg-black dark:hover:bg-blue-500 transition-colors duration-200 theme-transition"
                     >
                       <MessageSquare size={14} />
@@ -205,7 +238,7 @@ export default async function DashboardPage() {
                     </Link>
                   )}
                   
-                  {!isOfflineMode && (
+                  {!isOfflineMode && user.trialInfo?.isActive && (
                     <EditCollectionDialog
                       userId={user.id}
                       collection={{
@@ -252,45 +285,76 @@ export default async function DashboardPage() {
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                      <Link href={`/dashboard/collections/${collection.id}`}>
-                        <Button 
-                          variant="outline" 
-                          className="w-full border-luxury-black/20 dark:border-blue-400/60 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 hover:border-luxury-black/30 dark:hover:border-blue-400 rounded-sm flex items-center justify-center gap-2 py-5 dark:text-white dark:border-2 theme-transition" 
-                          animation="scale"
-                        >
-                          <Home size={16} className="dark:text-blue-400 theme-transition" />
-                          <span className="dark:text-white theme-transition">Объекты</span>
-                        </Button>
-                      </Link>
+                      {user.trialInfo?.isActive ? (
+                        <Link href={`/dashboard/collections/${collection.id}`}>
+                          <Button 
+                            variant="outline" 
+                            className="w-full border-luxury-black/20 dark:border-blue-400/60 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 hover:border-luxury-black/30 dark:hover:border-blue-400 rounded-sm flex items-center justify-center gap-2 py-5 dark:text-white dark:border-2 theme-transition" 
+                            animation="scale"
+                          >
+                            <Home size={16} className="dark:text-blue-400 theme-transition" />
+                            <span className="dark:text-white theme-transition">Объекты</span>
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Link href="/dashboard/subscription">
+                          <Button 
+                            variant="outline" 
+                            className="w-full border-amber-500/50 dark:border-amber-400/60 hover:bg-amber-500/5 dark:hover:bg-amber-500/10 hover:border-amber-500/70 dark:hover:border-amber-400 rounded-sm flex items-center justify-center gap-2 py-5 text-amber-700 dark:text-amber-400 dark:border-2 theme-transition" 
+                            animation="scale"
+                          >
+                            <AlertCircle size={16} className="text-amber-600 dark:text-amber-400 theme-transition" />
+                            <span className="theme-transition">Подписка</span>
+                          </Button>
+                        </Link>
+                      )}
                       
-                      <Link href={`/dashboard/collections/${collection.id}?tab=comments`}>
-                        <Button 
-                          variant={commentsCountMap[collection.id] > 0 ? "default" : "outline"}
-                          className={`w-full rounded-sm flex items-center justify-center gap-2 py-5 theme-transition
-                            ${commentsCountMap[collection.id] > 0 
-                              ? "bg-black text-white dark:bg-blue-500 dark:text-white hover:bg-black/90 dark:hover:bg-blue-600" 
-                              : "border-luxury-black/20 dark:border-blue-400/40 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 dark:text-white"
-                            }`}
-                          animation="scale"
-                        >
-                          <MessageSquare size={16} className={commentsCountMap[collection.id] > 0 ? "" : "dark:text-blue-400"} />
-                          <span className="dark:text-white theme-transition">
-                            {commentsCountMap[collection.id] > 0 
-                              ? `Комментарии (${commentsCountMap[collection.id]})` 
-                              : "Комментарии"}
-                          </span>
-                        </Button>
-                      </Link>
+                      {user.trialInfo?.isActive ? (
+                        <Link href={`/dashboard/collections/${collection.id}?tab=comments`}>
+                          <Button 
+                            variant={commentsCountMap[collection.id] > 0 ? "default" : "outline"}
+                            className={`w-full rounded-sm flex items-center justify-center gap-2 py-5 theme-transition
+                              ${commentsCountMap[collection.id] > 0 
+                                ? "bg-black text-white dark:bg-blue-500 dark:text-white hover:bg-black/90 dark:hover:bg-blue-600" 
+                                : "border-luxury-black/20 dark:border-blue-400/40 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 dark:text-white"
+                              }`}
+                            animation="scale"
+                          >
+                            <MessageSquare size={16} className={commentsCountMap[collection.id] > 0 ? "" : "dark:text-blue-400"} />
+                            <span className="dark:text-white theme-transition">
+                              {commentsCountMap[collection.id] > 0 
+                                ? `Комментарии (${commentsCountMap[collection.id]})` 
+                                : "Комментарии"}
+                            </span>
+                          </Button>
+                        </Link>
+                      ) : (
+                        <Link href="/dashboard/subscription">
+                          <Button 
+                            variant="default"
+                            className="w-full rounded-sm flex items-center justify-center gap-2 py-5 bg-amber-600 hover:bg-amber-700 text-white theme-transition"
+                            animation="scale"
+                          >
+                            <ChevronRight size={16} />
+                            <span>Оформить</span>
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </CardContent>
                   <CardFooter className="bg-gray-50 dark:bg-dark-slate pt-4 border-t border-gray-100 dark:border-dark-slate theme-transition mt-auto">
-                    {!isOfflineMode && (
+                    {!isOfflineMode && user.trialInfo?.isActive && (
                       <CollectionActions
                         collectionId={collection.id}
                         userId={user.id}
                         hasShareLink={!!collection.share_id}
                         shareId={collection.share_id}
                       />
+                    )}
+                    {!isOfflineMode && user.trialInfo && !user.trialInfo.isActive && (
+                      <div className="w-full text-center text-amber-600 dark:text-amber-400 text-sm italic">
+                        Для управления подборкой оформите подписку
+                      </div>
                     )}
                   </CardFooter>
                 </Card>

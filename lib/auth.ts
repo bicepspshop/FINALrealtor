@@ -2,13 +2,23 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { getServerClient, executeWithRetry, isNetworkError, createOfflineSession } from "./supabase"
 import bcrypt from "bcryptjs"
+import { checkTrialStatus, type TrialInfo } from "./subscription"
 
 // Увеличиваем время жизни cookie до 7 дней (в секундах)
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60
 
-// Улучшим функцию getSession для более надежной работы в офлайн-режиме
+// Расширенный тип сессии с информацией о подписке
+export interface SessionWithSubscription {
+  id: string;
+  email: string;
+  name: string;
+  trialInfo?: TrialInfo;
+  subscriptionStatus?: string;
+  isOfflineMode?: boolean;
+}
 
-export async function getSession() {
+// Улучшим функцию getSession для более надежной работы в офлайн-режиме
+export async function getSession(): Promise<SessionWithSubscription | null> {
   try {
     // Используем cookies() только в серверном контексте
     const cookieStore = cookies()
@@ -23,9 +33,11 @@ export async function getSession() {
     const supabase = getServerClient()
 
     try {
-      // Добавляем таймаут для запроса
+      // Добавляем информацию о подписке в запрос
       const { data, error } = (await Promise.race([
-        executeWithRetry(() => supabase.from("users").select("id, email, name").eq("id", token).single()),
+        executeWithRetry(() => supabase.from("users").select(
+          "id, email, name, trial_start_time, trial_duration_minutes, subscription_status"
+        ).eq("id", token).single()),
         new Promise<{ data: null; error: Error }>((resolve) =>
           setTimeout(
             () =>
@@ -61,8 +73,30 @@ export async function getSession() {
         return null
       }
 
+      // Проверяем статус подписки
+      let trialInfo: TrialInfo;
+      
+      try {
+        trialInfo = await checkTrialStatus(data.id);
+      } catch (trialError) {
+        console.error("getSession: Ошибка при проверке статуса подписки:", trialError);
+        // В случае ошибки, предоставим базовую информацию о подписке
+        trialInfo = {
+          isActive: data.subscription_status === 'active' || data.subscription_status === 'trial',
+          subscriptionStatus: data.subscription_status
+        };
+      }
+
       console.log("getSession: Сессия успешно получена для пользователя:", data.name)
-      return data
+      
+      // Возвращаем данные с информацией о подписке
+      return {
+        id: data.id,
+        email: data.email,
+        name: data.name,
+        subscriptionStatus: data.subscription_status,
+        trialInfo
+      }
     } catch (fetchError) {
       console.error("getSession: Ошибка при запросе к базе данных:", fetchError)
 

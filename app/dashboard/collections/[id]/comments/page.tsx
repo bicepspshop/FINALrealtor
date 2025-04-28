@@ -3,6 +3,7 @@ import { getServerClient } from "@/lib/supabase"
 import { CommentManagement } from "./comment-management"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
+import { redirect } from "next/navigation"
 
 interface CommentManagementPageProps {
   params: {
@@ -12,6 +13,13 @@ interface CommentManagementPageProps {
 
 export default async function CommentManagementPage({ params }: CommentManagementPageProps) {
   const session = await requireAuth()
+  
+  // Check subscription status - redirect to subscription page if expired
+  if (session.trialInfo && !session.trialInfo.isActive) {
+    console.log("CommentManagementPage: Пробный период истек, перенаправление на страницу подписки")
+    redirect("/dashboard/subscription")
+  }
+  
   const collectionId = params.id
   const supabase = getServerClient()
   
