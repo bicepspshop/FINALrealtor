@@ -7,6 +7,7 @@ import { VersionToggle } from "../components/version-toggle"
 import { ShareThemeProvider } from "../components/share-theme-provider"
 import { ShareHero } from "./share-hero"
 import { CommentProvider, CommentLayer } from "../components/comments"
+import { SubscriptionChecker } from "../components/subscription-checker"
 
 interface SharePageProps {
   params: {
@@ -59,22 +60,55 @@ export default async function SharePage({ params }: SharePageProps) {
     notFound()
   }
 
+  // Extract agent data safely
+  const agentName = agent?.name || "Агент недвижимости"
+  const agentEmail = agent?.email || undefined
+  const agentPhone = agent?.phone || undefined
+  const agentDescription = agent?.description || undefined
+  const agentAvatarUrl = agent?.avatar_url || undefined
+
+  // Prepare collection data with defaults for ShareHero
+  const heroCollection = {
+    id: collection.id,
+    name: collection.name || "Подборка недвижимости",
+    description: collection.description || "",
+    user_id: collection.user_id
+  }
+
+  // Prepare agent data for ShareHero
+  const heroAgent = agent ? {
+    name: agent.name || "Агент недвижимости",
+    email: agent.email,
+    phone: agent.phone,
+    description: agent.description,
+    avatar_url: agent.avatar_url
+  } : undefined
+
   return (
     <ShareThemeProvider>
       <CommentProvider collectionId={collection.id}>
+        {/* Real-time subscription checker */}
+        <SubscriptionChecker collectionId={collection.id} userId={collection.user_id} />
+        
         <div className="min-h-screen bg-[#FAF9F6] dark:bg-dark-charcoal text-[#2C2C2C] dark:text-white font-sans theme-transition">
           {/* Version Toggle */}
           <VersionToggle currentVersion="v1" shareId={shareId} variant="light" />
           
           {/* Hero Section */}
           <CommentLayer collectionId={collection.id}>
-            <ShareHero collection={collection} agent={agent} />
+            <ShareHero collection={heroCollection} agent={heroAgent} />
 
             {/* Main Content */}
             <main className="container mx-auto px-6 md:px-12 py-8 md:py-12">
               {/* Agent Info Card - Redesigned with glass effect */}
               <div className="mb-10 animate-fade-in-up">
-                <AgentInfo name={agent?.name || "Агент недвижимости"} email={agent?.email} phone={agent?.phone} description={agent?.description} avatarUrl={agent?.avatar_url} />
+                <AgentInfo 
+                  name={agentName} 
+                  email={agentEmail} 
+                  phone={agentPhone} 
+                  description={agentDescription} 
+                  avatarUrl={agentAvatarUrl} 
+                />
               </div>
 
               {properties.length === 0 ? (

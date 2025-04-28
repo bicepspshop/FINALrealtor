@@ -14,6 +14,7 @@ The subscription system provides a 14-day trial period for new users. After this
 - Subscription management page
 - Middleware protection for expired subscriptions
 - Automatic deactivation of share links for expired users
+- Real-time subscription status checking for open share links
 
 ## Implementation Steps
 
@@ -102,7 +103,15 @@ Share links are automatically deactivated when a user's subscription expires. Th
 2. If the owner's trial has expired or subscription is cancelled, visitors are redirected to an expiration page
 3. To reactivate share links, the user must purchase a subscription
 
-This ensures that clients cannot access collections from agents with expired accounts, encouraging agents to maintain an active subscription.
+### Real-time Subscription Status Checking
+
+The system also includes real-time checking for share links that are already open in a client's browser:
+
+1. A client-side component monitors the subscription status of the collection owner while the page is open
+2. Every minute, it sends a request to verify that the owner's subscription is still active
+3. If the subscription expires during the session, the client is automatically redirected to the expiration page
+
+This ensures that even if a client has already opened a collection when the agent's trial expires, they will be redirected to the expiration page after the next status check (within one minute). This prevents clients from continuing to access collections from expired accounts.
 
 ## Extending The System
 
