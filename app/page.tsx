@@ -7,6 +7,8 @@ import { ThemeToggle } from "@/components/ui/theme/theme-toggle"
 import { ThemeImage } from "@/components/ui/theme/theme-image"
 import { GallerySlider } from "@/components/ui/gallery-slider"
 import "../styles/hero-section.css"
+import { Suspense } from "react"
+import { UserNavButton } from "./user-nav-button"
 
 export default function Home() {
   return (
@@ -33,16 +35,9 @@ export default function Home() {
             </nav>
             <div className="flex space-x-4 items-center">
               <ThemeToggle />
-              <Link href="/login">
-                <Button variant="outline" className="border-white dark:border-moonstone text-white dark:text-moonstone hover:bg-white dark:hover:bg-moonstone hover:text-luxury-black dark:hover:text-dark-graphite theme-transition">
-                  Войти
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button variant="luxury" className="bg-luxury-gold dark:bg-luxury-royalBlue text-luxury-black dark:text-white hover:bg-luxury-goldMuted dark:hover:bg-luxury-royalBlueMuted theme-transition" animation="scale">
-                  Регистрация
-                </Button>
-              </Link>
+              <Suspense fallback={null}>
+                <UserNavButton />
+              </Suspense>
             </div>
           </div>
         </div>
@@ -89,9 +84,14 @@ export default function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
                 <Link href="/register">
-                  <Button variant="luxury" size="lg" animation="scale" className="w-full sm:w-auto bg-luxury-gold dark:bg-luxury-royalBlue text-luxury-black dark:text-white hover:bg-luxury-goldMuted dark:hover:bg-luxury-royalBlueMuted theme-transition py-7 px-10 text-lg">
-                    Начать бесплатно
-                  </Button>
+                  <div className="flex flex-col items-center">
+                    <Button variant="luxury" size="lg" animation="scale" className="w-full sm:w-auto bg-luxury-gold dark:bg-luxury-royalBlue text-luxury-black dark:text-white hover:bg-luxury-goldMuted dark:hover:bg-luxury-royalBlueMuted theme-transition py-7 px-10 text-lg">
+                      Начать бесплатно
+                    </Button>
+                    <span className="text-xs mt-2 text-white/80 dark:text-moonstone/80 font-medium tracking-wide" style={{letterSpacing: '0.02em'}}>
+                      Пробный период на 14 дней
+                    </span>
+                  </div>
                 </Link>
                 <Link href="#features">
                   <Button size="lg" variant="outline" animation="scale" className="w-full sm:w-auto border-2 border-white/40 dark:border-moonstone/40 backdrop-blur-sm text-white dark:text-moonstone hover:bg-white/10 dark:hover:bg-moonstone/10 hover:border-white/90 dark:hover:border-moonstone/90 hover:text-white dark:hover:text-white transition-all duration-300 theme-transition relative overflow-hidden group py-7 px-10 text-lg after:absolute after:bottom-0 after:left-0 after:h-[3px] after:w-0 after:bg-white dark:after:bg-moonstone after:transition-all after:duration-700 hover:after:w-full">
