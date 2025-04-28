@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ElegantTabs, ElegantTabsList, ElegantTabsTrigger, ElegantTabsContent } from "@/components/ui/tabs-elegant"
 import { ShareThemeProvider } from "../../components/share-theme-provider"
 import { PropertyHero } from "./property-hero"
+import { SubscriptionChecker } from "../../components/subscription-checker"
 
 interface PropertyPageProps {
   params: {
@@ -57,6 +58,10 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
     .eq("id", property.collection_id)
     .single()
 
+  if (!collection) {
+    notFound()
+  }
+
   const { data: agent } = await supabase.from("users").select("id, name, email, phone, description, avatar_url").eq("id", collection?.user_id).single()
 
   // Форматирование цены
@@ -89,6 +94,9 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
 
   return (
     <ShareThemeProvider>
+      {/* Real-time subscription checker */}
+      <SubscriptionChecker collectionId={collection.id} userId={collection.user_id} />
+      
       <div className="min-h-screen bg-[#FAF9F6] dark:bg-dark-charcoal text-[#2C2C2C] dark:text-white pb-16 theme-transition">
         {/* Hero section with property images */}
         <PropertyHero images={images} propertyTitle={propertyTitle} collection={collection} />

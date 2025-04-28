@@ -10,6 +10,7 @@ import { VersionToggle } from "../../../components/version-toggle"
 import { LuxuryEffects } from "../../components/luxury-effects"
 import { LuxurySeal, GoldenDust, OrnateFrame, ShimmeringText, LuxuryWatermark } from "../../components/luxury-elements"
 import "@/styles/luxury-experience.css"
+import { SubscriptionChecker } from "../../../components/subscription-checker"
 
 interface PropertyPageProps {
   params: {
@@ -56,6 +57,10 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
     .eq("id", property.collection_id)
     .single()
 
+  if (!collection) {
+    notFound()
+  }
+
   const { data: agent } = await supabase.from("users").select("id, name, email").eq("id", collection?.user_id).single()
 
   // Определение типа объекта недвижимости
@@ -74,6 +79,9 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
 
   return (
     <div className="min-h-screen bg-dark-charcoal text-white font-sans overflow-hidden luxury-experience-wrapper">
+      {/* Real-time subscription checker */}
+      <SubscriptionChecker collectionId={collection.id} userId={collection.user_id} />
+      
       {/* Client-side luxury effects */}
       <LuxuryEffects />
       {/* Version Toggle */}
