@@ -2,11 +2,13 @@
 
 import { useState, useCallback } from "react"
 import { useDropzone } from "react-dropzone"
-import Image from "next/image"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { getBrowserClient } from "@/lib/supabase"
+import { OptimizedImage } from "@/components/ui/optimized-image"
+import { uploadWindowViewImage } from "@/lib/optimized-upload"
+import { isValidImageFile } from "@/lib/image-utils"
 
 interface WindowViewUploadProps {
   onImageChange: (imageUrl: string | null) => void
@@ -31,34 +33,43 @@ export function WindowViewUpload({ onImageChange, initialImage = null }: WindowV
   const uploadFile = useCallback(
     async (file: File) => {
       try {
-        const fileExt = file.name.split(".").pop()
-        const fileName = `window-view-${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
-
-        console.log(`Начало загрузки вида из окна: ${fileName}`)
-
-        // Загружаем файл в Supabase Storage
-        const { data, error } = await supabase.storage.from("property-images").upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: false,
-        })
-
-        if (error) {
-          console.error("Ошибка загрузки вида из окна:", error)
+        // Validate file before upload
+        if (!isValidImageFile(file)) {
           toast({
             variant: "destructive",
             title: "Ошибка загрузки",
-            description: `Не удалось загрузить изображение вида из окна: ${error.message}`,
+            description: "Поддерживаются только изображения: JPEG, PNG, WEBP, GIF",
           })
           return null
         }
 
-        console.log(`Вид из окна успешно загружен: ${fileName}`)
+        // Check file size (10MB max)
+        if (file.size > 10 * 1024 * 1024) {
+          toast({
+            variant: "destructive",
+            title: "Ошибка загрузки",
+            description: "Размер файла не должен превышать 10MB",
+          })
+          return null
+        }
 
-        // Получаем публичный URL
-        const { data: urlData } = supabase.storage.from("property-images").getPublicUrl(fileName)
-        console.log(`Получен публичный URL для вида из окна: ${urlData.publicUrl}`)
+        console.log(`Начало загрузки вида из окна: ${file.name}`)
 
-        return urlData.publicUrl
+        // Use the optimized upload function
+        const url = await uploadWindowViewImage(file)
+
+        if (!url) {
+          console.error("Ошибка загрузки вида из окна")
+          toast({
+            variant: "destructive",
+            title: "Ошибка загрузки",
+            description: "Не удалось загрузить изображение вида из окна",
+          })
+          return null
+        }
+
+        console.log(`Вид из окна успешно загружен: ${url}`)
+        return url
       } catch (err) {
         console.error("Непредвиденная ошибка при загрузке вида из окна:", err)
         toast({
@@ -69,7 +80,7 @@ export function WindowViewUpload({ onImageChange, initialImage = null }: WindowV
         return null
       }
     },
-    [toast, supabase],
+    [toast],
   )
 
   const onDrop = useCallback(
@@ -120,7 +131,7 @@ export function WindowViewUpload({ onImageChange, initialImage = null }: WindowV
     if (file?.url) {
       try {
         const filePath = file.url.split("/").pop()
-        if (filePath) {
+        if (filePath && supabase) {
           console.log(`Удаление вида из окна из хранилища: ${filePath}`)
           await supabase.storage.from("property-images").remove([filePath])
         }
@@ -182,7 +193,13 @@ export function WindowViewUpload({ onImageChange, initialImage = null }: WindowV
         </div>
       ) : (
         <div className="relative rounded-md overflow-hidden bg-gray-100 border aspect-[4/3]">
-          <Image src={file.preview || "/placeholder.svg"} alt="Вид из окна" fill className="object-contain" />
+          <OptimizedImage 
+            src={file.preview || "/placeholder.svg"} 
+            alt="Вид из окна" 
+            fill 
+            objectFit="contain"
+            fallbackSrc="/placeholder.svg"
+          />
           {file.uploading && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
               <div className="w-8 h-8 border-4 border-t-primary border-r-primary border-b-primary border-l-transparent rounded-full animate-spin" />
