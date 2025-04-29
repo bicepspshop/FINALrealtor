@@ -1,12 +1,25 @@
-import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
+import { NextRequest, NextResponse } from 'next/server'
 import { getServerClient } from '@/lib/supabase'
 import { checkTrialStatus } from '@/lib/subscription'
 
-export async function GET() {
+// Helper to set caching headers based on subscription status
+function setCacheHeaders(response: NextResponse, isActive: boolean, subscriptionStatus: string): NextResponse {
+  // Active subscriptions can be cached longer since they don't change often
+  // Trial subscriptions need shorter cache times since they're counting down
+  const maxAge = 
+    subscriptionStatus === 'active' ? 60 * 30 : // 30 minutes for active subscriptions
+    subscriptionStatus === 'trial' ? 60 : // 1 minute for trials
+    5; // 5 seconds for expired or other statuses (mostly for error states)
+  
+  // Set cache control headers
+  response.headers.set('Cache-Control', `public, s-maxage=${maxAge}, max-age=${maxAge}`)
+  return response;
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const cookieStore = cookies()
-    const token = cookieStore.get('auth-token')?.value
+    // Get auth token from cookies
+    const token = request.cookies.get('auth-token')?.value;
 
     if (!token) {
       return NextResponse.json(
@@ -35,11 +48,16 @@ export async function GET() {
     // Check trial status
     const trialInfo = await checkTrialStatus(user.id)
     
-    // Return subscription status
-    return NextResponse.json({ 
+    // Create response
+    const response = NextResponse.json({ 
       isActive: trialInfo.isActive,
-      subscriptionStatus: trialInfo.subscriptionStatus
+      subscriptionStatus: trialInfo.subscriptionStatus,
+      // Add timestamp to help with debugging caching issues
+      timestamp: new Date().toISOString()
     })
+    
+    // Set appropriate cache headers based on subscription status
+    return setCacheHeaders(response, trialInfo.isActive, trialInfo.subscriptionStatus);
   } catch (error) {
     console.error('Error checking subscription:', error)
     return NextResponse.json(

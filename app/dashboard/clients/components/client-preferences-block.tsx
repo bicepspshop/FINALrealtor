@@ -49,7 +49,8 @@ interface ClientPreferencesProps {
 }
 
 export function ClientPreferencesBlock({ clientId, preferences, features }: ClientPreferencesProps) {
-  const [isEditing, setIsEditing] = useState(!preferences?.id)
+  // Changed initial state to NOT be editing by default, even for new records
+  const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   
@@ -154,15 +155,8 @@ export function ClientPreferencesBlock({ clientId, preferences, features }: Clie
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => {
-                if (preferences?.id) {
-                  setIsEditing(false)
-                } else {
-                  // If it's a new record, resetting doesn't make sense
-                }
-              }}
+              onClick={() => setIsEditing(false)} // Always allow closing without saving
               className="h-8 w-8 p-0 text-luxury-black/70 dark:text-white/70 hover:text-red-500 dark:hover:text-red-400 hover:bg-transparent theme-transition"
-              disabled={!preferences?.id}
             >
               <X size={16} />
               <span className="sr-only">Отмена</span>
@@ -249,12 +243,12 @@ export function ClientPreferencesBlock({ clientId, preferences, features }: Clie
                       <FormControl>
                         <Input 
                           type="number"
-                          placeholder="1" 
-                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 theme-transition"
-                          {...field} 
+                          min={0}
+                          {...field}
+                          className="bg-white dark:bg-dark-graphite dark:border-dark-slate theme-transition"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-500 dark:text-error theme-transition" />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -270,12 +264,12 @@ export function ClientPreferencesBlock({ clientId, preferences, features }: Clie
                       <FormControl>
                         <Input 
                           type="number"
-                          placeholder="3" 
-                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 theme-transition"
-                          {...field} 
+                          min={0}
+                          {...field}
+                          className="bg-white dark:bg-dark-graphite dark:border-dark-slate theme-transition"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-500 dark:text-error theme-transition" />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -293,12 +287,12 @@ export function ClientPreferencesBlock({ clientId, preferences, features }: Clie
                       <FormControl>
                         <Input 
                           type="number"
-                          placeholder="40" 
-                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 theme-transition"
-                          {...field} 
+                          min={0}
+                          {...field}
+                          className="bg-white dark:bg-dark-graphite dark:border-dark-slate theme-transition"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-500 dark:text-error theme-transition" />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -314,12 +308,12 @@ export function ClientPreferencesBlock({ clientId, preferences, features }: Clie
                       <FormControl>
                         <Input 
                           type="number"
-                          placeholder="80" 
-                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 theme-transition"
-                          {...field} 
+                          min={0}
+                          {...field}
+                          className="bg-white dark:bg-dark-graphite dark:border-dark-slate theme-transition"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-500 dark:text-error theme-transition" />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -337,12 +331,12 @@ export function ClientPreferencesBlock({ clientId, preferences, features }: Clie
                       <FormControl>
                         <Input 
                           type="number"
-                          placeholder="1" 
-                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 theme-transition"
-                          {...field} 
+                          min={0}
+                          {...field}
+                          className="bg-white dark:bg-dark-graphite dark:border-dark-slate theme-transition"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-500 dark:text-error theme-transition" />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -358,12 +352,12 @@ export function ClientPreferencesBlock({ clientId, preferences, features }: Clie
                       <FormControl>
                         <Input 
                           type="number"
-                          placeholder="10" 
-                          className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 theme-transition"
-                          {...field} 
+                          min={0}
+                          {...field}
+                          className="bg-white dark:bg-dark-graphite dark:border-dark-slate theme-transition"
                         />
                       </FormControl>
-                      <FormMessage className="text-red-500 dark:text-error theme-transition" />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -379,31 +373,44 @@ export function ClientPreferencesBlock({ clientId, preferences, features }: Clie
                     </FormLabel>
                     <FormControl>
                       <Input 
-                        placeholder="Введите особенности через запятую" 
-                        className="rounded-sm border-gray-200 dark:border-dark-slate dark:bg-dark-slate dark:text-white dark:placeholder:text-white/60 focus-visible:ring-luxury-gold/50 dark:focus-visible:ring-luxury-royalBlue/50 theme-transition"
                         {...field} 
+                        placeholder="Введите особенности через запятую"
+                        className="bg-white dark:bg-dark-graphite dark:border-dark-slate theme-transition"
                       />
                     </FormControl>
-                    <FormMessage className="text-red-500 dark:text-error theme-transition" />
-                    <p className="text-xs text-luxury-black/60 dark:text-white/60 mt-1 theme-transition">
+                    <p className="text-xs mt-1 text-muted-foreground">
                       Введите через запятую (например: Балкон, Паркинг, Новостройка)
                     </p>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
               
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end space-x-3 pt-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditing(false)}
+                  className="bg-white hover:bg-gray-100 text-luxury-black dark:bg-dark-graphite dark:text-white dark:hover:bg-dark-slate dark:border-dark-slate theme-transition"
+                >
+                  Отмена
+                </Button>
                 <Button 
                   type="submit" 
-                  className="bg-luxury-gold hover:bg-luxury-gold/90 text-white rounded-sm flex items-center gap-2 theme-transition" 
                   disabled={isSubmitting}
+                  className="bg-luxury-gold hover:bg-luxury-gold/90 text-white dark:bg-luxury-royalBlue dark:hover:bg-luxury-royalBlue/90 theme-transition"
                 >
                   {isSubmitting ? (
-                    <Loader2 size={16} className="animate-spin" />
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Сохранение...
+                    </>
                   ) : (
-                    <Save size={16} />
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Сохранить
+                    </>
                   )}
-                  Сохранить
                 </Button>
               </div>
             </form>

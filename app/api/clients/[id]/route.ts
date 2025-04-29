@@ -1,14 +1,20 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { getServerClient } from "@/lib/supabase"
 import { getSession } from "@/lib/auth"
 
-export async function PATCH(
-  request: Request,
+// Helper function to set cache headers
+function setCacheHeaders(response: NextResponse, maxAgeSeconds: number = 60): NextResponse {
+  response.headers.set('Cache-Control', `public, max-age=${maxAgeSeconds}`);
+  return response;
+}
+
+export async function GET(
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check authentication
     const session = await getSession()
+
     if (!session) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -18,68 +24,114 @@ export async function PATCH(
 
     const clientId = params.id
     
-    // Get client data from request
-    const data = await request.json()
+    // Get query parameter for field selection
+    const searchParams = request.nextUrl.searchParams;
+    const fields = searchParams.get('fields');
     
-    // Format birthday as proper date or null
-    const birthdayValue = data.birthday ? new Date(data.birthday).toISOString().split('T')[0] : null
+    // Default fields to fetch - minimal set for better performance
+    let fieldSelection = `
+      id,
+      full_name,
+      email,
+      phone,
+      lead_source,
+      last_contact_date
+    `;
     
-    // Create authenticated server client
+    // If detailed view is requested, fetch relations too
+    if (fields === 'detailed') {
+      fieldSelection = `
+        id,
+        full_name, 
+        email,
+        phone,
+        birthday,
+        lead_source,
+        last_contact_date,
+        client_deal_requests (
+          id,
+          real_estate_type,
+          budget_min,
+          budget_max,
+          first_payment,
+          payment_type
+        ),
+        client_preferences (
+          id,
+          rooms_min,
+          rooms_max,
+          preferred_floor_min,
+          preferred_floor_max,
+          area_min,
+          area_max
+        ),
+        client_locations (
+          id,
+          location_name
+        ),
+        client_features (
+          id,
+          feature_name
+        ),
+        client_deal_stages (
+          id,
+          stage,
+          status,
+          notes,
+          created_at
+        ),
+        client_notes (
+          id,
+          content,
+          created_at
+        ),
+        client_tasks (
+          id,
+          task_type,
+          title,
+          description,
+          due_date,
+          is_completed
+        ),
+        client_property_matches (
+          id,
+          property_id,
+          status,
+          sent_date,
+          notes
+        )
+      `;
+    }
+
     const supabase = getServerClient()
     
-    // First check if the client belongs to this agent
-    const { data: clientCheck, error: checkError } = await supabase
+    const { data: client, error } = await supabase
       .from("clients")
-      .select("id")
+      .select(fieldSelection)
       .eq("id", clientId)
       .eq("agent_id", session.id)
       .single()
-    
-    if (checkError || !clientCheck) {
-      return NextResponse.json(
-        { error: "Client not found or you don't have permission to update it" },
-        { status: 404 }
-      )
-    }
-    
-    // Update client using server-side authenticated client
-    const { error } = await supabase
-      .from("clients")
-      .update({
-        full_name: data.full_name,
-        phone: data.phone,
-        email: data.email,
-        birthday: birthdayValue,
-        lead_source: data.lead_source
-      })
-      .eq("id", clientId)
-      .eq("agent_id", session.id)
-    
+
     if (error) {
-      console.error("API error updating client:", error)
+      console.error("Error fetching client:", error)
       return NextResponse.json(
-        { error: error.message || "Failed to update client" },
+        { error: "Failed to fetch client data" },
         { status: 500 }
       )
     }
-    
-    // Return updated client
-    const { data: updatedClient, error: fetchError } = await supabase
-      .from("clients")
-      .select("*")
-      .eq("id", clientId)
-      .single()
-    
-    if (fetchError) {
-      console.error("API error fetching updated client:", fetchError)
+
+    if (!client) {
       return NextResponse.json(
-        { success: true, message: "Client updated successfully but could not fetch updated data" }
+        { error: "Client not found" },
+        { status: 404 }
       )
     }
-    
-    return NextResponse.json(updatedClient)
+
+    // Create response with appropriate cache headers
+    const response = NextResponse.json(client);
+    return setCacheHeaders(response, 60); // Cache for 60 seconds
   } catch (error) {
-    console.error("Unexpected API error:", error)
+    console.error("API error:", error)
     return NextResponse.json(
       { error: "An unexpected error occurred" },
       { status: 500 }
@@ -87,13 +139,14 @@ export async function PATCH(
   }
 }
 
+// Delete client endpoint
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check authentication
     const session = await getSession()
+
     if (!session) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -102,80 +155,41 @@ export async function DELETE(
     }
 
     const clientId = params.id
-    
-    // Create authenticated server client
     const supabase = getServerClient()
     
-    // First check if the client belongs to this agent
-    const { data: clientCheck, error: checkError } = await supabase
+    // First verify this client belongs to the current agent
+    const { data: client, error: checkError } = await supabase
       .from("clients")
       .select("id")
       .eq("id", clientId)
       .eq("agent_id", session.id)
       .single()
-    
-    if (checkError || !clientCheck) {
+      
+    if (checkError || !client) {
       return NextResponse.json(
         { error: "Client not found or you don't have permission to delete it" },
         { status: 404 }
       )
     }
-    
-    // Delete all related data first (property matches, notes, etc.)
-    // Property matches
-    const { error: matchesError } = await supabase
-      .from("client_property_matches")
-      .delete()
-      .eq("client_id", clientId)
-      
-    if (matchesError) {
-      console.error("Error deleting client property matches:", matchesError)
-      // Continue with deletion even if there was an error here
-    }
-    
-    // Delete client tasks if they exist
-    const { error: tasksError } = await supabase
-      .from("client_tasks")
-      .delete()
-      .eq("client_id", clientId)
-      
-    if (tasksError) {
-      console.error("Error deleting client tasks:", tasksError)
-      // Continue with deletion even if there was an error here
-    }
-    
-    // Delete client notes if they exist
-    const { error: notesError } = await supabase
-      .from("client_notes")
-      .delete()
-      .eq("client_id", clientId)
-      
-    if (notesError) {
-      console.error("Error deleting client notes:", notesError)
-      // Continue with deletion even if there was an error here
-    }
-    
-    // Finally delete the client
+
+    // Delete the client
     const { error } = await supabase
       .from("clients")
       .delete()
       .eq("id", clientId)
       .eq("agent_id", session.id)
-    
+
     if (error) {
-      console.error("API error deleting client:", error)
+      console.error("Error deleting client:", error)
       return NextResponse.json(
-        { error: error.message || "Failed to delete client" },
+        { error: "Failed to delete client" },
         { status: 500 }
       )
     }
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: "Client and all related data successfully deleted" 
-    })
+
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Unexpected API error:", error)
+    console.error("API error:", error)
     return NextResponse.json(
       { error: "An unexpected error occurred" },
       { status: 500 }
