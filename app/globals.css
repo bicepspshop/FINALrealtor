@@ -232,6 +232,10 @@ h1, h2, h3, h4, h5, h6,
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
+  .container-wide {
+    @apply max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6;
+  }
+
   .animate-slide-up {
     opacity: 0;
     transform: translateY(20px);

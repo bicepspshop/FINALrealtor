@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle, WifiOff, FolderPlus, Home, MessageSquare, Bell, ChevronRight, Plus } from "lucide-react"
 import { SubscriptionBanner } from "@/components/subscription-banner"
 import { Database } from "@/lib/types/database.types"
+import { DashboardTabs } from "@/components/dashboard-tabs"
 
 // Add these type definitions before the DashboardPage function
 type Collection = Database['public']['Tables']['collections']['Row']
@@ -162,8 +163,7 @@ export default async function DashboardPage() {
           
           <div className="flex justify-between items-center mb-10">
             <div>
-              <h1 className="text-3xl font-serif font-medium text-luxury-black dark:text-white theme-transition">Ваши подборки</h1>
-              <div className="w-20 h-0.5 bg-luxury-gold dark:bg-luxury-royalBlue mt-2 mb-3 theme-transition"></div>
+              <DashboardTabs activeTab="collections" />
               <p className="text-luxury-black/60 dark:text-white/60 theme-transition">Управляйте подборками объектов недвижимости для ваших клиентов</p>
             </div>
             {!isOfflineMode && !fetchError && user.trialInfo?.isActive && <CreateCollectionDialog userId={user.id} />}
