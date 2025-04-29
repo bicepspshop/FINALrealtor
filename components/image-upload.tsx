@@ -7,7 +7,8 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { getBrowserClient } from "@/lib/supabase"
-import type { SupabaseClient } from "@supabase/supabase-js"
+import { uploadPropertyImage } from "@/lib/optimized-upload"
+import { isValidImageFile } from "@/lib/image-utils"
 
 interface ImageUploadProps {
   onImagesChange: (imageUrls: string[]) => void
@@ -36,36 +37,45 @@ export function ImageUpload({ onImagesChange, maxFiles = 10, initialImages = [] 
 
   // Функция для загрузки одного файла
   const uploadFile = useCallback(
-    async (file: File, client: SupabaseClient): Promise<string | null> => {
+    async (file: File): Promise<string | null> => {
       try {
-        const fileExt = file.name.split(".").pop()
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`
-
-        console.log(`Начало загрузки файла: ${fileName}`)
-
-        // Загружаем файл в Supabase Storage
-        const { data, error } = await client.storage.from("property-images").upload(fileName, file, {
-          cacheControl: "3600",
-          upsert: false,
-        })
-
-        if (error) {
-          console.error("Ошибка загрузки файла:", error)
+        // Validate file before upload
+        if (!isValidImageFile(file)) {
           toast({
             variant: "destructive",
             title: "Ошибка загрузки",
-            description: `Не удалось загрузить файл: ${error.message}`,
+            description: "Поддерживаются только изображения: JPEG, PNG, WEBP, GIF",
           })
           return null
         }
 
-        console.log(`Файл успешно загружен: ${fileName}`)
+        // Check file size (20MB max)
+        if (file.size > 20 * 1024 * 1024) {
+          toast({
+            variant: "destructive",
+            title: "Ошибка загрузки",
+            description: "Размер файла не должен превышать 20MB",
+          })
+          return null
+        }
 
-        // Получаем публичный URL
-        const { data: urlData } = client.storage.from("property-images").getPublicUrl(fileName)
-        console.log(`Получен публичный URL: ${urlData.publicUrl}`)
+        console.log(`Начало загрузки файла: ${file.name}`)
 
-        return urlData.publicUrl
+        // Use the optimized upload function
+        const url = await uploadPropertyImage(file)
+
+        if (!url) {
+          console.error("Ошибка загрузки файла")
+          toast({
+            variant: "destructive",
+            title: "Ошибка загрузки",
+            description: "Не удалось загрузить файл",
+          })
+          return null
+        }
+
+        console.log(`Файл успешно загружен: ${url}`)
+        return url
       } catch (err) {
         console.error("Непредвиденная ошибка при загрузке:", err)
         toast({
@@ -104,7 +114,7 @@ export function ImageUpload({ onImagesChange, maxFiles = 10, initialImages = [] 
 
       for (let i = 0; i < newFiles.length; i++) {
         const file = newFiles[i].file!
-        const url = await uploadFile(file, supabase)
+        const url = await uploadFile(file)
 
         if (url) {
           uploadedUrls.push(url)
@@ -135,7 +145,7 @@ export function ImageUpload({ onImagesChange, maxFiles = 10, initialImages = [] 
         return currentFiles
       })
     },
-    [files, maxFiles, onImagesChange, uploadFile, supabase],
+    [files, maxFiles, onImagesChange, uploadFile],
   )
 
   const removeFile = useCallback(
@@ -143,7 +153,7 @@ export function ImageUpload({ onImagesChange, maxFiles = 10, initialImages = [] 
       const fileToRemove = files[index]
 
       // Если файл был загружен и имеет URL, удаляем его из хранилища
-      if (fileToRemove.url) {
+      if (fileToRemove.url && supabase) {
         try {
           const filePath = fileToRemove.url.split("/").pop()
           if (filePath) {
@@ -185,7 +195,7 @@ export function ImageUpload({ onImagesChange, maxFiles = 10, initialImages = [] 
     accept: {
       "image/*": [".jpeg", ".jpg", ".png", ".webp"],
     },
-    maxSize: 10485760, // 10MB
+    maxSize: 20 * 1024 * 1024, // 20MB
   })
 
   return (
@@ -219,7 +229,7 @@ export function ImageUpload({ onImagesChange, maxFiles = 10, initialImages = [] 
             </svg>
           </div>
           <div className="text-sm font-medium text-luxury-black dark:text-white theme-transition">Перетащите изображения сюда или нажмите для выбора</div>
-          <div className="text-xs text-gray-500 dark:text-gray-300 theme-transition">Загрузите до {maxFiles} изображений (макс. 10МБ каждое)</div>
+          <div className="text-xs text-gray-500 dark:text-gray-300 theme-transition">Загрузите до {maxFiles} изображений (макс. 20МБ каждое)</div>
         </div>
       </div>
 
@@ -236,6 +246,7 @@ export function ImageUpload({ onImagesChange, maxFiles = 10, initialImages = [] 
                   width={200}
                   height={200}
                   className="w-full h-full object-cover"
+                  unoptimized={true}
                 />
                 {file.uploading && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

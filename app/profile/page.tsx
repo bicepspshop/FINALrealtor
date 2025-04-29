@@ -164,9 +164,9 @@ export default function ProfilePage() {
         // Get user profile
         const profileResult = await getProfile(sessionData.user.id)
         
-        if (profileResult.success) {
+        if (profileResult.success && profileResult.profile) {
           form.reset({
-            name: profileResult.profile.name,
+            name: profileResult.profile.name || "",
             phone: profileResult.profile.phone || "",
             description: profileResult.profile.description || "",
           })
@@ -272,7 +272,7 @@ export default function ProfilePage() {
       <NavBar userName={user?.name || "Пользователь"} />
       
       <main className="flex-1 container-luxury py-8">
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-10 gap-4">
           <div>
             <h1 className="text-3xl font-serif font-medium text-luxury-black dark:text-white theme-transition">Профиль риелтора</h1>
             <div className="w-20 h-0.5 bg-luxury-gold dark:bg-luxury-royalBlue mt-2 mb-3 theme-transition"></div>

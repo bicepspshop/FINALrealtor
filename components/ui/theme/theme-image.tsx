@@ -2,7 +2,7 @@
 
 import { useTheme } from "next-themes"
 import Image, { ImageProps } from "next/image"
-import { useEffect, useState, memo } from "react"
+import { useEffect, useState, memo, useRef } from "react"
 import { cn } from "@/lib/utils"
 
 interface ThemeImageProps extends Omit<ImageProps, 'src' | 'className'> {
@@ -18,11 +18,13 @@ export const ThemeImage = memo(function ThemeImage({
   alt,
   className,
   brightnessFactor = 1, // Default to no brightness adjustment
+  onLoad,
   ...rest
 }: ThemeImageProps) {
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-
+  const loadedImageCount = useRef(0)
+  
   // Ensure darkSrc is properly formatted to use from public directory
   const formattedDarkSrc = darkSrc.startsWith('/images/') 
     ? `/images/${darkSrc.split('/').pop()}` // Keep just the filename and prepend /images/
@@ -31,7 +33,7 @@ export const ThemeImage = memo(function ThemeImage({
   // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true)
-  }, [])
+  }, []);
 
   // Apply brightness filter for backnight.png or any image with brightnessFactor
   const isDarkMode = mounted && resolvedTheme === 'dark'
@@ -45,6 +47,16 @@ export const ThemeImage = memo(function ThemeImage({
   
   // Get the appropriate src based on theme
   const currentSrc = !mounted ? lightSrc : resolvedTheme === 'dark' ? formattedDarkSrc : lightSrc
+  
+  // Handler for image load events
+  const handleImageLoad = () => {
+    loadedImageCount.current += 1;
+    
+    // Call the onLoad prop when both images have loaded
+    if (loadedImageCount.current === 2 && onLoad) {
+      onLoad({} as React.SyntheticEvent<HTMLImageElement>);
+    }
+  };
 
   // Improved crossfade effect with both images preloaded
   return (
@@ -61,7 +73,9 @@ export const ThemeImage = memo(function ThemeImage({
               resolvedTheme === 'dark' ? 'opacity-0 transform scale-[1.02]' : 'opacity-100 transform scale-100'
             )}
             {...rest}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes={rest.sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"}
+            onLoad={handleImageLoad}
+            loading={rest.loading || "eager"}
           />
           
           {/* Dark mode image */}
@@ -75,7 +89,9 @@ export const ThemeImage = memo(function ThemeImage({
             )}
             style={shouldBoostBrightness ? { filter: `brightness(${actualBrightnessFactor})` } : {}}
             {...rest}
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            sizes={rest.sizes || "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"}
+            onLoad={handleImageLoad}
+            loading={rest.loading || "eager"}
           />
         </>
       )}
@@ -87,6 +103,7 @@ export const ThemeImage = memo(function ThemeImage({
           alt={alt}
           className={className}
           {...rest}
+          onLoad={onLoad as any}
         />
       )}
     </div>
