@@ -468,7 +468,13 @@ export function NotesTasksBlock({
             />
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsAddingNote(false)} disabled={loading}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsAddingNote(false)} 
+              disabled={loading}
+              className="border-gray-300 dark:border-gray-600 text-luxury-black dark:text-white hover:bg-gray-100 dark:hover:bg-dark-slate/80 theme-transition"
+            >
               Отмена
             </Button>
             <Button type="button" onClick={handleAddNote} disabled={loading}>
@@ -538,7 +544,7 @@ export function NotesTasksBlock({
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full justify-start text-left font-normal">
+                    className="w-full justify-start text-left font-normal border-gray-300 dark:border-gray-600 text-luxury-black dark:text-white hover:bg-gray-100 dark:hover:bg-dark-slate/80 theme-transition">
                     {newTask.dueDate ? (
                       format(newTask.dueDate, "PPP", { locale: ru })
                     ) : (
@@ -560,7 +566,13 @@ export function NotesTasksBlock({
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setIsAddingTask(false)} disabled={loading}>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsAddingTask(false)} 
+              disabled={loading}
+              className="border-gray-300 dark:border-gray-600 text-luxury-black dark:text-white hover:bg-gray-100 dark:hover:bg-dark-slate/80 theme-transition"
+            >
               Отмена
             </Button>
             <Button type="button" onClick={handleAddTask} disabled={loading}>
