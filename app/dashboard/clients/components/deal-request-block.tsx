@@ -42,7 +42,7 @@ interface DealRequestProps {
 }
 
 export function DealRequestBlock({ clientId, dealRequest, locations }: DealRequestProps) {
-  const [isEditing, setIsEditing] = useState(!dealRequest?.id)
+  const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   
@@ -170,16 +170,8 @@ export function DealRequestBlock({ clientId, dealRequest, locations }: DealReque
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => {
-                if (dealRequest?.id) {
-                  setIsEditing(false)
-                } else {
-                  // If it's a new record, resetting doesn't make sense
-                  // Maybe navigate away or show a confirmation dialog
-                }
-              }}
+              onClick={() => setIsEditing(false)}
               className="h-8 w-8 p-0 text-luxury-black/70 dark:text-white/70 hover:text-red-500 dark:hover:text-red-400 hover:bg-transparent theme-transition"
-              disabled={!dealRequest?.id}
             >
               <X size={16} />
               <span className="sr-only">Отмена</span>
@@ -419,18 +411,31 @@ export function DealRequestBlock({ clientId, dealRequest, locations }: DealReque
                 )}
               />
               
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end space-x-3 pt-2">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditing(false)}
+                  className="bg-white hover:bg-gray-100 text-luxury-black dark:bg-dark-graphite dark:text-white dark:hover:bg-dark-slate dark:border-dark-slate theme-transition"
+                >
+                  Отмена
+                </Button>
                 <Button 
                   type="submit" 
-                  className="bg-luxury-gold hover:bg-luxury-gold/90 text-white rounded-sm flex items-center gap-2 theme-transition" 
                   disabled={isSubmitting}
+                  className="bg-luxury-gold hover:bg-luxury-gold/90 text-white dark:bg-luxury-royalBlue dark:hover:bg-luxury-royalBlue/90 theme-transition"
                 >
                   {isSubmitting ? (
-                    <Loader2 size={16} className="animate-spin" />
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Сохранение...
+                    </>
                   ) : (
-                    <Save size={16} />
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Сохранить
+                    </>
                   )}
-                  Сохранить
                 </Button>
               </div>
             </form>
