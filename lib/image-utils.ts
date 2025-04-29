@@ -1,61 +1,26 @@
 /**
- * Utility functions for handling images across the application
+ * Simplified image utility functions
  */
 
 /**
- * Generates a unique, organized filename for storage
- * @param file The original file to be uploaded
- * @param prefix An optional prefix for categorizing images
- * @param userId Optional user ID to namespace images
- * @returns A unique filename with appropriate extension
+ * Generates a unique filename for storage
  */
-export function generateUniqueFilename(file: File, prefix?: string, userId?: string): string {
-  // Extract and normalize the file extension
-  const fileExt = (file.name.split(".").pop() || "jpg").toLowerCase()
-  
-  // Validate the extension
-  const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']
-  const safeExt = validExtensions.includes(fileExt) ? fileExt : 'jpg'
-  
-  // Generate unique components
+export function generateUniqueFilename(file: File, prefix?: string): string {
+  const fileExt = file.name.split(".").pop()?.toLowerCase() || "jpg"
   const timestamp = Date.now()
-  const randomString = Math.random().toString(36).substring(2, 15)
-  
-  // Construct organized filename with optional namespacing
+  const randomString = Math.random().toString(36).substring(2, 10)
   const prefixPart = prefix ? `${prefix}-` : ''
-  const userPart = userId ? `${userId}/` : ''
   
-  return `${userPart}${prefixPart}${timestamp}-${randomString}.${safeExt}`
+  return `${prefixPart}${timestamp}-${randomString}.${fileExt}`
 }
 
 /**
  * Validates that a file is an acceptable image type
- * @param file The file to validate
- * @returns Boolean indicating if file is valid
  */
 export function isValidImageFile(file: File): boolean {
-  // Check mime type
-  const validMimeTypes = [
-    'image/jpeg', 
-    'image/png', 
-    'image/webp', 
-    'image/gif', 
-    'image/svg+xml'
-  ]
-  
-  if (!validMimeTypes.includes(file.type)) {
-    return false
-  }
-  
-  // Check extension
-  const extension = file.name.split('.').pop()?.toLowerCase() || ''
-  const validExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg']
-  
-  if (!validExtensions.includes(extension)) {
-    return false
-  }
-  
-  return true
+  // Check mime type and size in one function
+  const validMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  return validMimeTypes.includes(file.type)
 }
 
 /**

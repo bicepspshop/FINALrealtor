@@ -289,11 +289,11 @@ export default async function DashboardPage() {
                         <Link href={`/dashboard/collections/${collection.id}`}>
                           <Button 
                             variant="outline" 
-                            className="w-full border-luxury-black/20 dark:border-blue-400/60 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 hover:border-luxury-black/30 dark:hover:border-blue-400 rounded-sm flex items-center justify-center gap-2 py-5 dark:text-white dark:border-2 theme-transition" 
+                            className="w-full border-luxury-black/20 hover:border-luxury-black/40 dark:border-blue-400/60 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 dark:hover:border-blue-400 rounded-sm flex items-center justify-center gap-2 py-5 text-luxury-black dark:text-white dark:border-2 theme-transition" 
                             animation="scale"
                           >
-                            <Home size={16} className="dark:text-blue-400 theme-transition" />
-                            <span className="dark:text-white theme-transition">Объекты</span>
+                            <Home size={16} className="text-luxury-black/70 dark:text-blue-400 theme-transition" />
+                            <span className="theme-transition">Объекты</span>
                           </Button>
                         </Link>
                       ) : (
@@ -312,16 +312,12 @@ export default async function DashboardPage() {
                       {user.trialInfo?.isActive ? (
                         <Link href={`/dashboard/collections/${collection.id}?tab=comments`}>
                           <Button 
-                            variant={commentsCountMap[collection.id] > 0 ? "default" : "outline"}
-                            className={`w-full rounded-sm flex items-center justify-center gap-2 py-5 theme-transition
-                              ${commentsCountMap[collection.id] > 0 
-                                ? "bg-black text-white dark:bg-blue-500 dark:text-white hover:bg-black/90 dark:hover:bg-blue-600" 
-                                : "border-luxury-black/20 dark:border-blue-400/40 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 dark:text-white"
-                              }`}
+                            variant="outline"
+                            className="w-full border-luxury-black/20 hover:border-luxury-black/40 dark:border-blue-400/60 hover:bg-luxury-black/5 dark:hover:bg-blue-500/10 dark:hover:border-blue-400 rounded-sm flex items-center justify-center gap-2 py-5 text-luxury-black dark:text-white dark:border-2 theme-transition"
                             animation="scale"
                           >
-                            <MessageSquare size={16} className={commentsCountMap[collection.id] > 0 ? "" : "dark:text-blue-400"} />
-                            <span className="dark:text-white theme-transition">
+                            <MessageSquare size={16} className="text-luxury-black/70 dark:text-blue-400 theme-transition" />
+                            <span className="theme-transition">
                               {commentsCountMap[collection.id] > 0 
                                 ? `Комментарии (${commentsCountMap[collection.id]})` 
                                 : "Комментарии"}

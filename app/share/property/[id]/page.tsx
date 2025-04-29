@@ -211,7 +211,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 {hasAdditionalImages && (
                   <div className="mb-10">
                     <ElegantTabs defaultValue={property.floor_plan_url ? "floor-plan" : property.window_view_url ? "window-view" : "interior-finish"}>
-                      <ElegantTabsList className="w-full" indicatorClassName="bg-[#0066CC] dark:bg-[#0066CC]">
+                      <ElegantTabsList className="w-full" indicatorClassName="bg-[#CBA135] dark:bg-[#0066CC]">
                         {property.floor_plan_url && (
                           <ElegantTabsTrigger value="floor-plan">
                             Планировка

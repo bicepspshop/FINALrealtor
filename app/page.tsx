@@ -64,6 +64,23 @@ export default function Home() {
               priority
               sizes="100vw"
               fetchPriority="high"
+              loading="eager"
+              onLoad={() => {
+                // Preload other important images after hero loads
+                const preloadLinks = [
+                  '/images/house3.png',
+                  '/images/flat1.png',
+                  '/images/luxury-pattern.png'
+                ];
+                
+                preloadLinks.forEach(src => {
+                  const link = document.createElement('link');
+                  link.rel = 'preload';
+                  link.as = 'image';
+                  link.href = src;
+                  document.head.appendChild(link);
+                });
+              }}
             />
           </div>
           

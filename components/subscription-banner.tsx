@@ -72,16 +72,18 @@ export function SubscriptionBanner({ trialInfo }: SubscriptionBannerProps) {
   }
   
   return (
-    <Alert variant="default" className="mb-8 rounded-sm border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800/30 theme-transition">
+    <Alert variant="default" className="mb-8 rounded-sm border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800/30 theme-transition relative">
       <Clock className="h-4 w-4 text-amber-600 dark:text-amber-500 theme-transition" />
       <AlertTitle className="font-medium text-amber-700 dark:text-amber-500 theme-transition">Пробный период</AlertTitle>
       <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-700/80 dark:text-amber-500/90 theme-transition">
         <span>Осталось времени: <strong>{remainingTime}</strong></span>
-        <Link href="/dashboard/subscription">
-          <Button variant="outline" className="whitespace-nowrap border-amber-400 hover:border-amber-500 dark:border-amber-700 dark:hover:border-amber-600 text-amber-800 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 font-medium theme-transition">
-            Оформить подписку
-          </Button>
-        </Link>
+        <div className="absolute right-4" style={{ marginTop: "-20px" }}>
+          <Link href="/dashboard/subscription">
+            <Button variant="outline" className="whitespace-nowrap border-amber-400 hover:border-amber-500 dark:border-amber-700 dark:hover:border-amber-600 text-amber-800 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 font-medium theme-transition">
+              Оформить подписку
+            </Button>
+          </Link>
+        </div>
       </AlertDescription>
     </Alert>
   )

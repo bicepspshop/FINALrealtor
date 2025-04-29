@@ -218,7 +218,7 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
   const showMap = addressValue && addressValue.length > 5
 
   return (
-    <div className="bg-white dark:bg-dark-graphite p-6 rounded-lg shadow-elegant dark:shadow-elegant-dark border border-gray-100 dark:border-dark-slate relative overflow-hidden theme-transition w-full">
+    <div className="bg-white dark:bg-dark-graphite p-6 rounded-lg shadow-elegant dark:shadow-elegant-dark border border-gray-100 dark:border-dark-slate relative overflow-hidden theme-transition w-full max-w-[1200px] mx-auto">
       <div className="absolute inset-0 bg-[url('/images/background.png')] dark:bg-[url('/images/background-dark.png')] bg-cover bg-center opacity-[0.2] z-0 theme-transition"></div>
       <div className="relative z-10">
       <div className="mb-6">
@@ -227,7 +227,7 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <FormField
               control={form.control}
               name="residentialComplex"
@@ -504,56 +504,56 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
             />
           </div>
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-luxury-black dark:text-white theme-transition">Описание</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Опишите объект недвижимости..." className="min-h-[100px] bg-[#FFFFF0] dark:bg-[#E0F7FA] dark:text-black border-gray-200" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium text-luxury-black dark:text-white theme-transition">Описание</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Опишите объект недвижимости..." className="min-h-[160px] bg-[#FFFFF0] dark:bg-[#E0F7FA] dark:text-black border-gray-200" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="agent_comment"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-luxury-black dark:text-white theme-transition">Комментарий риелтора</FormLabel>
-                <FormControl>
-                  <Textarea placeholder="Внутренние заметки для риелтора (не видны клиентам)..." className="min-h-[100px] bg-[#FFFFF0] dark:bg-[#E0F7FA] dark:text-black border-gray-200" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-
-          <div>
-            <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Фотографии объекта</FormLabel>
-            <ImageUpload onImagesChange={handleImagesChange} />
+            <FormField
+              control={form.control}
+              name="agent_comment"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="font-medium text-luxury-black dark:text-white theme-transition">Комментарий риелтора</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Внутренние заметки для риелтора (не видны клиентам)..." className="min-h-[160px] bg-[#FFFFF0] dark:bg-[#E0F7FA] dark:text-black border-gray-200" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
-          {/* Планировка */}
-          <div>
-            <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Планировка</FormLabel>
-            <FloorPlanUpload onImageChange={handleFloorPlanChange} />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div>
+              <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Фотографии объекта</FormLabel>
+              <ImageUpload onImagesChange={handleImagesChange} />
+            </div>
 
-          {/* Вид из окна - новое поле */}
-          <div>
-            <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Вид из окна</FormLabel>
-            <WindowViewUpload onImageChange={handleWindowViewChange} />
-          </div>
+            <div>
+              <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Планировка</FormLabel>
+              <FloorPlanUpload onImageChange={handleFloorPlanChange} />
+            </div>
 
-          {/* Интерьер - новое поле */}
-          <div>
-            <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Отделка</FormLabel>
-            <InteriorFinishUpload onImageChange={handleInteriorFinishChange} />
+            <div>
+              <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Вид из окна</FormLabel>
+              <WindowViewUpload onImageChange={handleWindowViewChange} />
+            </div>
+
+            <div>
+              <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Отделка</FormLabel>
+              <InteriorFinishUpload onImageChange={handleInteriorFinishChange} />
+            </div>
           </div>
 
           <div className="flex gap-4 mt-8">

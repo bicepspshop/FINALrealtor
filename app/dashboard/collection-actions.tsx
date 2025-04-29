@@ -126,7 +126,7 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
           size="sm" 
           onClick={copyToClipboard} 
           disabled={isLoading}
-          className="bg-black dark:bg-[#4A6FA5] text-white hover:bg-black/80 dark:hover:bg-[#3B5B8C] flex items-center gap-1.5 px-2.5 py-1 transition-colors duration-300"
+          className="bg-black dark:bg-[#4A6FA5] text-white hover:bg-black/80 dark:hover:bg-[#3B5B8C] flex items-center gap-1.5 px-3 py-1.5 h-9 transition-colors duration-300 rounded-md"
         >
           {localHasShareLink ? (
             <>
@@ -142,16 +142,15 @@ export function CollectionActions({ collectionId, userId, hasShareLink, shareId 
         </Button>
 
         {localHasShareLink && localShareId && (
-          <Button 
-            variant="minimal" 
-            size="sm" 
-            onClick={() => router.push(`/share/${localShareId}`)} 
-            disabled={isLoading}
-            className="bg-black dark:bg-[#4A6FA5] text-white hover:bg-black/80 dark:hover:bg-[#3B5B8C] flex items-center gap-1.5 px-2.5 py-1 transition-colors duration-300"
+          <Link 
+            href={`/share/${localShareId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-black dark:bg-[#4A6FA5] text-white hover:bg-black/80 dark:hover:bg-[#3B5B8C] flex items-center gap-1.5 px-3 py-1.5 h-9 transition-colors duration-300 rounded-md"
           >
             <ExternalLink className="h-4 w-4" />
-            <span className="hidden md:inline">Перейти</span>
-          </Button>
+            <span className="hidden md:inline text-[13px] mt-1">Перейти</span>
+          </Link>
         )}
       </div>
 

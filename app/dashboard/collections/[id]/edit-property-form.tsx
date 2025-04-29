@@ -251,9 +251,10 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[900px] lg:max-w-[1000px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Редактировать объект</DialogTitle>
+          <DialogTitle className="text-2xl font-serif font-medium text-luxury-black dark:text-white theme-transition">Редактировать объект</DialogTitle>
+          <div className="w-20 h-0.5 bg-luxury-gold dark:bg-blue-400 mt-2 theme-transition"></div>
         </DialogHeader>
 
         {isLoadingProperty ? (
@@ -263,7 +264,7 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <FormField
                   control={form.control}
                   name="residentialComplex"
@@ -331,7 +332,6 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
                   )}
                 />
 
-                {/* Остальные поля формы остаются без изменений */}
                 <FormField
                   control={form.control}
                   name="rooms"
@@ -493,9 +493,7 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
                     </FormItem>
                   )}
                 />
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="balcony"
@@ -529,56 +527,56 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Описание</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Опишите объект недвижимости..." className="min-h-[100px]" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Описание</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Опишите объект недвижимости..." className="min-h-[160px]" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="agent_comment"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Комментарий риелтора</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Внутренние заметки для риелтора (не видны клиентам)..." className="min-h-[100px]" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-
-              <div>
-                <FormLabel className="block mb-2">Фотографии объекта</FormLabel>
-                <ImageUpload onImagesChange={handleImagesChange} initialImages={imageUrls} />
+                <FormField
+                  control={form.control}
+                  name="agent_comment"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Комментарий риелтора</FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Внутренние заметки для риелтора (не видны клиентам)..." className="min-h-[160px]" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
 
-              {/* Новое поле для загрузки планировки */}
-              {/* Планировка */}
-              <div>
-                <FormLabel className="block mb-2">Планировка</FormLabel>
-                <FloorPlanUpload onImageChange={handleFloorPlanChange} initialImage={floorPlanUrl} />
-              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div>
+                  <FormLabel className="block mb-2">Фотографии объекта</FormLabel>
+                  <ImageUpload onImagesChange={handleImagesChange} initialImages={imageUrls} />
+                </div>
 
-              {/* Новые поля для изображений */}
-              <div>
-                <FormLabel className="block mb-2">Вид из окна</FormLabel>
-                <WindowViewUpload onImageChange={handleWindowViewChange} initialImage={windowViewUrl} />
-              </div>
+                <div>
+                  <FormLabel className="block mb-2">Планировка</FormLabel>
+                  <FloorPlanUpload onImageChange={handleFloorPlanChange} initialImage={floorPlanUrl} />
+                </div>
 
-              <div>
-                <FormLabel className="block mb-2">Интерьер</FormLabel>
-                <InteriorFinishUpload onImageChange={handleInteriorFinishChange} initialImage={interiorFinishUrl} />
+                <div>
+                  <FormLabel className="block mb-2">Вид из окна</FormLabel>
+                  <WindowViewUpload onImageChange={handleWindowViewChange} initialImage={windowViewUrl} />
+                </div>
+
+                <div>
+                  <FormLabel className="block mb-2">Интерьер</FormLabel>
+                  <InteriorFinishUpload onImageChange={handleInteriorFinishChange} initialImage={interiorFinishUrl} />
+                </div>
               </div>
 
               <DialogFooter>
