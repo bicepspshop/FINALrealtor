@@ -10,6 +10,7 @@ import { AlertCircle, WifiOff, UserPlus, User, Calendar, Phone, Mail, Clock, Hom
 import { SubscriptionBanner } from "@/components/subscription-banner"
 import { DashboardTabs } from "@/components/dashboard-tabs"
 import { ClientContactInfo } from "./components/client-contact-info"
+import { ClientAvatar } from "./components/client-avatar"
 
 export default async function ClientsPage() {
   // Получаем сессию
@@ -172,8 +173,11 @@ export default async function ClientsPage() {
           {(!fetchError || isOfflineMode) && clients.length === 0 ? (
             <div className="bg-white dark:bg-dark-graphite rounded-sm shadow-elegant dark:shadow-elegant-dark p-16 text-center max-w-xl mx-auto mt-12 animate-fade-in-up theme-transition">
               <div className="mb-8">
-                <div className="w-40 h-40 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-dark-slate flex items-center justify-center theme-transition">
-                  <User className="h-20 w-20 text-luxury-gold dark:text-luxury-royalBlue/80 theme-transition" />
+                <div className="mx-auto mb-6">
+                  <ClientAvatar 
+                    clientId="00000000-0000-0000-0000-000000000000"
+                    size="lg"
+                  />
                 </div>
                 <div className="w-16 h-0.5 bg-luxury-gold dark:bg-luxury-royalBlue mx-auto mt-4 theme-transition"></div>
               </div>
@@ -204,9 +208,11 @@ export default async function ClientsPage() {
                     style={{ animationDelay: `${Math.min(index * 100, 500)}ms` }}
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-full bg-gray-100 dark:bg-dark-slate flex items-center justify-center shrink-0 theme-transition">
-                        <User className="h-7 w-7 text-luxury-gold dark:text-luxury-royalBlue/90 theme-transition" />
-                      </div>
+                      <ClientAvatar 
+                        clientId={client.id}
+                        clientName={client.full_name}
+                        size="sm"
+                      />
                       <div>
                         <h3 className="text-xl font-medium text-luxury-black dark:text-white truncate max-w-[200px] theme-transition">
                           {client.full_name}

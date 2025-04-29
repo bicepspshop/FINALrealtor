@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { getSession } from "@/lib/auth"
 import { getServerClient } from "@/lib/supabase"
@@ -10,6 +11,7 @@ import { ClientPreferencesBlock } from "../components/client-preferences-block"
 import { DealProgressTracker } from "../components/deal-progress-tracker"
 import { NotesTasksBlock } from "../components/notes-tasks-block"
 import { PropertyMatchesBlock } from "../components/property-matches-block"
+import { ClientAvatar } from "../components/client-avatar"
 
 export default async function ClientDetailPage({ params }: { params: { id: string } }) {
   const clientId = params.id
@@ -158,9 +160,11 @@ export default async function ClientDetailPage({ params }: { params: { id: strin
           </Link>
           
           <div className="flex items-center gap-6 mb-8">
-            <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-dark-slate flex items-center justify-center shrink-0 theme-transition">
-              <User className="h-10 w-10 text-luxury-gold dark:text-luxury-royalBlue/90 theme-transition" />
-            </div>
+            <ClientAvatar 
+              clientId={client.id}
+              clientName={client.full_name}
+              size="md"
+            />
             <div>
               <h1 className="text-3xl font-serif font-medium text-luxury-black dark:text-white theme-transition">
                 {client.full_name}
