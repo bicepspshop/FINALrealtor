@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Clock, CreditCard } from "lucide-react"
 import Link from "next/link"
 import { TrialInfo } from "@/lib/subscription"
+import { usePathname } from "next/navigation"
 
 interface SubscriptionBannerProps {
   trialInfo: TrialInfo;
@@ -13,6 +14,15 @@ interface SubscriptionBannerProps {
 
 export function SubscriptionBanner({ trialInfo }: SubscriptionBannerProps) {
   const [remainingTime, setRemainingTime] = useState<string>("")
+  const pathname = usePathname()
+  
+  // Check if we're on the clients page
+  const isClientsPage = pathname.startsWith("/dashboard/clients")
+  
+  // Apply offset style when on clients page
+  const containerStyles = isClientsPage 
+    ? { marginLeft: '-7px' }
+    : {}
   
   useEffect(() => {
     // Only update if in trial and we have remaining minutes
@@ -56,7 +66,11 @@ export function SubscriptionBanner({ trialInfo }: SubscriptionBannerProps) {
   
   if (trialInfo.subscriptionStatus === 'expired') {
     return (
-      <Alert variant="destructive" className="mb-8 rounded-sm border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800/30 theme-transition">
+      <Alert 
+        variant="destructive" 
+        className="mb-8 rounded-sm border-red-200 bg-red-50 dark:bg-red-900/20 dark:border-red-800/30 theme-transition"
+        style={containerStyles}
+      >
         <CreditCard className="h-4 w-4 text-red-600 dark:text-red-500 theme-transition" />
         <AlertTitle className="font-medium text-red-700 dark:text-red-500 theme-transition">Пробный период завершен</AlertTitle>
         <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-red-700/80 dark:text-red-500/90 theme-transition">
@@ -72,7 +86,11 @@ export function SubscriptionBanner({ trialInfo }: SubscriptionBannerProps) {
   }
   
   return (
-    <Alert variant="default" className="mb-8 rounded-sm border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800/30 theme-transition relative">
+    <Alert 
+      variant="default" 
+      className="mb-8 rounded-sm border-amber-200 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800/30 theme-transition relative"
+      style={containerStyles}
+    >
       <Clock className="h-4 w-4 text-amber-600 dark:text-amber-500 theme-transition" />
       <AlertTitle className="font-medium text-amber-700 dark:text-amber-500 theme-transition">Пробный период</AlertTitle>
       <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-700/80 dark:text-amber-500/90 theme-transition">

@@ -2,11 +2,11 @@
 
 import Link from "next/link"
 import Image from "next/image"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./client-auth-provider"
-import { WifiOff, User, ChevronDown, LogOut, Settings, Home } from "lucide-react"
+import { WifiOff, User, ChevronDown, LogOut, Settings, Home, Users } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme/theme-toggle"
 import {
   DropdownMenu,
@@ -24,8 +24,17 @@ interface NavBarProps {
 
 export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
   const router = useRouter()
+  const pathname = usePathname()
   const { toast } = useToast()
   const { logout } = useAuth()
+  
+  const isDashboardActive = pathname === "/dashboard" || pathname.startsWith("/dashboard/collections")
+  const isClientsActive = pathname.startsWith("/dashboard/clients")
+
+  // Add a negative offset when on the clients tab
+  const containerStyles = isClientsActive 
+    ? { transform: 'translateX(-7px)' }
+    : {}
 
   const handleLogout = async () => {
     logout()
@@ -37,20 +46,36 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
 
   return (
     <header className="bg-white dark:bg-dark-graphite border-b border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark py-3 sticky top-0 z-50 theme-transition">
-      <div className="container-luxury flex justify-between items-center">
+      <div className="container-luxury flex justify-between items-center" style={containerStyles}>
         <Link href="/" className="flex items-center">
           <h1 className="text-2xl font-serif font-medium tracking-tight text-luxury-black dark:text-white dark:gold-accent theme-transition">
             РиелторПро
           </h1>
         </Link>
 
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden md:flex items-center space-x-6">
           <Link 
             href="/dashboard" 
-            className="text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium flex items-center gap-2 theme-transition"
+            className={`transition-colors duration-300 font-medium flex items-center gap-2 theme-transition ${
+              isDashboardActive 
+                ? "text-luxury-gold dark:text-luxury-royalBlue" 
+                : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
+            }`}
           >
             <Home size={18} />
-            Главная
+            Подборки
+          </Link>
+          
+          <Link 
+            href="/dashboard/clients" 
+            className={`transition-colors duration-300 font-medium flex items-center gap-2 theme-transition ${
+              isClientsActive 
+                ? "text-luxury-gold dark:text-luxury-royalBlue" 
+                : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
+            }`}
+          >
+            <Users size={18} />
+            Клиенты
           </Link>
         </nav>
 
