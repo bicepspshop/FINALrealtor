@@ -47,7 +47,7 @@ export function DashboardTabs({ activeTab }: DashboardTabsProps) {
 
   // Apply left offset for clients tab
   const containerStyles = activeTab === "clients" 
-    ? { transform: 'translateX(-20px)' }
+    ? { transform: 'translateX(-7px)' }
     : {}
 
   if (!mounted) {

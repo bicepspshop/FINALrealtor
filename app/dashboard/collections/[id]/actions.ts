@@ -6,10 +6,10 @@ interface PropertyData {
   collectionId: string
   residentialComplex?: string
   propertyType: string
-  address: string
+  address?: string
   rooms: number | null
-  area: number
-  price: number
+  area?: number
+  price?: number
   description: string
   imageUrls: string[]
   floorPlanUrl?: string | null // Добавляем поле для URL планировки
@@ -59,10 +59,10 @@ export async function addProperty(data: PropertyData) {
     collection_id: data.collectionId,
     residential_complex: data.residentialComplex || null,
     property_type: data.propertyType,
-    address: data.address,
+    address: data.address || "",
     rooms: data.rooms,
-    area: data.area,
-    price: data.price,
+    area: data.area || 0,
+    price: data.price || 0,
     description: data.description,
     floor_plan_url: data.floorPlanUrl || null, // Добавляем URL планировки
     // Новые поля
@@ -146,10 +146,10 @@ export async function updateProperty(propertyId: string, data: Omit<PropertyData
       .update({
         residential_complex: data.residentialComplex || null,
         property_type: data.propertyType,
-        address: data.address,
+        address: data.address || "",
         rooms: data.rooms,
-        area: data.area,
-        price: data.price,
+        area: data.area || 0,
+        price: data.price || 0,
         description: data.description,
         floor_plan_url: data.floorPlanUrl || null, // Добавляем URL планировки
         // Новые поля

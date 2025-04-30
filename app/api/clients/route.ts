@@ -32,23 +32,29 @@ export async function POST(request: Request) {
       )
     }
     
-    // Format birthday as proper date or null
-    const birthdayValue = data.birthday ? new Date(data.birthday).toISOString().split('T')[0] : null
+    // Only process non-empty fields to reduce payload size
+    const clientData: Record<string, any> = {
+      full_name: data.full_name.trim(),
+      agent_id: session.id
+    };
+    
+    // Only add fields that have values
+    if (data.phone && data.phone.trim()) clientData.phone = data.phone.trim();
+    if (data.email && data.email.trim()) clientData.email = data.email.trim();
+    if (data.lead_source) clientData.lead_source = data.lead_source;
+    
+    // Format birthday properly if present
+    if (data.birthday) {
+      clientData.birthday = new Date(data.birthday).toISOString().split('T')[0];
+    }
     
     // Create authenticated server client
     const supabase = getServerClient()
     
-    // Insert client using server-side authenticated client
+    // Insert client with optimized returning clause
     const { data: client, error } = await supabase
       .from("clients")
-      .insert({
-        full_name: data.full_name,
-        phone: data.phone || null,
-        email: data.email || null,
-        birthday: birthdayValue,
-        lead_source: data.lead_source || null,
-        agent_id: session.id
-      })
+      .insert(clientData)
       .select("id")
       .single()
     

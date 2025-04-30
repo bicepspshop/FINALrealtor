@@ -3,6 +3,11 @@ import { cookies } from 'next/headers'
 import { checkTrialStatus } from "./lib/subscription"
 import { createClient } from "@supabase/supabase-js"
 
+// Define constants for cookie names and durations
+const SUBSCRIPTION_STATUS_COOKIE = 'subscription-status'
+const SUBSCRIPTION_EXPIRY_COOKIE = 'subscription-expiry' 
+const SUBSCRIPTION_CACHE_DURATION = 60 * 30 // 30 minutes in seconds
+
 // Create a Supabase client for the middleware
 function getSupabaseForMiddleware(authToken?: string) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
@@ -71,9 +76,12 @@ export async function middleware(request: NextRequest) {
         return await checkSubscriptionAndRedirect(supabase, collection.user_id, request)
       }
       
-      // For individual property pages (v1)
-      else if (request.nextUrl.pathname.startsWith('/share/property/')) {
-        const propertyId = request.nextUrl.pathname.split('/')[3]
+      // For individual property pages (v1 or v2)
+      else if (request.nextUrl.pathname.startsWith('/share/property/') || 
+               request.nextUrl.pathname.startsWith('/share/v2/property/')) {
+        
+        const isV2 = request.nextUrl.pathname.startsWith('/share/v2/property/');
+        const propertyId = request.nextUrl.pathname.split('/')[isV2 ? 4 : 3];
         
         if (!propertyId) {
           return NextResponse.next()
@@ -81,70 +89,15 @@ export async function middleware(request: NextRequest) {
         
         const supabase = getSupabaseForMiddleware()
         
-        // Find property and its collection
-        const { data: property, error: propertyError } = await supabase
-          .from("properties")
-          .select("collection_id")
-          .eq("id", propertyId)
-          .single()
-          
-        if (propertyError || !property) {
-          // If property not found, let the page handle the 404
-          return NextResponse.next()
-        }
+        // Find property and get user ID of collection owner
+        const userId = await getPropertyOwnerUserId(supabase, propertyId);
         
-        // Find collection and user
-        const { data: collection, error: collectionError } = await supabase
-          .from("collections")
-          .select("user_id")
-          .eq("id", property.collection_id)
-          .single()
-          
-        if (collectionError || !collection) {
-          // If collection not found, let the page handle the 404
+        if (!userId) {
           return NextResponse.next()
         }
         
         // Check the subscription status
-        return await checkSubscriptionAndRedirect(supabase, collection.user_id, request)
-      }
-      
-      // For v2 property pages
-      else if (request.nextUrl.pathname.startsWith('/share/v2/property/')) {
-        const propertyId = request.nextUrl.pathname.split('/')[4]
-        
-        if (!propertyId) {
-          return NextResponse.next()
-        }
-        
-        const supabase = getSupabaseForMiddleware()
-        
-        // Find property and its collection
-        const { data: property, error: propertyError } = await supabase
-          .from("properties")
-          .select("collection_id")
-          .eq("id", propertyId)
-          .single()
-          
-        if (propertyError || !property) {
-          // If property not found, let the page handle the 404
-          return NextResponse.next()
-        }
-        
-        // Find collection and user
-        const { data: collection, error: collectionError } = await supabase
-          .from("collections")
-          .select("user_id")
-          .eq("id", property.collection_id)
-          .single()
-          
-        if (collectionError || !collection) {
-          // If collection not found, let the page handle the 404
-          return NextResponse.next()
-        }
-        
-        // Check the subscription status
-        return await checkSubscriptionAndRedirect(supabase, collection.user_id, request)
+        return await checkSubscriptionAndRedirect(supabase, userId, request)
       }
       
       // All other share routes continue normally
@@ -171,8 +124,25 @@ export async function middleware(request: NextRequest) {
   }
 
   try {
-    // Make a server call to check subscription status
-    // This allows us to have up-to-date subscription info on every request
+    // Check if we have a cached subscription status
+    const cachedStatus = request.cookies.get(SUBSCRIPTION_STATUS_COOKIE)?.value
+    const expiryTimestamp = request.cookies.get(SUBSCRIPTION_EXPIRY_COOKIE)?.value
+    const currentTime = Math.floor(Date.now() / 1000)
+    
+    // If we have a valid cached status that hasn't expired
+    if (cachedStatus && expiryTimestamp && parseInt(expiryTimestamp) > currentTime) {
+      console.log('Using cached subscription status:', cachedStatus)
+      
+      // If subscription is not active, redirect to subscription page
+      if (cachedStatus !== 'active') {
+        return NextResponse.redirect(new URL('/dashboard/subscription', request.url))
+      }
+      
+      // Otherwise, continue to the protected route
+      return NextResponse.next()
+    }
+    
+    // No cache or cache expired, make a server call to check subscription status
     const subscriptionCheckResponse = await fetch(
       `${request.nextUrl.origin}/api/check-subscription`, 
       {
@@ -188,15 +158,37 @@ export async function middleware(request: NextRequest) {
       return NextResponse.next()
     }
 
-    const { isActive } = await subscriptionCheckResponse.json()
-
-    // If trial is not active, redirect to subscription page
-    if (!isActive) {
-      return NextResponse.redirect(new URL('/dashboard/subscription', request.url))
-    }
-
-    // Continue to the protected route
-    return NextResponse.next()
+    const { isActive, subscriptionStatus } = await subscriptionCheckResponse.json()
+    
+    // Set up response for adding cookies
+    const response = isActive
+      ? NextResponse.next()
+      : NextResponse.redirect(new URL('/dashboard/subscription', request.url))
+      
+    // Calculate expiry time (current time + cache duration in seconds)
+    const expiryTime = Math.floor(Date.now() / 1000) + SUBSCRIPTION_CACHE_DURATION
+    
+    // Cache the subscription status
+    response.cookies.set({
+      name: SUBSCRIPTION_STATUS_COOKIE,
+      value: isActive ? 'active' : 'expired',
+      path: '/',
+      maxAge: SUBSCRIPTION_CACHE_DURATION,
+      sameSite: 'lax'
+    })
+    
+    // Store the expiry timestamp
+    response.cookies.set({
+      name: SUBSCRIPTION_EXPIRY_COOKIE,
+      value: expiryTime.toString(),
+      path: '/',
+      maxAge: SUBSCRIPTION_CACHE_DURATION,
+      sameSite: 'lax'
+    })
+    
+    console.log(`Cached subscription status: ${isActive ? 'active' : 'expired'} until ${new Date(expiryTime * 1000).toLocaleString()}`)
+    
+    return response
   } catch (error) {
     console.error('Middleware error:', error)
     // On error, allow access but log error
@@ -237,6 +229,33 @@ async function checkSubscriptionAndRedirect(supabase: any, userId: string, reque
 
   // If subscription is expired or cancelled, redirect to expired page
   return NextResponse.redirect(new URL('/share/expired', request.url))
+}
+
+// Helper function to get the user ID of a property's collection owner
+async function getPropertyOwnerUserId(supabase: any, propertyId: string): Promise<string | null> {
+  // Find property and its collection
+  const { data: property, error: propertyError } = await supabase
+    .from("properties")
+    .select("collection_id")
+    .eq("id", propertyId)
+    .single()
+    
+  if (propertyError || !property) {
+    return null;
+  }
+  
+  // Find collection and user
+  const { data: collection, error: collectionError } = await supabase
+    .from("collections")
+    .select("user_id")
+    .eq("id", property.collection_id)
+    .single()
+    
+  if (collectionError || !collection) {
+    return null;
+  }
+  
+  return collection.user_id;
 }
 
 export const config = {

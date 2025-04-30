@@ -37,7 +37,7 @@ export async function checkTrialStatus(userId: string): Promise<TrialInfo> {
       return { isActive: false, subscriptionStatus: 'expired' };
     }
     
-    // Check if trial is still active by calculating end time
+    // For trial status, calculate if still active
     const trialStartTime = new Date(user.trial_start_time);
     const trialDurationMs = user.trial_duration_minutes * 60 * 1000;
     const trialEndTime = new Date(trialStartTime.getTime() + trialDurationMs);
@@ -45,14 +45,13 @@ export async function checkTrialStatus(userId: string): Promise<TrialInfo> {
     
     const isTrialActive = currentTime < trialEndTime;
     
-    // If trial expired but status not updated yet
+    // If trial expired but status not updated yet, update it
     if (!isTrialActive && user.subscription_status === 'trial') {
-      // Update the status
       await supabase
         .from("users")
         .update({ subscription_status: 'expired' })
         .eq("id", userId);
-        
+      
       return { 
         isActive: false, 
         subscriptionStatus: 'expired',
@@ -60,7 +59,7 @@ export async function checkTrialStatus(userId: string): Promise<TrialInfo> {
       };
     }
     
-    // Calculate remaining time
+    // Calculate remaining time if trial is active
     const remainingMinutes = isTrialActive ? 
       Math.floor((trialEndTime.getTime() - currentTime.getTime()) / (60 * 1000)) : 0;
     
@@ -94,14 +93,13 @@ export function formatRemainingTrialTime(remainingMinutes: number): string {
 export async function updateExpiredTrials(): Promise<{ updated: number, errors: any[] }> {
   try {
     const supabase = getServerClient();
-    const currentTime = new Date().toISOString();
+    const now = new Date();
     
-    // Find all users with trial status whose trial period has expired
+    // Find users with trial status whose trials have expired
     const { data: usersToUpdate, error } = await supabase
       .from("users")
       .select("id, trial_start_time, trial_duration_minutes")
       .eq("subscription_status", "trial")
-      .lte("trial_start_time", currentTime)
       .is("trial_duration_minutes", 'not.null');
     
     if (error || !usersToUpdate) {
@@ -112,25 +110,27 @@ export async function updateExpiredTrials(): Promise<{ updated: number, errors: 
     const errors = [];
     let updatedCount = 0;
     
-    // Check each user and update if trial has expired
-    for (const user of usersToUpdate) {
-      const trialStartTime = new Date(user.trial_start_time);
-      const trialDurationMs = user.trial_duration_minutes * 60 * 1000;
-      const trialEndTime = new Date(trialStartTime.getTime() + trialDurationMs);
-      const currentTime = new Date();
+    // Filter users whose trials have actually expired
+    const expiredUserIds = usersToUpdate
+      .filter((user: { trial_start_time: string; trial_duration_minutes: number }) => {
+        const trialStartTime = new Date(user.trial_start_time);
+        const trialDurationMs = user.trial_duration_minutes * 60 * 1000;
+        const trialEndTime = new Date(trialStartTime.getTime() + trialDurationMs);
+        return now > trialEndTime;
+      })
+      .map((user: { id: string }) => user.id);
+    
+    // Batch update all expired users
+    if (expiredUserIds.length > 0) {
+      const { error: batchUpdateError } = await supabase
+        .from("users")
+        .update({ subscription_status: 'expired' })
+        .in("id", expiredUserIds);
       
-      if (currentTime > trialEndTime) {
-        // Trial has expired, update status
-        const { error: updateError } = await supabase
-          .from("users")
-          .update({ subscription_status: 'expired' })
-          .eq("id", user.id);
-          
-        if (updateError) {
-          errors.push({ userId: user.id, error: updateError });
-        } else {
-          updatedCount++;
-        }
+      if (batchUpdateError) {
+        errors.push(batchUpdateError);
+      } else {
+        updatedCount = expiredUserIds.length;
       }
     }
     

@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./client-auth-provider"
 import { WifiOff, User, ChevronDown, LogOut, Settings, Home, Users } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme/theme-toggle"
+import { useEffect, useCallback } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +45,57 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
     })
   }
 
+  // Prefetch routes on component mount and when pathname changes
+  useEffect(() => {
+    // Define routes to prefetch
+    const routesToPrefetch = [
+      '/dashboard',
+      '/dashboard/clients',
+      '/profile'
+    ]
+    
+    // Add conditional routes based on current pathname
+    if (pathname === '/dashboard') {
+      // When on dashboard, likely to view collections
+      const recentCollectionIds = localStorage.getItem('recentCollections')
+      if (recentCollectionIds) {
+        try {
+          const ids = JSON.parse(recentCollectionIds)
+          // Prefetch the most recent 3 collections
+          ids.slice(0, 3).forEach((id: string) => {
+            router.prefetch(`/dashboard/collections/${id}`)
+          })
+        } catch (e) {
+          console.error('Error parsing recent collections', e)
+        }
+      }
+    }
+    
+    // Prefetch common routes
+    routesToPrefetch.forEach(route => {
+      if (route !== pathname) { // Don't prefetch current page
+        router.prefetch(route)
+      }
+    })
+  }, [pathname, router])
+  
+  // Define hover handlers for prefetching
+  const handleDashboardHover = useCallback(() => {
+    if (!isDashboardActive) {
+      router.prefetch('/dashboard')
+    }
+  }, [isDashboardActive, router])
+  
+  const handleClientsHover = useCallback(() => {
+    if (!isClientsActive) {
+      router.prefetch('/dashboard/clients')
+    }
+  }, [isClientsActive, router])
+  
+  const handleProfileHover = useCallback(() => {
+    router.prefetch('/profile')
+  }, [router])
+
   return (
     <header className="bg-white dark:bg-dark-graphite border-b border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark py-3 sticky top-0 z-50 theme-transition">
       <div className="container-luxury flex justify-between items-center" style={containerStyles}>
@@ -61,6 +113,7 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
                 ? "text-luxury-gold dark:text-luxury-royalBlue" 
                 : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
             }`}
+            onMouseEnter={handleDashboardHover}
           >
             <Home size={18} />
             Подборки
@@ -73,6 +126,7 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
                 ? "text-luxury-gold dark:text-luxury-royalBlue" 
                 : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
             }`}
+            onMouseEnter={handleClientsHover}
           >
             <Users size={18} />
             Клиенты
@@ -108,7 +162,7 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
                 Ваш аккаунт
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="bg-gray-700 theme-transition" />
-              <Link href="/profile">
+              <Link href="/profile" onMouseEnter={handleProfileHover}>
                 <DropdownMenuItem className="cursor-pointer flex items-center gap-2.5 py-2.5 rounded-sm hover:bg-gray-700 focus:bg-gray-700 theme-transition">
                   <User size={16} className="text-white opacity-80 theme-transition" />
                   <span className="text-white theme-transition">Профиль</span>
@@ -127,4 +181,30 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
       </div>
     </header>
   )
+}
+
+// Add helper function to store recently viewed collections
+export function storeRecentCollection(collectionId: string) {
+  if (typeof window !== 'undefined') {
+    try {
+      // Get existing recent collections
+      const recentCollectionsStr = localStorage.getItem('recentCollections')
+      let recentCollections: string[] = []
+      
+      if (recentCollectionsStr) {
+        recentCollections = JSON.parse(recentCollectionsStr)
+      }
+      
+      // Add the current collection to the front of the list and remove duplicates
+      recentCollections = [
+        collectionId,
+        ...recentCollections.filter(id => id !== collectionId)
+      ].slice(0, 10) // Keep only the 10 most recent
+      
+      // Save back to localStorage
+      localStorage.setItem('recentCollections', JSON.stringify(recentCollections))
+    } catch (e) {
+      console.error('Error storing recent collection', e)
+    }
+  }
 }

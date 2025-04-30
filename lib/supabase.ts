@@ -7,6 +7,18 @@ const RETRY_DELAY = 1000
 // Таймаут для запроса
 const REQUEST_TIMEOUT = 5000
 
+// Cache implementation for query results
+type CacheEntry = {
+  data: any;
+  timestamp: number;
+  expiresIn: number;
+}
+
+const queryCache = new Map<string, CacheEntry>();
+
+// Cache duration in milliseconds (default: 5 minutes)
+const DEFAULT_CACHE_DURATION = 5 * 60 * 1000;
+
 // Create a single supabase client for the browser
 const createBrowserClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string
@@ -23,7 +35,10 @@ const createBrowserClient = () => {
       autoRefreshToken: true,
       flowType: 'pkce',
     },
-  })
+    global: {
+      fetch: cachingFetch
+    }
+  }) as any
 }
 
 // Create a single supabase client for server components
@@ -42,11 +57,119 @@ const createServerClient = () => {
       persistSession: false,
       autoRefreshToken: false,
     },
-  })
+    global: {
+      fetch: cachingFetch
+    }
+  }) as any
+}
+
+// Extended fetch function with caching for GET requests
+async function cachingFetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  // Only cache GET requests
+  if (init?.method && init.method !== 'GET') {
+    return fetch(url, init);
+  }
+  
+  const urlStr = typeof url === 'string' ? url : url.toString();
+  
+  // Skip cache if cache-busting parameters exist
+  const hasTimestamp = urlStr.includes('t=') || urlStr.includes('timestamp=');
+  
+  // Skip cache if cache-control header is set to no-cache
+  const headers = init?.headers || {};
+  const headerEntries = headers instanceof Headers ? 
+    Array.from(headers.entries()) : 
+    (typeof headers === 'object' ? Object.entries(headers) : []);
+  
+  const cacheControlHeader = headerEntries.find(([key]) => 
+    key.toLowerCase() === 'cache-control'
+  );
+  
+  const shouldSkipCache = hasTimestamp || 
+    (cacheControlHeader && cacheControlHeader[1].includes('no-cache'));
+  
+  if (!shouldSkipCache) {
+    const cacheKey = generateCacheKey(url, init);
+    
+    // Check cache first
+    const cachedEntry = queryCache.get(cacheKey);
+    if (cachedEntry && !isCacheExpired(cachedEntry)) {
+      return new Response(JSON.stringify(cachedEntry.data), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200
+      });
+    }
+  }
+  
+  // Fetch from network
+  const response = await fetch(url, init);
+  
+  // Only cache successful responses and if not skipping cache
+  if (response.ok && !shouldSkipCache) {
+    try {
+      // Clone the response to avoid consuming it
+      const clonedResponse = response.clone();
+      const data = await clonedResponse.json();
+      
+      const cacheKey = generateCacheKey(url, init);
+      
+      // Store in cache
+      queryCache.set(cacheKey, {
+        data,
+        timestamp: Date.now(),
+        expiresIn: DEFAULT_CACHE_DURATION
+      });
+    } catch (error) {
+      console.warn('Failed to cache Supabase response:', error);
+    }
+  }
+  
+  return response;
+}
+
+// Helper to generate a unique cache key
+function generateCacheKey(url: RequestInfo | URL, init?: RequestInit): string {
+  const urlStr = typeof url === 'string' ? url : url.toString();
+  const headers = init?.headers ? JSON.stringify(init.headers) : '';
+  return `${urlStr}:${headers}`;
+}
+
+// Check if cache entry is expired
+function isCacheExpired(entry: CacheEntry): boolean {
+  return Date.now() > (entry.timestamp + entry.expiresIn);
+}
+
+// Clear specific cache entries or all entries
+export function clearSupabaseCache(urlPattern?: string): void {
+  if (!urlPattern) {
+    queryCache.clear();
+    return;
+  }
+  
+  // Normalize URL pattern to handle different variations
+  const normalizedPattern = urlPattern.toLowerCase();
+  
+  // Efficiently clear matching entries
+  for (const [key, _] of queryCache.entries()) {
+    const lowerKey = key.toLowerCase();
+    
+    if (lowerKey.includes(normalizedPattern)) {
+      queryCache.delete(key);
+      continue;
+    }
+    
+    // Check for API paths without query parameters
+    if (normalizedPattern.includes('/api/') && lowerKey.includes('/api/')) {
+      const keyBasePath = lowerKey.split('?')[0];
+      if (keyBasePath.includes(normalizedPattern) || normalizedPattern.includes(keyBasePath)) {
+        queryCache.delete(key);
+      }
+    }
+  }
 }
 
 // Client singleton
-let browserClient: ReturnType<typeof createClient> | null = null
+let browserClient: any = null
 
 // Get the browser client (singleton pattern)
 export const getBrowserClient = () => {
