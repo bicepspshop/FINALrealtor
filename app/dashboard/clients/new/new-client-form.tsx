@@ -99,15 +99,16 @@ export function NewClientForm({ userId }: { userId: string }) {
         throw new Error("Client was created but no ID was returned")
       }
       
+      // Clear cache to ensure fresh data is loaded
+      clearSupabaseCache('/api/dashboard/clients');
+      
       toast({
         title: "Клиент создан",
         description: "Новый клиент успешно добавлен",
       })
       
-      // Clear cache for clients dashboard to ensure updated list
-      clearSupabaseCache('/api/dashboard/clients');
-      
-      // Navigate to the client page
+      // Navigate to the client page and force refresh
+      router.refresh();
       router.push(`/dashboard/clients/${client.id}`)
       
     } catch (error) {
