@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Edit, Save, X, Loader2, Home, Banknote, CreditCard, MapPin } from "lucide-react"
+import { Edit, Save, X, Loader2, Home, Banknote, CreditCard, MapPin, Plus } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 
@@ -42,7 +42,7 @@ interface DealRequestProps {
 }
 
 export function DealRequestBlock({ clientId, dealRequest, locations }: DealRequestProps) {
-  const [isEditing, setIsEditing] = useState(!dealRequest?.id)
+  const [isEditing, setIsEditing] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   
@@ -149,6 +149,20 @@ export function DealRequestBlock({ clientId, dealRequest, locations }: DealReque
     }
   }
 
+  // Handle cancel button click
+  const handleCancel = () => {
+    setIsEditing(false)
+    // Reset form to default values
+    form.reset({
+      real_estate_type: dealRequest?.real_estate_type || "",
+      budget_min: dealRequest?.budget_min || 0,
+      budget_max: dealRequest?.budget_max || 0,
+      first_payment: dealRequest?.first_payment || 0,
+      payment_type: dealRequest?.payment_type || "",
+      preferred_locations: locationsString
+    })
+  }
+
   return (
     <Card className="overflow-hidden rounded-sm border border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark hover:shadow-elegant dark:hover:shadow-luxury-dark transition-all duration-500 animate-fade-in-up theme-transition">
       <CardHeader className="bg-white dark:bg-dark-graphite theme-transition pb-2">
@@ -170,19 +184,11 @@ export function DealRequestBlock({ clientId, dealRequest, locations }: DealReque
             <Button 
               variant="ghost" 
               size="sm" 
-              onClick={() => {
-                if (dealRequest?.id) {
-                  setIsEditing(false)
-                } else {
-                  // If it's a new record, resetting doesn't make sense
-                  // Maybe navigate away or show a confirmation dialog
-                }
-              }}
-              className="h-8 w-8 p-0 text-luxury-black/70 dark:text-white/70 hover:text-red-500 dark:hover:text-red-400 hover:bg-transparent theme-transition"
-              disabled={!dealRequest?.id}
+              onClick={handleCancel}
+              className="text-luxury-black/70 dark:text-white/70 hover:text-red-500 dark:hover:text-red-400 hover:bg-transparent theme-transition px-2 h-8"
             >
-              <X size={16} />
-              <span className="sr-only">Отмена</span>
+              <X size={16} className="mr-1" />
+              <span>Отмена</span>
             </Button>
           )}
         </div>
@@ -192,74 +198,83 @@ export function DealRequestBlock({ clientId, dealRequest, locations }: DealReque
       </CardHeader>
       <CardContent className="pt-4 pb-5">
         {!isEditing ? (
-          <div className="space-y-3 pt-1">
-            {dealRequest?.real_estate_type && (
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-dark-slate flex items-center justify-center shrink-0 theme-transition">
-                  <Home className="h-4 w-4 text-luxury-gold dark:text-luxury-royalBlue/90 theme-transition" />
+          dealRequest?.id ? (
+            <div className="space-y-3 pt-1">
+              {dealRequest?.real_estate_type && (
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gray-100 dark:bg-dark-slate flex items-center justify-center shrink-0 theme-transition">
+                    <Home className="h-4 w-4 text-luxury-gold dark:text-luxury-royalBlue/90 theme-transition" />
+                  </div>
+                  <div>
+                    <div className="text-luxury-black/80 dark:text-white/80 theme-transition">
+                      <span className="font-medium">Тип недвижимости:</span> {dealRequest.real_estate_type}
+                    </div>
+                  </div>
                 </div>
-                <div>
+              )}
+              
+              {(dealRequest?.budget_min !== undefined || dealRequest?.budget_max !== undefined) && (
+                <div className="flex items-center gap-3 pl-1">
+                  <Banknote size={16} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition" />
+                  <span className="text-luxury-black/80 dark:text-white/80 theme-transition">
+                    <span className="font-medium">Бюджет:</span> {formatCurrency(dealRequest?.budget_min)} - {formatCurrency(dealRequest?.budget_max)}
+                  </span>
+                </div>
+              )}
+              
+              {dealRequest?.first_payment !== undefined && dealRequest.first_payment !== null && dealRequest.first_payment > 0 && (
+                <div className="flex items-center gap-3 pl-1">
+                  <CreditCard size={16} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition" />
+                  <span className="text-luxury-black/80 dark:text-white/80 theme-transition">
+                    <span className="font-medium">Первый взнос:</span> {formatCurrency(dealRequest.first_payment)}
+                  </span>
+                </div>
+              )}
+              
+              {dealRequest?.payment_type && (
+                <div className="flex items-center gap-3 pl-1">
+                  <CreditCard size={16} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition" />
+                  <span className="text-luxury-black/80 dark:text-white/80 theme-transition">
+                    <span className="font-medium">Способ оплаты:</span> {dealRequest.payment_type}
+                  </span>
+                </div>
+              )}
+              
+              {locations && locations.length > 0 && (
+                <div className="flex items-start gap-3 pl-1">
+                  <MapPin size={16} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition mt-1" />
                   <div className="text-luxury-black/80 dark:text-white/80 theme-transition">
-                    <span className="font-medium">Тип недвижимости:</span> {dealRequest.real_estate_type}
+                    <span className="font-medium">Предпочтительные районы:</span>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {locations.map((location) => (
+                        <Badge
+                          key={location.id}
+                          className="bg-gray-100 hover:bg-gray-200 dark:bg-dark-slate dark:hover:bg-dark-slate/80 text-luxury-black/80 dark:text-white/80 theme-transition"
+                        >
+                          {location.location_name}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="text-luxury-black/60 dark:text-white/60 theme-transition mb-4">
+                Нет информации о запросе клиента
               </div>
-            )}
-            
-            {(dealRequest?.budget_min !== undefined || dealRequest?.budget_max !== undefined) && (
-              <div className="flex items-center gap-3 pl-1">
-                <Banknote size={16} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition" />
-                <span className="text-luxury-black/80 dark:text-white/80 theme-transition">
-                  <span className="font-medium">Бюджет:</span> {formatCurrency(dealRequest?.budget_min)} - {formatCurrency(dealRequest?.budget_max)}
-                </span>
-              </div>
-            )}
-            
-            {dealRequest?.first_payment !== undefined && dealRequest.first_payment !== null && dealRequest.first_payment > 0 && (
-              <div className="flex items-center gap-3 pl-1">
-                <CreditCard size={16} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition" />
-                <span className="text-luxury-black/80 dark:text-white/80 theme-transition">
-                  <span className="font-medium">Первый взнос:</span> {formatCurrency(dealRequest.first_payment)}
-                </span>
-              </div>
-            )}
-            
-            {dealRequest?.payment_type && (
-              <div className="flex items-center gap-3 pl-1">
-                <CreditCard size={16} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition" />
-                <span className="text-luxury-black/80 dark:text-white/80 theme-transition">
-                  <span className="font-medium">Способ оплаты:</span> {dealRequest.payment_type}
-                </span>
-              </div>
-            )}
-            
-            {locations && locations.length > 0 && (
-              <div className="flex items-start gap-3 pl-1">
-                <MapPin size={16} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition mt-1" />
-                <div className="text-luxury-black/80 dark:text-white/80 theme-transition">
-                  <span className="font-medium">Предпочтительные районы:</span>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {locations.map((location) => (
-                      <Badge
-                        key={location.id}
-                        className="bg-gray-100 hover:bg-gray-200 dark:bg-dark-slate dark:hover:bg-dark-slate/80 text-luxury-black/80 dark:text-white/80 theme-transition"
-                      >
-                        {location.location_name}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            {(!dealRequest?.id) && (
-              <div className="flex items-center justify-center py-2">
-                <p className="text-luxury-black/60 dark:text-white/60 theme-transition text-sm italic">
-                  Нет информации о запросе клиента
-                </p>
-              </div>
-            )}
-          </div>
+              <Button 
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing(true)}
+                className="border-luxury-gold/40 dark:border-luxury-royalBlue/40 text-luxury-black dark:text-white hover:bg-luxury-gold/10 dark:hover:bg-luxury-royalBlue/10 theme-transition"
+              >
+                <Plus size={16} className="mr-2" />
+                Добавить запрос
+              </Button>
+            </div>
+          )
         ) : (
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

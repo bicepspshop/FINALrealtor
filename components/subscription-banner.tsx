@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Clock, CreditCard } from "lucide-react"
@@ -20,50 +20,49 @@ export function SubscriptionBanner({ trialInfo }: SubscriptionBannerProps) {
   const isClientsPage = pathname.startsWith("/dashboard/clients")
   
   // Apply offset style when on clients page
-  const containerStyles = isClientsPage 
-    ? { marginLeft: '-7px' }
-    : {}
+  const containerStyles = useMemo(() => 
+    isClientsPage ? { marginLeft: '-7px' } : {}, 
+  [isClientsPage])
   
   useEffect(() => {
-    // Only update if in trial and we have remaining minutes
-    if (trialInfo.subscriptionStatus === 'trial' && trialInfo.remainingMinutes) {
-      const updateTimeDisplay = () => {
-        if (trialInfo.trialEndTime) {
-          const now = new Date();
-          const endTime = new Date(trialInfo.trialEndTime);
-          const diff = endTime.getTime() - now.getTime();
-          
-          if (diff <= 0) {
-            // Trial has expired
-            setRemainingTime("0д 0ч 0м");
-            // Refresh page when trial expires
-            window.location.reload();
-            return;
-          }
-          
-          const remainingMinutes = Math.floor(diff / (1000 * 60));
-          const days = Math.floor(remainingMinutes / (60 * 24));
-          const hours = Math.floor((remainingMinutes % (60 * 24)) / 60);
-          const minutes = Math.floor(remainingMinutes % 60);
-          
-          setRemainingTime(`${days}д ${hours}ч ${minutes}м`);
-        }
-      };
-      
-      // Initial update
-      updateTimeDisplay();
-      
-      // Update countdown every minute
-      const interval = setInterval(updateTimeDisplay, 60000);
-      
-      return () => clearInterval(interval);
+    // Only process for trial status
+    if (trialInfo.subscriptionStatus !== 'trial' || !trialInfo.trialEndTime) {
+      return;
     }
-  }, [trialInfo]);
+      
+    const updateTimeDisplay = () => {
+      const now = new Date();
+      const endTime = new Date(trialInfo.trialEndTime as Date);
+      const diff = endTime.getTime() - now.getTime();
+      
+      if (diff <= 0) {
+        setRemainingTime("0д 0ч 0м");
+        window.location.reload();
+        return;
+      }
+      
+      const remainingMinutes = Math.floor(diff / (1000 * 60));
+      const days = Math.floor(remainingMinutes / (60 * 24));
+      const hours = Math.floor((remainingMinutes % (60 * 24)) / 60);
+      const minutes = Math.floor(remainingMinutes % 60);
+      
+      setRemainingTime(`${days}д ${hours}ч ${minutes}м`);
+    };
+    
+    // Initial update
+    updateTimeDisplay();
+    
+    // Update countdown every minute
+    const interval = setInterval(updateTimeDisplay, 60000);
+    return () => clearInterval(interval);
+  }, [trialInfo.subscriptionStatus, trialInfo.trialEndTime]);
   
+  // Don't render anything for active subscriptions
   if (trialInfo.subscriptionStatus === 'active') {
-    return null; // Don't show banner for paid users
+    return null;
   }
   
+  // Subscription expired banner
   if (trialInfo.subscriptionStatus === 'expired') {
     return (
       <Alert 
@@ -85,6 +84,7 @@ export function SubscriptionBanner({ trialInfo }: SubscriptionBannerProps) {
     )
   }
   
+  // Trial period banner
   return (
     <Alert 
       variant="default" 

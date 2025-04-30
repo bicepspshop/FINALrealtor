@@ -67,19 +67,24 @@ export function NewClientForm({ userId }: { userId: string }) {
     setIsSubmitting(true)
     
     try {
+      // Prepare data by removing empty values
+      const clientData: Record<string, any> = {
+        full_name: data.full_name
+      };
+      
+      // Only include fields with actual values
+      if (data.phone) clientData.phone = data.phone;
+      if (data.email) clientData.email = data.email;
+      if (data.birthday) clientData.birthday = data.birthday;
+      if (data.lead_source) clientData.lead_source = data.lead_source;
+      
       // Call the API endpoint to create a client
       const response = await fetch('/api/clients', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          full_name: data.full_name,
-          phone: data.phone || null,
-          email: data.email || null,
-          birthday: data.birthday || null,
-          lead_source: data.lead_source || null
-        })
+        body: JSON.stringify(clientData)
       })
       
       if (!response.ok) {

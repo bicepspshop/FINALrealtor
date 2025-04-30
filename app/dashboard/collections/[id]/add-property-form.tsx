@@ -25,11 +25,11 @@ import { AddressSuggest } from "@/components/address-suggest"
 const formSchema = z.object({
   residentialComplex: z.string().optional(),
   propertyType: z.enum(["apartment", "house", "land"]),
-  address: z.string().min(5, "Адрес должен содержать не менее 5 символов"),
+  address: z.string().optional(),
   rooms: z.coerce.number().int().min(0).optional(),
-  area: z.coerce.number().positive("Площадь должна быть положительным числом"),
+  area: z.coerce.number().positive("Площадь должна быть положительным числом").optional(),
   livingArea: z.coerce.number().positive("Жилая площадь должна быть положительным числом").optional(),
-  price: z.coerce.number().positive("Цена должна быть положительным числом"),
+  price: z.coerce.number().positive("Цена должна быть положительным числом").optional(),
   description: z.string().optional(),
   agent_comment: z.string().optional(),
 
@@ -107,11 +107,11 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
         collectionId,
         residentialComplex: values.residentialComplex,
         propertyType: values.propertyType,
-        address: values.address,
+        address: values.address || "",
         rooms: values.rooms || null,
-        area: values.area!,
+        area: values.area || 0,
         livingArea: values.livingArea,
-        price: values.price!,
+        price: values.price || 0,
         description: values.description || "",
         agent_comment: values.agent_comment || "",
 
@@ -183,7 +183,7 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
 
   const handleAddressSelect = (address: string, coordinates?: [number, number]) => {
     // Устанавливаем выбранный адрес в форму
-    form.setValue("address", address, { shouldValidate: true })
+    form.setValue("address", address, { shouldValidate: false })
 
     // Если получены координаты, устанавливаем их для карты
     if (coordinates) {
@@ -214,7 +214,7 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
     setMapError(error)
   }
 
-  const addressValue = form.watch("address")
+  const addressValue = form.watch("address") || ""
   const showMap = addressValue && addressValue.length > 5
 
   return (
@@ -275,7 +275,7 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
                   <FormLabel className="font-medium text-luxury-black dark:text-white theme-transition">Адрес</FormLabel>
                   <FormControl>
                     <AddressSuggest
-                      value={field.value}
+                      value={field.value || ""}
                       onChange={field.onChange}
                       onSelect={handleAddressSelect}
                       placeholder="ул. Ленина, 123, Москва"
@@ -556,24 +556,27 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
             </div>
           </div>
 
-          <div className="flex gap-4 mt-8">
-            <Button 
-            type="submit" 
-            disabled={isLoading} 
-            className="bg-luxury-gold dark:bg-blue-400 hover:bg-luxury-gold/90 dark:hover:bg-blue-500 text-luxury-black dark:text-white font-medium py-6 px-8 theme-transition"
-            animation="scale"
-            >
-              {isLoading ? "Добавление..." : "Добавить объект"}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="border-luxury-black/20 dark:border-blue-400/40 hover:bg-luxury-black/5 dark:hover:bg-blue-400/10 hover:border-luxury-black/30 dark:hover:border-blue-400/60 rounded-sm py-6 px-8 dark:text-white theme-transition"
-              animation="scale"
-              onClick={() => router.push(`/dashboard/collections/${collectionId}`)}
-            >
-              Отмена
-            </Button>
+          <div className="col-span-full mt-8 flex flex-col gap-4">
+            <div className="text-sm text-luxury-black/60 dark:text-white/60 theme-transition">
+              <p>* Большинство полей являются необязательными. Объект может быть сохранен с минимальной информацией, а остальные детали можно добавить позже.</p>
+            </div>
+            <div className="flex justify-end gap-4">
+              <Button 
+                type="submit" 
+                disabled={isLoading} 
+                className="bg-luxury-gold dark:bg-blue-400 hover:bg-luxury-gold/90 dark:hover:bg-blue-500 text-luxury-black dark:text-white font-medium py-6 px-8 theme-transition"
+              >
+                {isLoading ? "Добавление..." : "Добавить объект"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                className="border-luxury-black/20 dark:border-blue-400/40 hover:bg-luxury-black/5 dark:hover:bg-blue-400/10 hover:border-luxury-black/30 dark:hover:border-blue-400/60 rounded-sm py-6 px-8 dark:text-white theme-transition"
+                onClick={() => router.push(`/dashboard/collections/${collectionId}`)}
+              >
+                Отмена
+              </Button>
+            </div>
           </div>
         </form>
       </Form>
