@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerClient } from '@/lib/supabase'
+import { SubscriptionService } from '@/lib/subscription-service'
 
 export async function GET(req: NextRequest) {
   try {
@@ -32,49 +33,13 @@ export async function GET(req: NextRequest) {
       )
     }
     
-    // Check user's subscription status
-    const { data: user, error: userError } = await supabase
-      .from('users')
-      .select('subscription_status, trial_start_time, trial_duration_minutes')
-      .eq('id', userId)
-      .single()
-      
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
-    }
-    
-    // Determine if subscription is active
-    let isActive = false
-    
-    // Paid subscription is always active
-    if (user.subscription_status === 'active') {
-      isActive = true
-    } 
-    // Check if trial is still valid
-    else if (user.subscription_status === 'trial') {
-      const trialStartTime = new Date(user.trial_start_time)
-      const trialDurationMs = user.trial_duration_minutes * 60 * 1000
-      const trialEndTime = new Date(trialStartTime.getTime() + trialDurationMs)
-      const currentTime = new Date()
-      
-      isActive = currentTime < trialEndTime
-      
-      // If trial just expired, update the user's status
-      if (!isActive) {
-        await supabase
-          .from('users')
-          .update({ subscription_status: 'expired' })
-          .eq('id', userId)
-      }
-    }
+    // Check user's subscription status using the centralized service
+    const subscriptionStatus = await SubscriptionService.getSubscriptionStatus(userId)
     
     // Return subscription status
     return NextResponse.json({ 
-      isActive,
-      status: user.subscription_status
+      isActive: subscriptionStatus.isActive,
+      status: subscriptionStatus.status
     }, {
       headers: {
         // Prevent caching of this response

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { updateExpiredTrials } from '@/lib/subscription'
+import { SubscriptionService } from '@/lib/subscription-service'
 
 export async function GET(req: NextRequest) {
   try {
@@ -15,8 +15,8 @@ export async function GET(req: NextRequest) {
       )
     }
     
-    // Run the batch update process
-    const result = await updateExpiredTrials()
+    // Run the batch update process using our centralized service
+    const result = await SubscriptionService.updateAllExpiredTrials()
     
     return NextResponse.json({
       success: true,

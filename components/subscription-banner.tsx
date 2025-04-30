@@ -5,39 +5,99 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Clock, CreditCard } from "lucide-react"
 import Link from "next/link"
-import { TrialInfo } from "@/lib/subscription"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { SubscriptionStatus } from "@/lib/subscription-service"
 
+// Support both old and new prop interfaces during transition
 interface SubscriptionBannerProps {
-  trialInfo: TrialInfo;
+  initialStatus?: SubscriptionStatus;
+  trialInfo?: any; // For backwards compatibility
 }
 
-export function SubscriptionBanner({ trialInfo }: SubscriptionBannerProps) {
-  const [remainingTime, setRemainingTime] = useState<string>("")
-  const pathname = usePathname()
+export function SubscriptionBanner({ initialStatus, trialInfo }: SubscriptionBannerProps) {
+  // Handle both new and legacy props
+  const initialData = useMemo(() => {
+    // If initialStatus is provided, use it (new format)
+    if (initialStatus) {
+      return initialStatus;
+    }
+    
+    // Otherwise, convert from old trialInfo format
+    if (trialInfo) {
+      return {
+        isActive: trialInfo.isActive || false,
+        status: trialInfo.subscriptionStatus || 'unknown',
+        trialEndTime: trialInfo.trialEndTime,
+        remainingMinutes: trialInfo.remainingMinutes
+      } as SubscriptionStatus;
+    }
+    
+    // Default fallback
+    return {
+      isActive: false,
+      status: 'unknown'
+    } as SubscriptionStatus;
+  }, [initialStatus, trialInfo]);
+
+  const [status, setStatus] = useState<SubscriptionStatus>(initialData);
+  const [remainingTime, setRemainingTime] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  
+  const pathname = usePathname();
+  const router = useRouter();
   
   // Check if we're on the clients page
-  const isClientsPage = pathname.startsWith("/dashboard/clients")
+  const isClientsPage = pathname.startsWith("/dashboard/clients");
   
   // Apply offset style when on clients page
   const containerStyles = useMemo(() => 
     isClientsPage ? { marginLeft: '-7px' } : {}, 
-  [isClientsPage])
+  [isClientsPage]);
   
+  // Function to fetch the latest subscription status
+  const refreshStatus = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/subscription-status', {
+        method: 'GET',
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+      
+      if (response.ok) {
+        const freshStatus = await response.json();
+        setStatus(freshStatus);
+        
+        // If subscription just expired, reload the page to trigger middleware
+        if (status?.isActive && !freshStatus.isActive) {
+          router.refresh();
+        }
+      }
+    } catch (error) {
+      console.error('Error refreshing subscription status:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Calculate and update remaining time
   useEffect(() => {
-    // Only process for trial status
-    if (trialInfo.subscriptionStatus !== 'trial' || !trialInfo.trialEndTime) {
+    // Safety check to make sure status is defined and properly initialized
+    if (!status || status.status !== 'trial' || !status.trialEndTime) {
       return;
     }
       
     const updateTimeDisplay = () => {
       const now = new Date();
-      const endTime = new Date(trialInfo.trialEndTime as Date);
+      const endTime = new Date(status.trialEndTime as Date);
       const diff = endTime.getTime() - now.getTime();
       
       if (diff <= 0) {
         setRemainingTime("0д 0ч 0м");
-        window.location.reload();
+        refreshStatus(); // Check status when timer hits zero
         return;
       }
       
@@ -53,17 +113,28 @@ export function SubscriptionBanner({ trialInfo }: SubscriptionBannerProps) {
     updateTimeDisplay();
     
     // Update countdown every minute
-    const interval = setInterval(updateTimeDisplay, 60000);
+    const interval = setInterval(() => {
+      updateTimeDisplay();
+      
+      // Every 5 minutes, also refresh the status from the server
+      if (new Date().getMinutes() % 5 === 0) {
+        refreshStatus();
+      }
+    }, 60000);
+    
     return () => clearInterval(interval);
-  }, [trialInfo.subscriptionStatus, trialInfo.trialEndTime]);
+  }, [status]); // Simplified dependency array
   
+  // Ensure status is defined before rendering
+  if (!status) return null;
+
   // Don't render anything for active subscriptions
-  if (trialInfo.subscriptionStatus === 'active') {
+  if (status.status === 'active') {
     return null;
   }
   
   // Subscription expired banner
-  if (trialInfo.subscriptionStatus === 'expired') {
+  if (status.status === 'expired') {
     return (
       <Alert 
         variant="destructive" 
