@@ -37,225 +37,199 @@ function getSupabaseForMiddleware(authToken?: string) {
   return createClient(supabaseUrl, supabaseAnonKey, options);
 }
 
+/**
+ * Middleware to check subscription status and redirect if needed
+ */
 export async function middleware(request: NextRequest) {
-  // Handle share links separately
+  // Skip middleware for static assets
+  if (
+    request.nextUrl.pathname.startsWith('/_next') ||
+    request.nextUrl.pathname.startsWith('/images') ||
+    request.nextUrl.pathname.startsWith('/api/subscription-status') ||
+    request.nextUrl.pathname.startsWith('/login') ||
+    request.nextUrl.pathname.startsWith('/register') ||
+    request.nextUrl.pathname === '/favicon.ico'
+  ) {
+    return NextResponse.next();
+  }
+
+  // Handle share links - this needs direct DB access
   if (request.nextUrl.pathname.startsWith('/share/')) {
-    // Skip the /share/expired route to avoid redirect loops
-    if (request.nextUrl.pathname === '/share/expired') {
-      return NextResponse.next()
-    }
-    
-    try {
-      // For the main share pages (collections)
-      if (request.nextUrl.pathname.startsWith('/share/') && !request.nextUrl.pathname.startsWith('/share/property/') && 
-          !request.nextUrl.pathname.startsWith('/share/expired/') && !request.nextUrl.pathname.startsWith('/share/components/') && 
-          !request.nextUrl.pathname.startsWith('/share/v2/property/') && !request.nextUrl.pathname.startsWith('/share/v2/components/')) {
-        
-        // Extract share ID from the URL path
-        const shareId = request.nextUrl.pathname.split('/')[2]
-        
-        if (!shareId) {
-          return NextResponse.next()
-        }
-
-        const supabase = getSupabaseForMiddleware()
-
-        // Find collection by share_id
-        const { data: collection, error: collectionError } = await supabase
-          .from("collections")
-          .select("id, user_id")
-          .eq("share_id", shareId)
-          .single()
-
-        if (collectionError || !collection) {
-          // If collection not found, let the page handle the 404
-          return NextResponse.next()
-        }
-
-        // Check the subscription status
-        return await checkSubscriptionAndRedirect(supabase, collection.user_id, request)
-      }
-      
-      // For individual property pages (v1 or v2)
-      else if (request.nextUrl.pathname.startsWith('/share/property/') || 
-               request.nextUrl.pathname.startsWith('/share/v2/property/')) {
-        
-        const isV2 = request.nextUrl.pathname.startsWith('/share/v2/property/');
-        const propertyId = request.nextUrl.pathname.split('/')[isV2 ? 4 : 3];
-        
-        if (!propertyId) {
-          return NextResponse.next()
-        }
-        
-        const supabase = getSupabaseForMiddleware()
-        
-        // Find property and get user ID of collection owner
-        const userId = await getPropertyOwnerUserId(supabase, propertyId);
-        
-        if (!userId) {
-          return NextResponse.next()
-        }
-        
-        // Check the subscription status
-        return await checkSubscriptionAndRedirect(supabase, userId, request)
-      }
-      
-      // All other share routes continue normally
-      return NextResponse.next()
-    } catch (error) {
-      console.error('Share middleware error:', error)
-      // On error, allow access but log error
-      return NextResponse.next()
-    }
+    return handleShareLinks(request);
   }
   
-  // Skip middleware for non-dashboard routes or subscription page
-  if (!request.nextUrl.pathname.startsWith('/dashboard') || 
-      request.nextUrl.pathname.startsWith('/dashboard/subscription')) {
-    return NextResponse.next()
+  // Only check subscription for dashboard routes, excluding subscription page
+  if (request.nextUrl.pathname.startsWith('/dashboard') && 
+      !request.nextUrl.pathname.startsWith('/dashboard/subscription')) {
+    return handleDashboardRoutes(request);
   }
 
-  // Check if user is authenticated
-  const authToken = request.cookies.get('auth-token')?.value
+  // For all other routes, continue
+  return NextResponse.next();
+}
+
+/**
+ * Handle subscription checks for dashboard routes
+ */
+async function handleDashboardRoutes(request: NextRequest) {
+  // Get auth token
+  const authToken = request.cookies.get('auth-token')?.value;
   
   if (!authToken) {
-    // Redirect to login if not authenticated
-    return NextResponse.redirect(new URL('/login', request.url))
+    // Not authenticated, redirect to login
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
   try {
-    // Check if we have a cached subscription status
-    const cachedStatus = request.cookies.get(SUBSCRIPTION_STATUS_COOKIE)?.value
-    const expiryTimestamp = request.cookies.get(SUBSCRIPTION_EXPIRY_COOKIE)?.value
-    const currentTime = Math.floor(Date.now() / 1000)
-    
-    // If we have a valid cached status that hasn't expired
-    if (cachedStatus && expiryTimestamp && parseInt(expiryTimestamp) > currentTime) {
-      console.log('Using cached subscription status:', cachedStatus)
-      
-      // If subscription is not active, redirect to subscription page
-      if (cachedStatus !== 'active') {
-        return NextResponse.redirect(new URL('/dashboard/subscription', request.url))
-      }
-      
-      // Otherwise, continue to the protected route
-      return NextResponse.next()
-    }
-    
-    // No cache or cache expired, make a server call to check subscription status
+    // Make a server call to check subscription status directly
+    // This ensures we always get the latest status
     const subscriptionCheckResponse = await fetch(
-      `${request.nextUrl.origin}/api/check-subscription`, 
+      `${request.nextUrl.origin}/api/subscription-status`,
       {
         headers: {
           Cookie: `auth-token=${authToken}`
-        }
+        },
+        cache: 'no-store'
       }
-    )
+    );
 
     if (!subscriptionCheckResponse.ok) {
-      // If there's an error checking subscription, allow access but log error
-      console.error('Error checking subscription status in middleware')
-      return NextResponse.next()
+      console.error('Error checking subscription status in middleware');
+      // On error, allow access to prevent false lockouts but log the error
+      return NextResponse.next();
     }
 
-    const { isActive, subscriptionStatus } = await subscriptionCheckResponse.json()
+    const status = await subscriptionCheckResponse.json();
     
-    // Set up response for adding cookies
-    const response = isActive
-      ? NextResponse.next()
-      : NextResponse.redirect(new URL('/dashboard/subscription', request.url))
-      
-    // Calculate expiry time (current time + cache duration in seconds)
-    const expiryTime = Math.floor(Date.now() / 1000) + SUBSCRIPTION_CACHE_DURATION
+    // If not active (expired trial or cancelled subscription)
+    if (!status.isActive) {
+      // Redirect to subscription page
+      return NextResponse.redirect(new URL('/dashboard/subscription', request.url));
+    }
     
-    // Cache the subscription status
-    response.cookies.set({
-      name: SUBSCRIPTION_STATUS_COOKIE,
-      value: isActive ? 'active' : 'expired',
-      path: '/',
-      maxAge: SUBSCRIPTION_CACHE_DURATION,
-      sameSite: 'lax'
-    })
-    
-    // Store the expiry timestamp
-    response.cookies.set({
-      name: SUBSCRIPTION_EXPIRY_COOKIE,
-      value: expiryTime.toString(),
-      path: '/',
-      maxAge: SUBSCRIPTION_CACHE_DURATION,
-      sameSite: 'lax'
-    })
-    
-    console.log(`Cached subscription status: ${isActive ? 'active' : 'expired'} until ${new Date(expiryTime * 1000).toLocaleString()}`)
-    
-    return response
+    // Status is active, allow access
+    return NextResponse.next();
   } catch (error) {
-    console.error('Middleware error:', error)
-    // On error, allow access but log error
-    return NextResponse.next()
+    console.error('Middleware error for dashboard routes:', error);
+    // On error, allow access but log the error
+    return NextResponse.next();
   }
 }
 
-// Helper function to check subscription status and redirect if needed
-async function checkSubscriptionAndRedirect(supabase: any, userId: string, request: NextRequest) {
-  // Check the subscription status of the user
-  const { data: user, error: userError } = await supabase
-    .from("users")
-    .select("subscription_status, trial_start_time, trial_duration_minutes")
-    .eq("id", userId)
-    .single()
-
-  if (userError || !user) {
-    // If user not found, let the page handle the 404
-    return NextResponse.next()
+/**
+ * Handle subscription checks for share links
+ */
+async function handleShareLinks(request: NextRequest) {
+  // Skip the /share/expired route to avoid redirect loops
+  if (request.nextUrl.pathname === '/share/expired') {
+    return NextResponse.next();
   }
-
-  // Check if subscription is active or trial is valid
-  if (user.subscription_status === 'active') {
-    // Paid subscription, allow access
-    return NextResponse.next()
-  } else if (user.subscription_status === 'trial') {
-    // Check if trial is still valid
-    const trialStartTime = new Date(user.trial_start_time);
-    const trialDurationMs = user.trial_duration_minutes * 60 * 1000;
-    const trialEndTime = new Date(trialStartTime.getTime() + trialDurationMs);
-    const currentTime = new Date();
+  
+  try {
+    // For share links we need to query the database directly
+    // as the share user might not be the logged-in user
     
-    if (currentTime < trialEndTime) {
-      // Trial still active, allow access
-      return NextResponse.next()
+    // Extract the relevant ID and determine path type
+    let userId: string | null = null;
+    
+    if (request.nextUrl.pathname.startsWith('/share/') && 
+        !request.nextUrl.pathname.startsWith('/share/property/') && 
+        !request.nextUrl.pathname.startsWith('/share/expired/') && 
+        !request.nextUrl.pathname.startsWith('/share/components/') && 
+        !request.nextUrl.pathname.startsWith('/share/v2/property/') && 
+        !request.nextUrl.pathname.startsWith('/share/v2/components/')) {
+      
+      // Collection share
+      const shareId = request.nextUrl.pathname.split('/')[2];
+      if (!shareId) return NextResponse.next();
+      
+      const supabase = getSupabaseForMiddleware();
+      const { data: collection, error: collectionError } = await supabase
+        .from("collections")
+        .select("user_id")
+        .eq("share_id", shareId)
+        .single();
+      
+      if (collectionError || !collection) return NextResponse.next();
+      
+      userId = collection.user_id;
+    } 
+    else if (request.nextUrl.pathname.startsWith('/share/property/') || 
+             request.nextUrl.pathname.startsWith('/share/v2/property/')) {
+      
+      // Property share
+      const isV2 = request.nextUrl.pathname.startsWith('/share/v2/property/');
+      const propertyId = request.nextUrl.pathname.split('/')[isV2 ? 4 : 3];
+      if (!propertyId) return NextResponse.next();
+      
+      const supabase = getSupabaseForMiddleware();
+      
+      // Find the property and its collection
+      const { data: property, error: propertyError } = await supabase
+        .from("properties")
+        .select("collection_id")
+        .eq("id", propertyId)
+        .single();
+      
+      if (propertyError || !property) return NextResponse.next();
+      
+      // Find the collection and its owner
+      const { data: collection, error: collectionError } = await supabase
+        .from("collections")
+        .select("user_id")
+        .eq("id", property.collection_id)
+        .single();
+      
+      if (collectionError || !collection) return NextResponse.next();
+      
+      userId = collection.user_id;
     }
-  }
-
-  // If subscription is expired or cancelled, redirect to expired page
-  return NextResponse.redirect(new URL('/share/expired', request.url))
-}
-
-// Helper function to get the user ID of a property's collection owner
-async function getPropertyOwnerUserId(supabase: any, propertyId: string): Promise<string | null> {
-  // Find property and its collection
-  const { data: property, error: propertyError } = await supabase
-    .from("properties")
-    .select("collection_id")
-    .eq("id", propertyId)
-    .single()
     
-  if (propertyError || !property) {
-    return null;
-  }
-  
-  // Find collection and user
-  const { data: collection, error: collectionError } = await supabase
-    .from("collections")
-    .select("user_id")
-    .eq("id", property.collection_id)
-    .single()
+    // If no userId was found, allow access
+    if (!userId) return NextResponse.next();
     
-  if (collectionError || !collection) {
-    return null;
+    // Check subscription status directly in the database
+    const supabase = getSupabaseForMiddleware();
+    const { data: user, error: userError } = await supabase
+      .from("users")
+      .select("subscription_status, trial_start_time, trial_duration_minutes")
+      .eq("id", userId)
+      .single();
+    
+    if (userError || !user) return NextResponse.next();
+    
+    // Check if subscription is active
+    if (user.subscription_status === 'active') {
+      // Paid subscription, allow access
+      return NextResponse.next();
+    } 
+    else if (user.subscription_status === 'trial') {
+      // Check if trial is still valid
+      const trialStartTime = new Date(user.trial_start_time);
+      const trialDurationMs = user.trial_duration_minutes * 60 * 1000;
+      const trialEndTime = new Date(trialStartTime.getTime() + trialDurationMs);
+      const currentTime = new Date();
+      
+      if (currentTime < trialEndTime) {
+        // Trial is still active, allow access
+        return NextResponse.next();
+      }
+      
+      // Trial has expired but status not updated yet, update it
+      await supabase
+        .from("users")
+        .update({ subscription_status: 'expired' })
+        .eq("id", userId);
+    }
+    
+    // If we get here, subscription is not active
+    // Redirect to expired page
+    return NextResponse.redirect(new URL('/share/expired', request.url));
+  } catch (error) {
+    console.error('Share middleware error:', error);
+    // On error, allow access but log the error
+    return NextResponse.next();
   }
-  
-  return collection.user_id;
 }
 
 export const config = {

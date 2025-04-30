@@ -1,25 +1,24 @@
-import { getSession, requireAuth } from "@/lib/auth"
+import { requireAuth } from "@/lib/auth"
 import { NavBar } from "@/components/nav-bar"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Clock, CreditCard, CheckCircle, AlertTriangle } from "lucide-react"
-import { formatRemainingTrialTime } from "@/lib/subscription"
+import { SubscriptionService } from "@/lib/subscription-service"
 
 export default async function SubscriptionPage() {
   // Get user session with auth check
   const session = await requireAuth()
   
-  // Default values
-  let subscriptionStatus = session.subscriptionStatus || 'unknown';
-  let trialInfo = session.trialInfo || { isActive: false, subscriptionStatus: 'unknown' };
+  // Get subscription status directly from the service
+  const subscriptionStatus = await SubscriptionService.getSubscriptionStatus(session.id);
   
   // Format trial end time
   let trialEndDate = "Недоступно";
   let remainingTime = "Закончился";
   
-  if (trialInfo.trialEndTime) {
-    const date = new Date(trialInfo.trialEndTime);
+  if (subscriptionStatus.trialEndTime) {
+    const date = new Date(subscriptionStatus.trialEndTime);
     trialEndDate = new Intl.DateTimeFormat('ru-RU', {
       day: 'numeric',
       month: 'long',
@@ -28,8 +27,8 @@ export default async function SubscriptionPage() {
       minute: '2-digit'
     }).format(date);
     
-    if (trialInfo.remainingMinutes && trialInfo.remainingMinutes > 0) {
-      remainingTime = formatRemainingTrialTime(trialInfo.remainingMinutes);
+    if (subscriptionStatus.remainingMinutes && subscriptionStatus.remainingMinutes > 0) {
+      remainingTime = SubscriptionService.formatRemainingTime(subscriptionStatus.remainingMinutes);
     }
   }
   
@@ -55,17 +54,17 @@ export default async function SubscriptionPage() {
                 {/* Status Badge */}
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium text-luxury-black/80 dark:text-white/80 theme-transition">Текущий статус:</span>
-                  {subscriptionStatus === 'trial' && (
+                  {subscriptionStatus.status === 'trial' && (
                     <span className="bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-500 text-sm py-1 px-3 rounded-full flex items-center gap-1 theme-transition">
                       <Clock className="h-3 w-3" /> Пробный период
                     </span>
                   )}
-                  {subscriptionStatus === 'expired' && (
+                  {subscriptionStatus.status === 'expired' && (
                     <span className="bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-500 text-sm py-1 px-3 rounded-full flex items-center gap-1 theme-transition">
                       <AlertTriangle className="h-3 w-3" /> Пробный период истек
                     </span>
                   )}
-                  {subscriptionStatus === 'active' && (
+                  {subscriptionStatus.status === 'active' && (
                     <span className="bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-500 text-sm py-1 px-3 rounded-full flex items-center gap-1 theme-transition">
                       <CheckCircle className="h-3 w-3" /> Активная подписка
                     </span>
@@ -73,13 +72,13 @@ export default async function SubscriptionPage() {
                 </div>
                 
                 {/* Trial Period Info */}
-                {(subscriptionStatus === 'trial' || subscriptionStatus === 'expired') && (
+                {(subscriptionStatus.status === 'trial' || subscriptionStatus.status === 'expired') && (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                       <span className="text-sm font-medium text-luxury-black/80 dark:text-white/80 theme-transition">Дата окончания пробного периода:</span>
                       <span className="text-sm text-luxury-black dark:text-white theme-transition">{trialEndDate}</span>
                     </div>
-                    {subscriptionStatus === 'trial' && (
+                    {subscriptionStatus.status === 'trial' && (
                       <div className="grid grid-cols-2 gap-2">
                         <span className="text-sm font-medium text-luxury-black/80 dark:text-white/80 theme-transition">Осталось времени:</span>
                         <span className="text-sm text-luxury-black dark:text-white theme-transition">{remainingTime}</span>
@@ -89,7 +88,7 @@ export default async function SubscriptionPage() {
                 )}
                 
                 {/* Paid Subscription Info (placeholder) */}
-                {subscriptionStatus === 'active' && (
+                {subscriptionStatus.status === 'active' && (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
                       <span className="text-sm font-medium text-luxury-black/80 dark:text-white/80 theme-transition">Тип подписки:</span>
@@ -105,15 +104,15 @@ export default async function SubscriptionPage() {
             </CardContent>
             <CardFooter className="border-t border-gray-100 dark:border-dark-slate pt-6 theme-transition">
               <div className="w-full">
-                {subscriptionStatus !== 'active' && (
-                  <Alert variant={subscriptionStatus === 'expired' ? 'destructive' : 'warning'} className="mb-6 rounded-sm">
+                {subscriptionStatus.status !== 'active' && (
+                  <Alert variant={subscriptionStatus.status === 'expired' ? 'destructive' : 'warning'} className="mb-6 rounded-sm">
                     <AlertTitle>
-                      {subscriptionStatus === 'expired' 
+                      {subscriptionStatus.status === 'expired' 
                         ? 'Доступ ограничен!' 
                         : 'Оформите подписку сейчас'}
                     </AlertTitle>
                     <AlertDescription>
-                      {subscriptionStatus === 'expired'
+                      {subscriptionStatus.status === 'expired'
                         ? 'После истечения пробного периода доступ к функциям платформы ограничен. Оформите подписку для восстановления доступа.'
                         : 'Чтобы сохранить доступ ко всем функциям платформы после окончания пробного периода, оформите подписку.'}
                     </AlertDescription>
@@ -125,7 +124,7 @@ export default async function SubscriptionPage() {
                   disabled
                 >
                   <CreditCard className="mr-2 h-4 w-4" />
-                  {subscriptionStatus === 'active'
+                  {subscriptionStatus.status === 'active'
                     ? 'Управление платежами'
                     : 'Оформить подписку'}
                 </Button>
