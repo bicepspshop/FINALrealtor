@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { SubscriptionStatusChecker } from '@/components/subscription-status-checker';
+import { SubscriptionStatusChecker, SubscriptionStatusProvider } from '@/components/subscription-status-checker';
 import { requireAuth } from '@/lib/auth';
 import { SubscriptionService } from '@/lib/subscription-service';
 import { Suspense } from 'react';
@@ -26,18 +26,15 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     console.error('Error getting subscription status for layout:', error);
   }
   
-  // We need to enhance the children with subscription status data
-  // For this, we'll use context or prop drilling based on the app's structure
-  
   return (
-    <>
-      {/* Real-time subscription status checker */}
-      <Suspense fallback={null}>
+    <Suspense fallback={null}>
+      <SubscriptionStatusProvider>
+        {/* Legacy subscription checker for backward compatibility */}
         <SubscriptionStatusChecker />
-      </Suspense>
-      
-      {/* Page content */}
-      {children}
-    </>
+        
+        {/* Page content */}
+        {children}
+      </SubscriptionStatusProvider>
+    </Suspense>
   );
 } 
