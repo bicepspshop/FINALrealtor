@@ -11,6 +11,10 @@ import { getServerClient, executeWithRetry } from "@/lib/supabase"
 import ClientsContent from "./components/clients-content"
 import { ClientAvatar } from "./components/client-avatar"
 
+// Disable caching for this route
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Define client data type
 export interface ClientData {
   id: string;

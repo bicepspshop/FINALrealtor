@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form"
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
+import { clearSupabaseCache } from "@/lib/supabase"
 
 // Form schema with validation
 const formSchema = z.object({
@@ -102,6 +103,9 @@ export function NewClientForm({ userId }: { userId: string }) {
         title: "Клиент создан",
         description: "Новый клиент успешно добавлен",
       })
+      
+      // Clear cache for clients dashboard to ensure updated list
+      clearSupabaseCache('/api/dashboard/clients');
       
       // Navigate to the client page
       router.push(`/dashboard/clients/${client.id}`)
