@@ -107,9 +107,8 @@ export function NewClientForm({ userId }: { userId: string }) {
         description: "Новый клиент успешно добавлен",
       })
       
-      // Navigate to the client page and force refresh
-      router.refresh();
-      router.push(`/dashboard/clients/${client.id}`)
+      // Force a full page reload instead of client-side navigation
+      window.location.href = `/dashboard/clients/${client.id}`;
       
     } catch (error) {
       console.error("Error creating client:", error)
