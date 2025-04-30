@@ -8,7 +8,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./client-auth-provider"
 import { WifiOff, User, ChevronDown, LogOut, Settings, Home, Users } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme/theme-toggle"
-import { useEffect, useCallback } from "react"
+import { useEffect, useCallback, useState } from "react"
+import { useSubscription } from "./subscription-status-checker"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,9 +29,11 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
   const pathname = usePathname()
   const { toast } = useToast()
   const { logout } = useAuth()
+  const subscription = useSubscription()
   
   const isDashboardActive = pathname === "/dashboard" || pathname.startsWith("/dashboard/collections")
   const isClientsActive = pathname.startsWith("/dashboard/clients")
+  const isSubscriptionPage = pathname.startsWith('/dashboard/subscription')
 
   // Add a negative offset when on the clients tab
   const containerStyles = isClientsActive 
@@ -43,6 +46,15 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
       title: "Выход выполнен",
       description: "Вы успешно вышли из системы.",
     })
+  }
+
+  // Handle navigation with subscription check
+  const handleNavigation = (e: React.MouseEvent, path: string) => {
+    if (!subscription.isActive && !isSubscriptionPage && !path.startsWith('/dashboard/subscription')) {
+      e.preventDefault();
+      router.push('/dashboard/subscription');
+      return;
+    }
   }
 
   // Prefetch routes on component mount and when pathname changes
@@ -112,8 +124,9 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
               isDashboardActive 
                 ? "text-luxury-gold dark:text-luxury-royalBlue" 
                 : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
-            }`}
+            } ${!subscription.isActive && isSubscriptionPage ? "pointer-events-none opacity-60" : ""}`}
             onMouseEnter={handleDashboardHover}
+            onClick={(e) => handleNavigation(e, "/dashboard")}
           >
             <Home size={18} />
             Подборки
@@ -125,8 +138,9 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
               isClientsActive 
                 ? "text-luxury-gold dark:text-luxury-royalBlue" 
                 : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
-            }`}
+            } ${!subscription.isActive && isSubscriptionPage ? "pointer-events-none opacity-60" : ""}`}
             onMouseEnter={handleClientsHover}
+            onClick={(e) => handleNavigation(e, "/dashboard/clients")}
           >
             <Users size={18} />
             Клиенты
