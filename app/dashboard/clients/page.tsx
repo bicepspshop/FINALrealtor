@@ -11,7 +11,7 @@ import { getServerClient, executeWithRetry } from "@/lib/supabase"
 import ClientsContent from "./components/clients-content"
 import { ClientAvatar } from "./components/client-avatar"
 
-// Disable caching for this route
+// Disable caching for this page
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
