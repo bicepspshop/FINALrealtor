@@ -2,7 +2,6 @@
 
 import { useState, memo } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
@@ -18,6 +17,7 @@ import { useToast } from "@/hooks/use-toast"
 import { deleteProperty } from "./actions"
 import { EditPropertyForm } from "./edit-property-form"
 import { PropertyDetails } from "./property-details"
+import { OptimizedImage } from "@/components/ui/optimized-image"
 
 interface PropertyImage {
   id: string
@@ -153,15 +153,14 @@ export const PropertyCard = memo(function PropertyCard({ property, collectionId,
         <CardContent className="pb-4 pt-4 px-4 dark:bg-dark-graphite theme-transition">
           {property.property_images && property.property_images.length > 0 ? (
             <div className="aspect-video relative mb-4 rounded-sm overflow-hidden">
-              <Image
+              <OptimizedImage
                 src={property.property_images[0].image_url || "/placeholder.svg"}
                 alt={property.address}
                 width={600}
                 height={338}
-                quality={80}
-                loading="lazy"
+                usePlaceholder={true}
+                fadeIn={true}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                decoding="async"
                 className="object-cover w-full h-full hover:scale-105 transition-all duration-700"
               />
             </div>

@@ -7,6 +7,18 @@ const RETRY_DELAY = 1000
 // Таймаут для запроса
 const REQUEST_TIMEOUT = 5000
 
+// Cache implementation for query results
+type CacheEntry = {
+  data: any;
+  timestamp: number;
+  expiresIn: number;
+}
+
+const queryCache = new Map<string, CacheEntry>();
+
+// Cache duration in milliseconds (default: 5 minutes)
+const DEFAULT_CACHE_DURATION = 5 * 60 * 1000;
+
 // Create a single supabase client for the browser
 const createBrowserClient = () => {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string
@@ -23,6 +35,9 @@ const createBrowserClient = () => {
       autoRefreshToken: true,
       flowType: 'pkce',
     },
+    global: {
+      fetch: cachingFetch
+    }
   })
 }
 
@@ -42,11 +57,86 @@ const createServerClient = () => {
       persistSession: false,
       autoRefreshToken: false,
     },
+    global: {
+      fetch: cachingFetch
+    }
   })
 }
 
+// Extended fetch function with caching for GET requests
+async function cachingFetch(url: RequestInfo | URL, init?: RequestInit): Promise<Response> {
+  // Only cache GET requests
+  if (!init || init.method === 'GET' || !init.method) {
+    const cacheKey = generateCacheKey(url, init);
+    
+    // Check cache first
+    const cachedEntry = queryCache.get(cacheKey);
+    if (cachedEntry && !isCacheExpired(cachedEntry)) {
+      // Return cached response
+      return new Response(JSON.stringify(cachedEntry.data), {
+        headers: { 'Content-Type': 'application/json' },
+        status: 200
+      });
+    }
+    
+    // If not in cache or expired, fetch from network
+    const response = await fetch(url, init);
+    
+    // Only cache successful responses
+    if (response.ok) {
+      try {
+        // Clone the response to avoid consuming it
+        const clonedResponse = response.clone();
+        const data = await clonedResponse.json();
+        
+        // Store in cache
+        queryCache.set(cacheKey, {
+          data,
+          timestamp: Date.now(),
+          expiresIn: DEFAULT_CACHE_DURATION
+        });
+      } catch (error) {
+        // If parsing fails, just return the original response
+        console.warn('Failed to cache Supabase response:', error);
+      }
+    }
+    
+    return response;
+  }
+  
+  // For non-GET requests, just pass through without caching
+  return fetch(url, init);
+}
+
+// Helper to generate a unique cache key
+function generateCacheKey(url: RequestInfo | URL, init?: RequestInit): string {
+  const urlStr = typeof url === 'string' ? url : url.toString();
+  const headers = init?.headers ? JSON.stringify(init.headers) : '';
+  return `${urlStr}:${headers}`;
+}
+
+// Check if cache entry is expired
+function isCacheExpired(entry: CacheEntry): boolean {
+  return Date.now() > (entry.timestamp + entry.expiresIn);
+}
+
+// Clear specific cache entries or all entries
+export function clearSupabaseCache(urlPattern?: string): void {
+  if (!urlPattern) {
+    queryCache.clear();
+    return;
+  }
+  
+  // Clear specific entries matching the URL pattern
+  queryCache.forEach((_, key) => {
+    if (key.includes(urlPattern)) {
+      queryCache.delete(key);
+    }
+  });
+}
+
 // Client singleton
-let browserClient: ReturnType<typeof createClient> | null = null
+let browserClient: any = null
 
 // Get the browser client (singleton pattern)
 export const getBrowserClient = () => {

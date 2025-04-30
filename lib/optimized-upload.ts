@@ -2,7 +2,11 @@
  * Simplified file upload utility for Supabase storage
  */
 import { getBrowserClient } from "@/lib/supabase"
-import { generateUniqueFilename, isValidImageFile } from "@/lib/image-utils"
+import { 
+  generateUniqueFilename, 
+  isValidImageFile, 
+  compressImage 
+} from "@/lib/image-utils"
 
 /**
  * Uploads a file to Supabase storage with optimized settings
@@ -10,7 +14,12 @@ import { generateUniqueFilename, isValidImageFile } from "@/lib/image-utils"
 export async function uploadFile(
   file: File,
   prefix?: string,
-  bucketName: string = "property-images"
+  bucketName: string = "property-images",
+  options = { 
+    compress: true, 
+    maxWidth: 1200, 
+    quality: 0.8 
+  }
 ): Promise<string | null> {
   // Validate file type and size
   if (!isValidImageFile(file) || file.size > 20 * 1024 * 1024) {
@@ -22,14 +31,32 @@ export async function uploadFile(
     const supabase = getBrowserClient()
     if (!supabase) return null
     
+    // Compress image if option is enabled and it's a compatible format
+    let fileToUpload = file;
+    if (options.compress && /^image\/(jpeg|png|webp)/.test(file.type)) {
+      try {
+        fileToUpload = await compressImage(
+          file, 
+          options.maxWidth, 
+          options.quality, 
+          'webp'
+        );
+        console.log(`Image compressed: ${file.size} → ${fileToUpload.size} bytes`);
+      } catch (compressionError) {
+        // If compression fails, fall back to original file
+        console.warn("Image compression failed, using original:", compressionError);
+        fileToUpload = file;
+      }
+    }
+    
     // Generate filename and upload
-    const fileName = generateUniqueFilename(file, prefix)
+    const fileName = generateUniqueFilename(fileToUpload, prefix)
     
     const { error } = await supabase.storage
       .from(bucketName)
-      .upload(fileName, file, {
+      .upload(fileName, fileToUpload, {
         cacheControl: "public, max-age=31536000, immutable",
-        contentType: file.type,
+        contentType: fileToUpload.type,
         upsert: false
       })
     

@@ -8,21 +8,14 @@ interface ContactInfoProps {
 }
 
 export function ClientContactInfo({ phone, email }: ContactInfoProps) {
-  const handlePhoneClick = (e: React.MouseEvent) => {
+  const handleContactClick = (e: React.MouseEvent, type: 'phone' | 'email', value: string) => {
     e.preventDefault()
     e.stopPropagation()
-    if (phone) {
-      window.open(`tel:${phone}`, '_blank')
-    }
+    window.open(`${type === 'phone' ? 'tel:' : 'mailto:'}${value}`, '_blank')
   }
 
-  const handleEmailClick = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (email) {
-      window.open(`mailto:${email}`, '_blank')
-    }
-  }
+  // No need to render an empty fragment if there are no contact details
+  if (!phone && !email) return null;
 
   return (
     <>
@@ -30,7 +23,7 @@ export function ClientContactInfo({ phone, email }: ContactInfoProps) {
         <div className="flex items-center gap-2">
           <Phone size={14} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition" />
           <span 
-            onClick={handlePhoneClick}
+            onClick={(e) => handleContactClick(e, 'phone', phone)}
             className="hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors truncate max-w-[180px] cursor-pointer"
           >
             {phone}
@@ -42,7 +35,7 @@ export function ClientContactInfo({ phone, email }: ContactInfoProps) {
         <div className="flex items-center gap-2">
           <Mail size={14} className="text-gray-400 dark:text-gray-500 shrink-0 theme-transition" />
           <span 
-            onClick={handleEmailClick}
+            onClick={(e) => handleContactClick(e, 'email', email)}
             className="hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors truncate max-w-[180px] cursor-pointer"
           >
             {email}

@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { getServerClient } from "@/lib/supabase"
 import { getSession } from "@/lib/auth"
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    // Check authentication
     const session = await getSession()
+
     if (!session) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -13,59 +13,95 @@ export async function GET(request: Request) {
       )
     }
     
-    const url = new URL(request.url)
-    const collectionId = url.searchParams.get('collection_id')
-    const limit = url.searchParams.get('limit') ? parseInt(url.searchParams.get('limit') as string) : undefined
+    // Parse pagination parameters from search params
+    const searchParams = request.nextUrl.searchParams;
+    const collectionId = searchParams.get('collectionId');
+    const page = parseInt(searchParams.get('page') || '1', 10);
+    const pageSize = parseInt(searchParams.get('pageSize') || '20', 10);
     
-    // Create authenticated server client
+    // Calculate range for pagination
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize - 1;
+
+    // Specific fields to fetch for better performance
+    const propertyFields = [
+      'id', 
+      'residential_complex', 
+      'property_type', 
+      'address',
+      'rooms',
+      'area',
+      'price',
+      'description',
+      'living_area',
+      'floor',
+      'total_floors',
+      'balcony',
+      'year_built',
+      'renovation_type',
+      'bathroom_count',
+      'has_parking',
+      'property_status'
+    ].join(',');
+    
+    // Minimal image fields needed
+    const imageFields = 'id,image_url';
+
     const supabase = getServerClient()
     
-    // First get collections owned by this user
-    const { data: userCollections, error: collectionsError } = await supabase
-      .from("collections")
-      .select("id")
-      .eq("user_id", session.id)
-    
-    if (collectionsError) {
-      console.error("API error fetching user collections:", collectionsError)
-      return NextResponse.json(
-        { error: collectionsError.message || "Failed to fetch collections" },
-        { status: 500 }
-      )
-    }
-    
-    // Extract collection IDs
-    const userCollectionIds = userCollections.map(collection => collection.id)
-    
+    // If Collection ID is provided, filter by it
     let query = supabase
       .from("properties")
-      .select("id, property_type, address, rooms, area, price, property_status, collection_id")
-      .in("collection_id", userCollectionIds) // Only return properties from collections owned by the current user
-      .order("created_at", { ascending: false })
+      .select(`${propertyFields}, property_images(${imageFields})`)
+      .order('created_at', { ascending: false })
     
-    // Filter by specific collection if provided
+    // Add collection filter if specified 
     if (collectionId) {
-      query = query.eq("collection_id", collectionId)
+      query = query.eq('collection_id', collectionId);
     }
     
-    // Apply limit if provided
-    if (limit) {
-      query = query.limit(limit)
+    // Add pagination
+    query = query.range(start, end);
+    
+    // Get total count first if required
+    const { count, error: countError } = await supabase
+      .from("properties") 
+      .select('*', { count: 'exact', head: true })
+      .eq('collection_id', collectionId || '');
+      
+    if (countError) {
+      console.error("Error getting count:", countError);
     }
     
-    const { data: properties, error } = await query
+    // Execute the main query
+    const { data, error } = await query;
     
     if (error) {
-      console.error("API error fetching properties:", error)
+      console.error("Error fetching properties:", error.message)
       return NextResponse.json(
-        { error: error.message || "Failed to fetch properties" },
+        { error: "Failed to fetch properties" },
         { status: 500 }
       )
     }
     
-    return NextResponse.json(properties)
+    // Create response with pagination info
+    const response = NextResponse.json({
+      properties: data || [],
+      pagination: {
+        page,
+        pageSize,
+        totalCount: count || 0,
+        totalPages: count ? Math.ceil(count / pageSize) : 0
+      }
+    });
+    
+    // Set cache control headers based on content
+    // Properties don't change very frequently - safe to cache for 2 minutes
+    response.headers.set('Cache-Control', 'public, max-age=120');
+    
+    return response;
   } catch (error) {
-    console.error("Unexpected API error:", error)
+    console.error("API error:", error)
     return NextResponse.json(
       { error: "An unexpected error occurred" },
       { status: 500 }
