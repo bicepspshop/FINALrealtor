@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth"
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { clientId: string, noteId: string } }
+  { params }: { params: { id: string, noteId: string } }
 ) {
   try {
     // Get authenticated user
@@ -13,7 +13,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const clientId = params.clientId;
+    const clientId = params.id;
     const noteId = params.noteId;
 
     // Verify client belongs to this user first
