@@ -10,6 +10,8 @@ import { YandexMap } from "@/components/yandex-map"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
+import { FallbackMap } from "@/components/fallback-map"
+import { TextFolding } from "@/components/ui/text-folding"
 
 interface PropertyImage {
   id: string
@@ -327,7 +329,11 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
 
               <ElegantTabsContent value="description">
                 {property.description ? (
-                  <p className="text-gray-700 whitespace-pre-line dark:text-white/90 theme-transition">{property.description}</p>
+                  <TextFolding 
+                    text={property.description} 
+                    className="text-gray-700 dark:text-white/90 theme-transition"
+                    title="Описание объекта"
+                  />
                 ) : (
                   <p className="text-gray-500 italic dark:text-white/60 theme-transition">Описание отсутствует</p>
                 )}
@@ -336,7 +342,11 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
               {property.agent_comment && (
                 <ElegantTabsContent value="agent_comment">
                   <div className="p-4 bg-amber-50 dark:bg-blue-900/20 rounded-md border border-amber-200 dark:border-blue-800 theme-transition">
-                    <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line theme-transition">{property.agent_comment}</p>
+                    <TextFolding 
+                      text={property.agent_comment} 
+                      className="text-gray-700 dark:text-gray-300 theme-transition"
+                      title="Комментарий риелтора"
+                    />
                     <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 italic theme-transition">Эта информация видна только вам и не показывается клиентам</p>
                   </div>
                 </ElegantTabsContent>
@@ -346,7 +356,12 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
         </div>
 
         <DialogFooter>
-          <Button onClick={onClose}>Закрыть</Button>
+          <Button 
+            onClick={onClose}
+            className="bg-luxury-gold dark:bg-blue-400 hover:bg-luxury-gold/90 dark:hover:bg-blue-500 text-luxury-black dark:text-white theme-transition"
+          >
+            Закрыть
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

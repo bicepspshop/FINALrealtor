@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
+import { TextFolding } from "@/components/ui/text-folding"
 
 // Define the different stages
 const DEAL_STAGES = {
@@ -132,9 +133,14 @@ export function DealStageHistory({
                   </div>
                   
                   {stage.notes && (
-                    <p className="text-sm text-luxury-black/80 dark:text-white/80 bg-gray-50 dark:bg-dark-slate/50 p-3 rounded-sm mt-2 theme-transition">
-                      {stage.notes}
-                    </p>
+                    <div className="mt-2">
+                      <TextFolding 
+                        text={stage.notes}
+                        maxLength={80}
+                        className="text-sm text-gray-700 dark:text-gray-300 theme-transition" 
+                        title="Заметки к этапу"
+                      />
+                    </div>
                   )}
                 </div>
               )
@@ -198,9 +204,14 @@ export function DealStageHistory({
                   </div>
                   
                   {stage.notes && (
-                    <p className="text-sm text-luxury-black/80 dark:text-white/80 bg-gray-50 dark:bg-dark-slate/50 p-3 rounded-sm mt-2 theme-transition">
-                      {stage.notes}
-                    </p>
+                    <div className="mt-2">
+                      <TextFolding 
+                        text={stage.notes}
+                        maxLength={80}
+                        className="text-sm text-gray-600 dark:text-gray-300 theme-transition" 
+                        title="Заметки к этапу"
+                      />
+                    </div>
                   )}
                 </div>
               )

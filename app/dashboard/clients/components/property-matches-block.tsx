@@ -15,6 +15,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Edit, Plus, Home, Building2, Trash2, Calendar, MapPin, ListFilter, ExternalLink, Loader2 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { TextFolding } from "@/components/ui/text-folding"
 
 // Form schema for adding/editing property match
 const propertyMatchSchema = z.object({
@@ -497,9 +499,14 @@ export function PropertyMatchesBlock({ clientId, propertyMatches = [] }: Propert
                 </div>
                 
                 {match.notes && (
-                  <p className="mt-2 text-sm text-luxury-black/70 dark:text-white/70 theme-transition">
-                    {match.notes}
-                  </p>
+                  <div className="mt-2">
+                    <TextFolding 
+                      text={match.notes}
+                      maxLength={80}
+                      className="text-sm text-gray-700 dark:text-gray-300 theme-transition" 
+                      title="Заметки к подбору"
+                    />
+                  </div>
                 )}
                 
                 <div className="mt-3 flex justify-end">

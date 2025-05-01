@@ -580,7 +580,13 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
               </div>
 
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onClose} 
+                  disabled={isLoading}
+                  className="border-luxury-black/40 dark:border-white/60 text-luxury-black dark:text-white hover:bg-luxury-black/10 dark:hover:bg-white/10 hover:border-luxury-black/70 dark:hover:border-white/80 theme-transition"
+                >
                   Отмена
                 </Button>
                 <Button type="submit" disabled={isLoading}>

@@ -9,6 +9,7 @@ import { ElegantTabs, ElegantTabsList, ElegantTabsTrigger, ElegantTabsContent } 
 import { ShareThemeProvider } from "../../components/share-theme-provider"
 import { PropertyHero } from "./property-hero"
 import { SubscriptionChecker } from "../../components/subscription-checker"
+import { TextFolding } from "@/components/ui/text-folding"
 
 interface PropertyPageProps {
   params: {
@@ -141,7 +142,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                     <ElegantTabsContent value="description">
                       <div className="text-[#2C2C2C]/80 dark:text-white/80 leading-relaxed theme-transition">
                         {property.description ? (
-                          <p>{property.description}</p>
+                          <TextFolding 
+                            text={property.description}
+                            className="text-[#2C2C2C]/80 dark:text-white/80 theme-transition"
+                            title="Описание объекта"
+                          />
                         ) : (
                           <p>Описание объекта недвижимости не представлено агентом.</p>
                         )}
@@ -151,7 +156,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                     {property.agent_comment && (
                       <ElegantTabsContent value="agent_comment">
                         <div className="text-[#2C2C2C]/80 dark:text-white/80 leading-relaxed theme-transition">
-                          <p>{property.agent_comment}</p>
+                          <TextFolding 
+                            text={property.agent_comment}
+                            className="text-[#2C2C2C]/80 dark:text-white/80 theme-transition"
+                            title="Комментарий риелтора"
+                          />
                         </div>
                       </ElegantTabsContent>
                     )}

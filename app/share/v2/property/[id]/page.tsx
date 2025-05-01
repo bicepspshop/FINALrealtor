@@ -11,6 +11,7 @@ import { LuxuryEffects } from "../../components/luxury-effects"
 import { LuxurySeal, GoldenDust, OrnateFrame, ShimmeringText, LuxuryWatermark } from "../../components/luxury-elements"
 import "@/styles/luxury-experience.css"
 import { SubscriptionChecker } from "../../../components/subscription-checker"
+import { TextFolding } from "@/components/ui/text-folding"
 
 interface PropertyPageProps {
   params: {
@@ -249,9 +250,13 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
                 
                 <div className="text-white/90 leading-relaxed max-w-3xl luxury-description-text">
                   {property.description ? (
-                    <p>{property.description}</p>
+                    <TextFolding 
+                      text={property.description}
+                      className="text-white/90 theme-transition"
+                      title="Описание объекта"
+                    />
                   ) : (
-                    <p>Описание объекта недвижимости не представлено агентом.</p>
+                    <p className="text-white/70 italic">Описание объекта недвижимости не представлено агентом.</p>
                   )}
                 </div>
                 </div>
