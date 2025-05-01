@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { PlusCircle, MessageSquare, CalendarClock, Clock, Check, X, Phone, Mail, Calendar, CalendarIcon } from "lucide-react"
+import { PlusCircle, MessageSquare, CalendarClock, Clock, Check, X, Phone, Mail, Calendar, CalendarIcon, Trash } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar as CalendarComponent } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { TextFolding } from "@/components/ui/text-folding"
 
 type Note = {
   id?: string
@@ -101,6 +102,37 @@ export function NotesTasksBlock({
     }
   }
 
+  // Delete note function
+  const deleteNote = async (noteId: string) => {
+    if (!noteId) return;
+    
+    if (!confirm("Вы уверены, что хотите удалить эту заметку?")) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/clients/${clientId}/notes/${noteId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Не удалось удалить заметку");
+      }
+
+      toast.success("Заметка удалена");
+      
+      // Refresh the page to show updated notes
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deleting note:", error);
+      toast.error("Не удалось удалить заметку");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Tasks functions
   const handleAddTask = async () => {
     if (!newTask.title.trim()) {
@@ -179,6 +211,37 @@ export function NotesTasksBlock({
       setLoading(false)
     }
   }
+
+  // Delete task function
+  const deleteTask = async (taskId: string) => {
+    if (!taskId) return;
+    
+    if (!confirm("Вы уверены, что хотите удалить эту задачу?")) return;
+    
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/clients/${clientId}/tasks/${taskId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error("Не удалось удалить задачу");
+      }
+
+      toast.success("Задача удалена");
+      
+      // Refresh the page to show updated tasks
+      window.location.reload();
+    } catch (error) {
+      console.error("Error deleting task:", error);
+      toast.error("Не удалось удалить задачу");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Format date
   const formatDate = (dateString?: string) => {
@@ -327,15 +390,28 @@ export function NotesTasksBlock({
                   {sortedNotes.map((note, index) => (
                     <div 
                       key={note.id || index} 
-                      className="bg-gray-50 dark:bg-dark-slate/40 rounded-sm p-4 theme-transition"
+                      className="bg-gray-50 dark:bg-dark-slate/40 rounded-sm p-4 theme-transition relative"
                     >
                       <div className="text-xs text-luxury-black/60 dark:text-white/60 flex items-center gap-1 mb-2 theme-transition">
                         <Clock className="h-3 w-3" />
                         {formatDate(note.created_at)}
                       </div>
-                      <p className="text-sm text-luxury-black/80 dark:text-white/80 whitespace-pre-wrap theme-transition">
-                        {note.content}
-                      </p>
+                      <TextFolding
+                        text={note.content}
+                        title="Заметка"
+                        className="text-sm text-luxury-black/80 dark:text-white/80 theme-transition"
+                      />
+                      {note.id && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deleteNote(note.id!)}
+                          className="absolute top-3 right-3 h-7 w-7 text-luxury-black/40 dark:text-white/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-transparent"
+                          disabled={loading}
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -375,7 +451,7 @@ export function NotesTasksBlock({
                           : isDueDatePassed 
                             ? 'border-red-400 dark:border-red-600' 
                             : 'border-green-400 dark:border-green-600'
-                        } p-4 rounded-sm bg-gray-50 dark:bg-dark-slate/40 theme-transition`}
+                        } p-4 rounded-sm bg-gray-50 dark:bg-dark-slate/40 theme-transition relative`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-center gap-3">
@@ -415,31 +491,45 @@ export function NotesTasksBlock({
                               </div>
                               
                               {task.description && (
-                                <p className={`text-xs mt-2 ${task.is_completed 
-                                  ? 'text-luxury-black/40 dark:text-white/40' 
-                                  : 'text-luxury-black/70 dark:text-white/70'
-                                } theme-transition`}>
-                                  {task.description}
-                                </p>
+                                <TextFolding
+                                  text={task.description}
+                                  title={`Задача: ${task.title}`}
+                                  className={`text-xs ${task.is_completed 
+                                    ? 'text-luxury-black/40 dark:text-white/40' 
+                                    : 'text-luxury-black/70 dark:text-white/70'
+                                  } theme-transition`}
+                                />
                               )}
                             </div>
                           </div>
                           
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            className={`h-6 w-6 rounded-full ${task.is_completed 
-                              ? 'border-gray-200 dark:border-dark-slate hover:bg-gray-100 dark:hover:bg-dark-slate/60' 
-                              : 'border-green-200 dark:border-green-800/30 hover:bg-green-50 dark:hover:bg-green-900/20'
-                            } theme-transition`}
-                            onClick={() => updateTaskStatus(task.id!, !task.is_completed)}
-                            disabled={loading}
-                          >
-                            {task.is_completed 
-                              ? <X className="h-3 w-3 text-gray-400 dark:text-gray-500" /> 
-                              : <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
-                            }
-                          </Button>
+                          <div className="flex items-center">
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              className={`h-6 w-6 rounded-full mr-2 ${task.is_completed 
+                                ? 'border-gray-200 dark:border-dark-slate hover:bg-gray-100 dark:hover:bg-dark-slate/60' 
+                                : 'border-green-200 dark:border-green-800/30 hover:bg-green-50 dark:hover:bg-green-900/20'
+                              } theme-transition`}
+                              onClick={() => updateTaskStatus(task.id!, !task.is_completed)}
+                              disabled={loading}
+                            >
+                              {task.is_completed 
+                                ? <X className="h-3 w-3 text-gray-400 dark:text-gray-500" /> 
+                                : <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
+                              }
+                            </Button>
+                            
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => deleteTask(task.id!)}
+                              className="h-6 w-6 text-luxury-black/40 dark:text-white/40 hover:text-red-500 dark:hover:text-red-400 hover:bg-transparent p-0"
+                              disabled={loading}
+                            >
+                              <Trash className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )

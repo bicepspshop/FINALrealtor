@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast"
 import { deleteProperty } from "./actions"
 import { EditPropertyForm } from "./edit-property-form"
 import { PropertyDetails } from "./property-details"
+import { TextFolding } from "@/components/ui/text-folding"
 
 interface PropertyImage {
   id: string
@@ -191,7 +192,12 @@ export const PropertyCard = memo(function PropertyCard({ property, collectionId,
           {property.description && (
             <div>
               <p className="text-sm text-luxury-black/50 dark:text-white/50 theme-transition">Описание</p>
-              <p className="text-sm line-clamp-3 text-luxury-black/80 dark:text-white/80 theme-transition">{property.description}</p>
+              <TextFolding 
+                text={property.description}
+                maxLength={120}
+                className="text-sm text-luxury-black/80 dark:text-white/80 theme-transition"
+                title="Описание объекта"
+              />
             </div>
           )}
         </CardContent>
