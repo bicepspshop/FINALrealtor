@@ -134,7 +134,7 @@ export default async function DashboardPage() {
         
         <NavBar userName={user.name} isOfflineMode={isOfflineMode} />
 
-        <main className="flex-1 container-luxury py-8 relative z-10">
+        <main className="flex-1 container-luxury w-[95%] sm:w-auto py-8 relative z-10">
           {/* Subscription Banner */}
           {user.trialInfo && !isOfflineMode && user.trialInfo.isActive && (
             <SubscriptionBanner trialInfo={user.trialInfo} />
@@ -161,15 +161,15 @@ export default async function DashboardPage() {
             </Alert>
           )}
           
-          <div className="flex justify-between items-center mb-10">
+          <div className="flex justify-between items-start sm:items-center mb-10">
             <div>
               <DashboardTabs activeTab="collections" />
-              <p className="text-luxury-black/60 dark:text-white/60 theme-transition">Управляйте подборками объектов недвижимости для ваших клиентов</p>
+              <p className="text-luxury-black/60 dark:text-white/60 theme-transition hidden sm:block">Управляйте подборками объектов недвижимости для ваших клиентов</p>
             </div>
             {!isOfflineMode && !fetchError && user.trialInfo?.isActive && <CreateCollectionDialog userId={user.id} />}
             {!isOfflineMode && !fetchError && user.trialInfo && !user.trialInfo.isActive && (
               <Link href="/dashboard/subscription">
-                <Button className="bg-luxury-gold hover:bg-luxury-gold/90 text-white py-5 px-5 rounded-sm">
+                <Button className="bg-luxury-gold hover:bg-luxury-gold/90 text-white py-5 px-5 rounded-sm mt-3 sm:mt-0">
                   Оформить подписку
                 </Button>
               </Link>

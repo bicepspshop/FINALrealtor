@@ -30,7 +30,7 @@ interface PropertyListProps {
 
 export function PropertyList({ properties }: PropertyListProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-10 sm:gap-8 xl:gap-x-8">
       {properties.map((property, index) => (
         <PropertyCardWithComment key={property.id} property={property} index={index} />
       ))}

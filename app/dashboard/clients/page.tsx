@@ -225,7 +225,7 @@ export default async function ClientsPage({
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-gray-100 dark:from-dark-charcoal dark:to-dark-slate relative theme-transition dashboard">
       <NavBar userName={session.name} isOfflineMode={isOfflineMode} />
 
-      <main className="flex-1 container-wide py-8 relative z-10">
+      <main className="flex-1 container-wide w-[93%] sm:w-auto py-8 relative z-10">
         {/* Subscription Banner */}
         {trialInfo && !isOfflineMode && trialInfo.isActive && (
           <SubscriptionBanner trialInfo={trialInfo} />
@@ -254,25 +254,26 @@ export default async function ClientsPage({
           </Alert>
         )}
         
-        <div className="flex justify-between items-center mb-10">
+        <div className="flex justify-between items-start sm:items-center mb-10">
           <div>
             <DashboardTabs activeTab="clients" />
-            <p className="text-luxury-black/60 dark:text-white/60 theme-transition ml-[-6px]">
+            <p className="text-luxury-black/60 dark:text-white/60 theme-transition ml-[-6px] hidden sm:block">
               Управление клиентами и сделками
             </p>
           </div>
           <div className="mr-2">
             {showAddClientButton ? (
               <Link href="/dashboard/clients/new">
-                <Button className="bg-luxury-black dark:bg-luxury-royalBlue dark:text-white hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white py-5 px-5 rounded-sm flex items-center gap-2">
+                <Button className="mt-3 sm:mt-0 bg-luxury-black dark:bg-luxury-royalBlue dark:text-white hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white py-5 px-5 rounded-sm flex items-center gap-2" title="Добавить клиента">
                   <UserPlus size={18} />
-                  Добавить клиента
+                  <span className="hidden sm:inline">Добавить клиента</span>
                 </Button>
               </Link>
             ) : showSubscriptionButton ? (
               <Link href="/dashboard/subscription">
-                <Button className="bg-luxury-gold hover:bg-luxury-gold/90 text-white py-5 px-5 rounded-sm">
-                  Оформить подписку
+                <Button className="mt-3 sm:mt-0 bg-luxury-gold hover:bg-luxury-gold/90 text-white py-5 px-5 rounded-sm flex items-center">
+                  <span className="hidden sm:inline">Оформить подписку</span>
+                  <span className="sm:hidden">Подписка</span>
                 </Button>
               </Link>
             ) : null}
@@ -312,9 +313,10 @@ export default async function ClientsPage({
             
             {isTrialActive && (
               <Link href="/dashboard/clients/new">
-                <Button className="bg-luxury-black dark:bg-luxury-royalBlue dark:text-white hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white py-5 px-5 rounded-sm flex items-center gap-2">
+                <Button className="mt-[12px] sm:mt-0 bg-luxury-black dark:bg-luxury-royalBlue dark:text-white hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white py-5 px-5 rounded-sm flex items-center gap-2" title="Добавить первого клиента">
                   <UserPlus size={18} />
-                  Добавить первого клиента
+                  <span className="hidden sm:inline">Добавить первого клиента</span>
+                  <span className="sm:hidden">Добавить</span>
                 </Button>
               </Link>
             )}

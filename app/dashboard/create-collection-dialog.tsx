@@ -177,10 +177,11 @@ export function CreateCollectionDialog({ userId, buttonText = "Создать п
         <Button 
           variant="default"
           animation="scale" 
-          className="flex items-center gap-2 bg-luxury-black dark:bg-luxury-royalBlue dark:text-white hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white py-5 px-5 rounded-sm"
+          className="mt-[12px] sm:mt-0 flex items-center gap-2 bg-luxury-black dark:bg-luxury-royalBlue dark:text-white hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white py-5 px-5 rounded-sm"
+          title="Создать подборку"
         >
           <PlusCircle size={18} className="text-white" />
-          <span className="text-white">{buttonText || "Создать подборку"}</span>
+          <span className="text-white hidden sm:inline">{buttonText || "Создать подборку"}</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px] rounded-sm bg-white dark:bg-dark-graphite border-gray-100 dark:border-dark-slate theme-transition">

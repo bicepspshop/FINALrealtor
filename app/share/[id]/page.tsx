@@ -99,7 +99,7 @@ export default async function SharePage({ params }: SharePageProps) {
             <ShareHero collection={heroCollection} agent={heroAgent} />
 
             {/* Main Content */}
-            <main className="container mx-auto px-6 md:px-12 py-8 md:py-12">
+            <main className="container mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
               {/* Agent Info Card - Redesigned with glass effect */}
               <div className="mb-10 animate-fade-in-up">
                 <AgentInfo 
@@ -149,8 +149,8 @@ export default async function SharePage({ params }: SharePageProps) {
             </main>
 
             {/* Footer with luxury design */}
-            <footer className="bg-white dark:bg-dark-charcoal mt-20 border-t border-gray-100 dark:border-dark-slate py-12 theme-transition">
-              <div className="container mx-auto px-6 md:px-12">
+            <footer className="bg-white dark:bg-dark-charcoal mt-20 border-t border-gray-100 dark:border-dark-slate py-8 md:py-12 theme-transition">
+              <div className="container mx-auto px-4 sm:px-6 md:px-8">
                 <div className="flex flex-col md:flex-row justify-between items-center gap-6">
                   <div className="flex flex-col items-center md:items-start">
                     <Link href="/" className="text-xl font-serif font-medium text-[#2C2C2C] dark:text-white mb-2 theme-transition hover:text-[#CBA135] dark:hover:text-luxury-royalBlue transition-colors">РиелторПро</Link>

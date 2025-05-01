@@ -162,7 +162,7 @@ export function PropertyCard({ property, index, isSelected, onSelect }: Property
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-40 dark:opacity-60 theme-transition"></div>
 
               {/* Property type label */}
-              <div className="absolute top-4 left-4 bg-white/90 dark:bg-dark-charcoal/90 backdrop-blur-sm px-3 py-1 rounded-sm text-xs font-medium text-[#2C2C2C] dark:text-white shadow-sm z-10 theme-transition">
+              <div className="absolute top-4 left-4 bg-white/90 dark:bg-dark-charcoal/90 backdrop-blur-sm px-3 py-1 rounded-sm text-xs font-medium text-[#2C2C2C] dark:text-white shadow-sm z-10 theme-transition hidden md:block">
                 {roomsText}
               </div>
 
@@ -189,7 +189,7 @@ export function PropertyCard({ property, index, isSelected, onSelect }: Property
                   </button>
 
                   {/* Image counter indicator */}
-                  <div className="absolute bottom-4 right-4 bg-white/90 dark:bg-dark-charcoal/90 backdrop-blur-sm text-[#2C2C2C] dark:text-white text-xs px-2 py-1 rounded-sm font-medium shadow-sm z-10 theme-transition">
+                  <div className="absolute bottom-4 right-4 bg-white/90 dark:bg-dark-charcoal/90 backdrop-blur-sm text-[#2C2C2C] dark:text-white text-xs px-2 py-1 rounded-sm font-medium shadow-sm z-10 theme-transition hidden md:block">
                     {currentImageIndex + 1} / {property.property_images.length}
                   </div>
                 </>

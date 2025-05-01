@@ -33,6 +33,57 @@
   font-display: swap;
 }
 
+/* Mobile optimization classes */
+@media (max-width: 640px) {
+  .container-luxury {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    width: 100% !important;
+  }
+  
+  .dashboard {
+    overflow-x: hidden;
+    width: 100vw;
+  }
+  
+  /* Share page mobile optimizations */
+  .PropertyCarousel,
+  .PropertyCard,
+  .property-images {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+  
+  /* Fix container width in share pages */
+  main.container {
+    width: 100% !important;
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Ensure all content stays within viewport */
+  body, html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  /* Property detail page fixes */
+  div[class*="shadow-elegant"],
+  div[class*="rounded-sm"],
+  .property-detail-card {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure images don't overflow */
+  img {
+    max-width: 100%;
+  }
+}
+
 :root {
   --background: 0 0% 100%;
   --foreground: 0 0% 10%;
