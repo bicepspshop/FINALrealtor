@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./client-auth-provider"
-import { WifiOff, User, ChevronDown, LogOut, Settings, Home, Users } from "lucide-react"
+import { WifiOff, User, ChevronDown, LogOut, Settings, Home, Users, Menu } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme/theme-toggle"
 import { useEffect, useCallback, useState } from "react"
 import { useSubscription } from "./subscription-status-checker"
@@ -18,6 +18,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 
 interface NavBarProps {
   userName: string
@@ -158,8 +165,64 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
           {/* Theme Toggle Button */}
           <ThemeToggle />
           
+          {/* Mobile Navigation Menu */}
+          <Sheet>
+            <SheetTrigger asChild className="md:hidden">
+              <Button variant="ghost" size="icon">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[240px] bg-white dark:bg-dark-graphite p-4">
+              <SheetHeader className="text-left">
+                <SheetTitle className="text-lg mb-6">Меню</SheetTitle>
+              </SheetHeader>
+              <div className="flex flex-col gap-4">
+                <Link 
+                  href="/dashboard" 
+                  className={`transition-colors duration-300 font-medium flex items-center gap-2 theme-transition py-2 ${
+                    isDashboardActive 
+                      ? "text-luxury-gold dark:text-luxury-royalBlue" 
+                      : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
+                  }`}
+                  onClick={(e) => handleNavigation(e, "/dashboard")}
+                >
+                  <Home size={18} />
+                  Подборки
+                </Link>
+                
+                <Link 
+                  href="/dashboard/clients" 
+                  className={`transition-colors duration-300 font-medium flex items-center gap-2 theme-transition py-2 ${
+                    isClientsActive 
+                      ? "text-luxury-gold dark:text-luxury-royalBlue" 
+                      : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
+                  }`}
+                  onClick={(e) => handleNavigation(e, "/dashboard/clients")}
+                >
+                  <Users size={18} />
+                  Клиенты
+                </Link>
+                
+                <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
+                
+                <Link href="/profile" className="transition-colors duration-300 font-medium flex items-center gap-2 theme-transition py-2 text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue">
+                  <User size={18} />
+                  Профиль
+                </Link>
+                
+                <button 
+                  onClick={handleLogout} 
+                  className="transition-colors duration-300 font-medium flex items-center gap-2 theme-transition py-2 text-red-500 hover:text-red-600"
+                >
+                  <LogOut size={18} />
+                  Выйти
+                </button>
+              </div>
+            </SheetContent>
+          </Sheet>
+          
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger asChild className="hidden md:flex">
               <Button 
                 variant="ghost" 
                 className="flex items-center gap-2 hover:bg-luxury-gold/5 hover:text-luxury-gold dark:hover:bg-luxury-royalBlue/10 dark:hover:text-luxury-royalBlue transition-all duration-300 theme-transition"

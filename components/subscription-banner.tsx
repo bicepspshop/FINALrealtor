@@ -166,13 +166,11 @@ export function SubscriptionBanner({ initialStatus, trialInfo }: SubscriptionBan
       <AlertTitle className="font-medium text-amber-700 dark:text-amber-500 theme-transition">Пробный период</AlertTitle>
       <AlertDescription className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-amber-700/80 dark:text-amber-500/90 theme-transition">
         <span>Осталось времени: <strong>{remainingTime}</strong></span>
-        <div className="absolute right-4" style={{ marginTop: "-20px" }}>
-          <Link href="/dashboard/subscription">
-            <Button variant="outline" className="whitespace-nowrap border-amber-400 hover:border-amber-500 dark:border-amber-700 dark:hover:border-amber-600 text-amber-800 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 font-medium theme-transition">
-              Оформить подписку
-            </Button>
-          </Link>
-        </div>
+        <Link href="/dashboard/subscription">
+          <Button variant="outline" className="whitespace-nowrap border-amber-400 hover:border-amber-500 dark:border-amber-700 dark:hover:border-amber-600 text-amber-800 dark:text-amber-400 hover:text-amber-900 dark:hover:text-amber-300 font-medium theme-transition">
+            Оформить подписку
+          </Button>
+        </Link>
       </AlertDescription>
     </Alert>
   )

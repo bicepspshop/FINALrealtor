@@ -42,8 +42,9 @@ export default function RootLayout({
           }}
           type="text/javascript"
         />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
-      <body>
+      <body className="min-h-screen w-full overflow-x-hidden">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <ClientAuthProvider>
             <ThemeScript />

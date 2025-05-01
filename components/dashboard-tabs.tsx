@@ -11,38 +11,11 @@ interface DashboardTabsProps {
 export function DashboardTabs({ activeTab }: DashboardTabsProps) {
   const collectionsRef = useRef<HTMLAnchorElement>(null)
   const clientsRef = useRef<HTMLAnchorElement>(null)
-  const [indicatorStyle, setIndicatorStyle] = useState({
-    left: 0,
-    width: 0
-  })
   const [mounted, setMounted] = useState(false)
   
   // Update indicator position and width based on active tab
   useEffect(() => {
     setMounted(true)
-    
-    // Update indicator position after DOM is fully loaded
-    const updateIndicator = () => {
-      const activeRef = activeTab === "collections" ? collectionsRef.current : clientsRef.current
-      
-      if (activeRef) {
-        const { offsetLeft, offsetWidth } = activeRef
-        // Apply a slight offset to the left if clients tab is active
-        const leftOffset = activeTab === "clients" ? -20 : 0
-        
-        setIndicatorStyle({
-          left: offsetLeft + leftOffset,
-          width: offsetWidth
-        })
-      }
-    }
-    
-    // Initial update
-    updateIndicator()
-    
-    // Update on window resize to ensure proper positioning
-    window.addEventListener('resize', updateIndicator)
-    return () => window.removeEventListener('resize', updateIndicator)
   }, [activeTab])
 
   // Apply left offset for clients tab
@@ -53,12 +26,13 @@ export function DashboardTabs({ activeTab }: DashboardTabsProps) {
   if (!mounted) {
     return (
       <div 
-        className="relative flex items-center gap-10 mb-4"
+        className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-10 mb-4"
         style={containerStyles}
       >
         <div className="flex flex-col">
           <span className="text-3xl font-serif font-medium text-luxury-black dark:text-white">
-            Ваши подборки
+            <span className="sm:hidden">Подборки</span>
+            <span className="hidden sm:inline">Ваши подборки</span>
           </span>
         </div>
         
@@ -73,7 +47,7 @@ export function DashboardTabs({ activeTab }: DashboardTabsProps) {
 
   return (
     <div 
-      className="relative flex items-center gap-10 mb-4"
+      className="relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-10 mb-4"
       style={containerStyles}
     >
       <div className="flex flex-col">
@@ -86,7 +60,8 @@ export function DashboardTabs({ activeTab }: DashboardTabsProps) {
               : "text-luxury-black/60 dark:text-white/60 hover:text-luxury-black dark:hover:text-white"
           }`}
         >
-          Ваши подборки
+          <span className="sm:hidden">Подборки</span>
+          <span className="hidden sm:inline">Ваши подборки</span>
         </Link>
       </div>
       
@@ -103,15 +78,6 @@ export function DashboardTabs({ activeTab }: DashboardTabsProps) {
           Клиенты
         </Link>
       </div>
-
-      <div 
-        className="absolute bottom-[-2px] h-1 bg-luxury-gold dark:bg-luxury-royalBlue theme-transition rounded-sm"
-        style={{
-          left: `${indicatorStyle.left}px`,
-          width: `${indicatorStyle.width}px`,
-          transition: "all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1)"
-        }}
-      />
     </div>
   )
 } 

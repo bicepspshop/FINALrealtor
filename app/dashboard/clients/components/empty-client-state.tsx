@@ -38,7 +38,7 @@ export default function EmptyClientState({ isOfflineMode, isTrialActive }: Empty
       
       {showAddButton && (
         <Link href="/dashboard/clients/new">
-          <Button className="bg-luxury-black dark:bg-luxury-royalBlue dark:text-white hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white py-5 px-5 rounded-sm flex items-center gap-2">
+          <Button className="mt-[12px] sm:mt-0 bg-luxury-black dark:bg-luxury-royalBlue dark:text-white hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white py-5 px-5 rounded-sm flex items-center gap-2">
             <UserPlus size={18} />
             Добавить первого клиента
           </Button>
