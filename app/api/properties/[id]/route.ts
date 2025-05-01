@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { getServerClient } from "@/lib/supabase"
 import { getSession } from "@/lib/auth"
+import { formatPropertyWithImageArrays } from "@/lib/image-utils"
 
 export async function GET(
   request: Request,
@@ -21,8 +22,8 @@ export async function GET(
     // Create authenticated server client
     const supabase = getServerClient()
     
-    // Fetch property details
-    const { data: property, error } = await supabase
+    // Fetch property details with all image URLs
+    const { data: propertyRaw, error } = await supabase
       .from("properties")
       .select(`
         id,
@@ -42,6 +43,15 @@ export async function GET(
         has_parking,
         property_status,
         collection_id,
+        floor_plan_url1,
+        floor_plan_url2,
+        floor_plan_url3,
+        interior_finish_url1,
+        interior_finish_url2,
+        interior_finish_url3,
+        window_view_url1,
+        window_view_url2,
+        window_view_url3,
         property_images (
           id,
           image_url
@@ -58,12 +68,15 @@ export async function GET(
       )
     }
     
-    if (!property) {
+    if (!propertyRaw) {
       return NextResponse.json(
         { error: "Property not found" },
         { status: 404 }
       )
     }
+    
+    // Format property data to include image arrays
+    const property = formatPropertyWithImageArrays(propertyRaw)
     
     return NextResponse.json(property)
   } catch (error) {

@@ -12,7 +12,7 @@ interface PropertyData {
   price?: number
   description: string
   imageUrls: string[]
-  floorPlanUrl?: string | null // Добавляем поле для URL планировки
+  floorPlanUrl?: string[] | null // Updated for multiple floor plan URLs
   // Новые поля
   livingArea?: number | null
   floor?: number | null
@@ -23,8 +23,8 @@ interface PropertyData {
   bathroomCount?: number | null
   hasParking?: boolean
   propertyStatus?: string
-  window_view_url?: string | null
-  interior_finish_url?: string | null
+  windowViewUrl?: string[] | null // Updated for multiple window view URLs
+  interiorFinishUrl?: string[] | null // Updated for multiple interior finish URLs
   agent_comment?: string | null
 }
 
@@ -52,33 +52,44 @@ export async function addProperty(data: PropertyData) {
       return { error: "Коллекция не найдена" }
     }
 
+    // Get the URLs for each category, ensuring they're arrays
+    const floorPlanUrls = Array.isArray(data.floorPlanUrl) ? data.floorPlanUrl : [];
+    const windowViewUrls = Array.isArray(data.windowViewUrl) ? data.windowViewUrl : [];
+    const interiorFinishUrls = Array.isArray(data.interiorFinishUrl) ? data.interiorFinishUrl : [];
+
     // Insert property
     const { data: property, error: propertyError } = await supabase
     .from("properties")
     .insert({
-    collection_id: data.collectionId,
-    residential_complex: data.residentialComplex || null,
-    property_type: data.propertyType,
-    address: data.address || "",
-    rooms: data.rooms,
-    area: data.area || 0,
-    price: data.price || 0,
-    description: data.description,
-    floor_plan_url: data.floorPlanUrl || null, // Добавляем URL планировки
-    // Новые поля
-    living_area: data.livingArea || null,
-    floor: data.floor || null,
-    total_floors: data.totalFloors || null,
-    balcony: data.balcony || false,
-    year_built: data.yearBuilt || null,
-    renovation_type: data.renovationType || null,
-    bathroom_count: data.bathroomCount || null,
-    has_parking: data.hasParking || false,
-    property_status: data.propertyStatus || "available",
-    window_view_url: data.window_view_url || null,
-    interior_finish_url: data.interior_finish_url || null,
-    agent_comment: data.agent_comment || null,
-
+      collection_id: data.collectionId,
+      residential_complex: data.residentialComplex || null,
+      property_type: data.propertyType,
+      address: data.address || "",
+      rooms: data.rooms,
+      area: data.area || 0,
+      price: data.price || 0,
+      description: data.description,
+      // Updated to use the new column names with individual URLs
+      floor_plan_url1: floorPlanUrls[0] || null,
+      floor_plan_url2: floorPlanUrls[1] || null,
+      floor_plan_url3: floorPlanUrls[2] || null,
+      // Новые поля
+      living_area: data.livingArea || null,
+      floor: data.floor || null,
+      total_floors: data.totalFloors || null,
+      balcony: data.balcony || false,
+      year_built: data.yearBuilt || null,
+      renovation_type: data.renovationType || null,
+      bathroom_count: data.bathroomCount || null,
+      has_parking: data.hasParking || false,
+      property_status: data.propertyStatus || "available",
+      window_view_url1: windowViewUrls[0] || null,
+      window_view_url2: windowViewUrls[1] || null,
+      window_view_url3: windowViewUrls[2] || null,
+      interior_finish_url1: interiorFinishUrls[0] || null,
+      interior_finish_url2: interiorFinishUrls[1] || null,
+      interior_finish_url3: interiorFinishUrls[2] || null,
+      agent_comment: data.agent_comment || null,
     })
       .select("id")
       .single()
@@ -139,6 +150,11 @@ export async function updateProperty(propertyId: string, data: Omit<PropertyData
 
     // Проверяем валидность URL изображений
     const validImageUrls = data.imageUrls.filter((url) => url && url.trim() !== "")
+    
+    // Get the URLs for each category, ensuring they're arrays
+    const floorPlanUrls = Array.isArray(data.floorPlanUrl) ? data.floorPlanUrl : [];
+    const windowViewUrls = Array.isArray(data.windowViewUrl) ? data.windowViewUrl : [];
+    const interiorFinishUrls = Array.isArray(data.interiorFinishUrl) ? data.interiorFinishUrl : [];
 
     // Update property details
     const { error: propertyError } = await supabase
@@ -151,7 +167,10 @@ export async function updateProperty(propertyId: string, data: Omit<PropertyData
         area: data.area || 0,
         price: data.price || 0,
         description: data.description,
-        floor_plan_url: data.floorPlanUrl || null, // Добавляем URL планировки
+        // Updated to use the new column names with individual URLs
+        floor_plan_url1: floorPlanUrls[0] || null,
+        floor_plan_url2: floorPlanUrls[1] || null,
+        floor_plan_url3: floorPlanUrls[2] || null,
         // Новые поля
         living_area: data.livingArea || null,
         floor: data.floor || null,
@@ -162,10 +181,13 @@ export async function updateProperty(propertyId: string, data: Omit<PropertyData
         bathroom_count: data.bathroomCount || null,
         has_parking: data.hasParking || false,
         property_status: data.propertyStatus || "available",
-        window_view_url: data.window_view_url || null,
-        interior_finish_url: data.interior_finish_url || null,
+        window_view_url1: windowViewUrls[0] || null,
+        window_view_url2: windowViewUrls[1] || null,
+        window_view_url3: windowViewUrls[2] || null,
+        interior_finish_url1: interiorFinishUrls[0] || null,
+        interior_finish_url2: interiorFinishUrls[1] || null,
+        interior_finish_url3: interiorFinishUrls[2] || null,
         agent_comment: data.agent_comment || null,
-
       })
       .eq("id", propertyId)
 
@@ -257,22 +279,33 @@ export async function deleteProperty(propertyId: string) {
   }
 }
 
+/**
+ * Get a property by ID
+ */
 export async function getPropertyById(propertyId: string) {
   try {
     const supabase = getServerClient()
 
-    const { data, error } = await supabase
+    // Fetch property details
+    const { data: property, error } = await supabase
       .from("properties")
       .select(`
         id, 
-        residential_complex,
         property_type, 
         address, 
         rooms, 
         area, 
         price, 
         description,
-        floor_plan_url,
+        floor_plan_url1,
+        floor_plan_url2,
+        floor_plan_url3,
+        window_view_url1,
+        window_view_url2,
+        window_view_url3,
+        interior_finish_url1,
+        interior_finish_url2,
+        interior_finish_url3,
         living_area,
         floor,
         total_floors,
@@ -282,23 +315,29 @@ export async function getPropertyById(propertyId: string) {
         bathroom_count,
         has_parking,
         property_status,
-        window_view_url,
-        interior_finish_url,
+        residential_complex,
         agent_comment,
-
-        property_images (id, image_url)
+        collection_id,
+        property_images (
+          id,
+          image_url
+        )
       `)
       .eq("id", propertyId)
       .single()
 
     if (error) {
       console.error("Error fetching property:", error)
-      return { error: "Failed to fetch property: " + error.message }
+      return { error: error.message || "Failed to fetch property" }
     }
 
-    return { success: true, property: data }
+    if (!property) {
+      return { error: "Property not found" }
+    }
+
+    return { property }
   } catch (error) {
-    console.error("Unexpected error fetching property:", error)
-    return { error: "An unexpected error occurred: " + (error instanceof Error ? error.message : String(error)) }
+    console.error("Unexpected error:", error)
+    return { error: "An unexpected error occurred" }
   }
 }

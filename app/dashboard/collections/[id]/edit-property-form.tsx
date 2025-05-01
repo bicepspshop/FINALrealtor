@@ -15,11 +15,12 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { ImageUpload } from "@/components/image-upload"
 import { FloorPlanUpload } from "@/components/floor-plan-upload"
-import { WindowViewUpload } from "@/components/window-view-upload"  // New import
-import { InteriorFinishUpload } from "@/components/interior-finish-upload"  // New import
+import { WindowViewUpload } from "@/components/window-view-upload"
+import { InteriorFinishUpload } from "@/components/interior-finish-upload"
 import { updateProperty, getPropertyById } from "./actions"
 import { YandexMap } from "@/components/yandex-map"
 import { AddressSuggest } from "@/components/address-suggest"
+import { getPropertyImagesByCategory } from "@/lib/image-utils"
 
 const formSchema = z.object({
   residentialComplex: z.string().optional(),
@@ -53,9 +54,9 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [imageUrls, setImageUrls] = useState<string[]>([])
-  const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(null)
-  const [windowViewUrl, setWindowViewUrl] = useState<string | null>(null)  // New state
-  const [interiorFinishUrl, setInteriorFinishUrl] = useState<string | null>(null)  // New state
+  const [floorPlanUrls, setFloorPlanUrls] = useState<string[]>([])
+  const [windowViewUrls, setWindowViewUrls] = useState<string[]>([])
+  const [interiorFinishUrls, setInteriorFinishUrls] = useState<string[]>([])
   const [isLoadingProperty, setIsLoadingProperty] = useState(true)
   const [mapCoordinates, setMapCoordinates] = useState<[number, number] | null>(null)
 
@@ -126,13 +127,28 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
           })
 
           // Установка URL изображений
-          const urls = property.property_images.map((img) => img.image_url)
+          const urls = property.property_images.map((img: { image_url: string }) => img.image_url)
           setImageUrls(urls)
 
-          // Установка URL планировки и других изображений
-          setFloorPlanUrl(property.floor_plan_url)
-          setWindowViewUrl(property.window_view_url)  // Устанавливаем вид из окна
-          setInteriorFinishUrl(property.interior_finish_url)  // Устанавливаем интерьер
+          // Get image URLs for each category
+          const floorPlanImages = [];
+          if (property.floor_plan_url1) floorPlanImages.push(property.floor_plan_url1);
+          if (property.floor_plan_url2) floorPlanImages.push(property.floor_plan_url2);
+          if (property.floor_plan_url3) floorPlanImages.push(property.floor_plan_url3);
+          setFloorPlanUrls(floorPlanImages);
+
+          const windowViewImages = [];
+          if (property.window_view_url1) windowViewImages.push(property.window_view_url1);
+          if (property.window_view_url2) windowViewImages.push(property.window_view_url2);
+          if (property.window_view_url3) windowViewImages.push(property.window_view_url3);
+          setWindowViewUrls(windowViewImages);
+
+          const interiorFinishImages = [];
+          if (property.interior_finish_url1) interiorFinishImages.push(property.interior_finish_url1);
+          if (property.interior_finish_url2) interiorFinishImages.push(property.interior_finish_url2);
+          if (property.interior_finish_url3) interiorFinishImages.push(property.interior_finish_url3);
+          setInteriorFinishUrls(interiorFinishImages);
+
         } catch (error) {
           console.error("Ошибка при загрузке объекта:", error)
           toast({
@@ -166,9 +182,9 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
         agent_comment: values.agent_comment || "",
 
         imageUrls,
-        floorPlanUrl,
-        window_view_url: windowViewUrl,  // Добавляем вид из окна
-        interior_finish_url: interiorFinishUrl,  // Добавляем интерьер
+        floorPlanUrl: floorPlanUrls,
+        windowViewUrl: windowViewUrls,
+        interiorFinishUrl: interiorFinishUrls,
         floor: values.floor,
         totalFloors: values.totalFloors,
         balcony: values.balcony,
@@ -208,16 +224,16 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
     setImageUrls(urls)
   }
 
-  const handleFloorPlanChange = (url: string | null) => {
-    setFloorPlanUrl(url)
+  const handleFloorPlanChange = (urls: string[]) => {
+    setFloorPlanUrls(urls)
   }
 
-  const handleWindowViewChange = (url: string | null) => {
-    setWindowViewUrl(url)
+  const handleWindowViewChange = (urls: string[]) => {
+    setWindowViewUrls(urls)
   }
 
-  const handleInteriorFinishChange = (url: string | null) => {
-    setInteriorFinishUrl(url)
+  const handleInteriorFinishChange = (urls: string[]) => {
+    setInteriorFinishUrls(urls)
   }
 
   const handleAddressSelect = (address: string, coordinates?: [number, number]) => {
@@ -557,7 +573,7 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="space-y-6">
                 <div>
                   <FormLabel className="block mb-2">Фотографии объекта</FormLabel>
                   <ImageUpload onImagesChange={handleImagesChange} initialImages={imageUrls} />
@@ -565,17 +581,26 @@ export function EditPropertyForm({ propertyId, isOpen, onClose }: EditPropertyFo
 
                 <div>
                   <FormLabel className="block mb-2">Планировка</FormLabel>
-                  <FloorPlanUpload onImageChange={handleFloorPlanChange} initialImage={floorPlanUrl} />
+                  <FloorPlanUpload 
+                    onImageChange={handleFloorPlanChange}
+                    initialImages={floorPlanUrls}
+                  />
                 </div>
 
                 <div>
                   <FormLabel className="block mb-2">Вид из окна</FormLabel>
-                  <WindowViewUpload onImageChange={handleWindowViewChange} initialImage={windowViewUrl} />
+                  <WindowViewUpload 
+                    onImageChange={handleWindowViewChange}
+                    initialImages={windowViewUrls}
+                  />
                 </div>
 
                 <div>
                   <FormLabel className="block mb-2">Интерьер</FormLabel>
-                  <InteriorFinishUpload onImageChange={handleInteriorFinishChange} initialImage={interiorFinishUrl} />
+                  <InteriorFinishUpload 
+                    onImageChange={handleInteriorFinishChange}
+                    initialImages={interiorFinishUrls}
+                  />
                 </div>
               </div>
 

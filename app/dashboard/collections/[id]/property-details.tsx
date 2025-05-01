@@ -12,6 +12,7 @@ import { AlertCircle } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { FallbackMap } from "@/components/fallback-map"
 import { TextFolding } from "@/components/ui/text-folding"
+import { getPropertyImagesByCategory } from "@/lib/image-utils"
 
 interface PropertyImage {
   id: string
@@ -37,9 +38,15 @@ interface Property {
   bathroom_count?: number | null
   has_parking?: boolean
   property_status?: string
-  floor_plan_url?: string | null
-  window_view_url?: string | null
-  interior_finish_url?: string | null
+  floor_plan_url1?: string | null
+  floor_plan_url2?: string | null
+  floor_plan_url3?: string | null
+  window_view_url1?: string | null
+  window_view_url2?: string | null
+  window_view_url3?: string | null
+  interior_finish_url1?: string | null
+  interior_finish_url2?: string | null
+  interior_finish_url3?: string | null
   agent_comment?: string | null
 }
 
@@ -51,6 +58,11 @@ interface PropertyDetailsProps {
 
 export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsProps) {
   const [mapError, setMapError] = useState<string | null>(null)
+
+  // Get image arrays for each category
+  const floorPlanImages = getPropertyImagesByCategory(property, 'floor_plan');
+  const windowViewImages = getPropertyImagesByCategory(property, 'window_view');
+  const interiorFinishImages = getPropertyImagesByCategory(property, 'interior_finish');
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("ru-RU", {
@@ -87,11 +99,7 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
   }
 
     // Function to determine if we should show the images tab section
-  const hasAdditionalImages = Boolean(
-    property.floor_plan_url || 
-    property.window_view_url || 
-    property.interior_finish_url
-  )
+  const hasAdditionalImages = floorPlanImages.length > 0 || windowViewImages.length > 0 || interiorFinishImages.length > 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -140,46 +148,88 @@ export function PropertyDetails({ property, isOpen, onClose }: PropertyDetailsPr
             {/* Additional image types in tabs */}
             {hasAdditionalImages && (
               <div className="mt-6 mb-6">
-                <ElegantTabs defaultValue={property.floor_plan_url ? "floor-plan" : property.window_view_url ? "window-view" : "interior-finish"}>
+                <ElegantTabs defaultValue={floorPlanImages.length > 0 ? "floor-plan" : windowViewImages.length > 0 ? "window-view" : "interior-finish"}>
                   <ElegantTabsList className="mb-4 w-full" indicatorClassName="bg-blue-500 dark:bg-blue-500">
-                    {property.floor_plan_url && <ElegantTabsTrigger value="floor-plan">Планировка</ElegantTabsTrigger>}
-                    {property.window_view_url && <ElegantTabsTrigger value="window-view">Вид из окна</ElegantTabsTrigger>}
-                    {property.interior_finish_url && <ElegantTabsTrigger value="interior-finish">Отделка</ElegantTabsTrigger>}
+                    {floorPlanImages.length > 0 && <ElegantTabsTrigger value="floor-plan">Планировка</ElegantTabsTrigger>}
+                    {windowViewImages.length > 0 && <ElegantTabsTrigger value="window-view">Вид из окна</ElegantTabsTrigger>}
+                    {interiorFinishImages.length > 0 && <ElegantTabsTrigger value="interior-finish">Отделка</ElegantTabsTrigger>}
                   </ElegantTabsList>
 
-                  {property.floor_plan_url && (
+                  {floorPlanImages.length > 0 && (
                     <ElegantTabsContent value="floor-plan">
-                      <div className="relative aspect-[4/3] rounded-md overflow-hidden">
-                        <img
-                          src={property.floor_plan_url}
-                          alt="Планировка"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
+                      <Carousel className="w-full">
+                        <CarouselContent>
+                          {floorPlanImages.map((imageUrl, index) => (
+                            <CarouselItem key={`floor-plan-${index}`}>
+                              <div className="relative aspect-[4/3] rounded-md overflow-hidden">
+                                <img
+                                  src={imageUrl}
+                                  alt={`Планировка ${index + 1}`}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        {floorPlanImages.length > 1 && (
+                          <>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </>
+                        )}
+                      </Carousel>
                     </ElegantTabsContent>
                   )}
 
-                  {property.window_view_url && (
+                  {windowViewImages.length > 0 && (
                     <ElegantTabsContent value="window-view">
-                      <div className="relative aspect-[4/3] rounded-md overflow-hidden">
-                        <img
-                          src={property.window_view_url}
-                          alt="Вид из окна"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
+                      <Carousel className="w-full">
+                        <CarouselContent>
+                          {windowViewImages.map((imageUrl, index) => (
+                            <CarouselItem key={`window-view-${index}`}>
+                              <div className="relative aspect-[4/3] rounded-md overflow-hidden">
+                                <img
+                                  src={imageUrl}
+                                  alt={`Вид из окна ${index + 1}`}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        {windowViewImages.length > 1 && (
+                          <>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </>
+                        )}
+                      </Carousel>
                     </ElegantTabsContent>
                   )}
 
-                  {property.interior_finish_url && (
+                  {interiorFinishImages.length > 0 && (
                     <ElegantTabsContent value="interior-finish">
-                      <div className="relative aspect-[4/3] rounded-md overflow-hidden">
-                        <img
-                          src={property.interior_finish_url}
-                          alt="Внутренняя отделка"
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
+                      <Carousel className="w-full">
+                        <CarouselContent>
+                          {interiorFinishImages.map((imageUrl, index) => (
+                            <CarouselItem key={`interior-finish-${index}`}>
+                              <div className="relative aspect-[4/3] rounded-md overflow-hidden">
+                                <img
+                                  src={imageUrl}
+                                  alt={`Интерьер ${index + 1}`}
+                                  className="w-full h-full object-contain"
+                                />
+                              </div>
+                            </CarouselItem>
+                          ))}
+                        </CarouselContent>
+                        {interiorFinishImages.length > 1 && (
+                          <>
+                            <CarouselPrevious />
+                            <CarouselNext />
+                          </>
+                        )}
+                      </Carousel>
                     </ElegantTabsContent>
                   )}
                 </ElegantTabs>

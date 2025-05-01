@@ -14,8 +14,8 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { ImageUpload } from "@/components/image-upload"
 import { FloorPlanUpload } from "@/components/floor-plan-upload"
-import { WindowViewUpload } from "@/components/window-view-upload"  // New import
-import { InteriorFinishUpload } from "@/components/interior-finish-upload"  // New import
+import { WindowViewUpload } from "@/components/window-view-upload"
+import { InteriorFinishUpload } from "@/components/interior-finish-upload"
 import { addProperty } from "./actions"
 import { YandexMap } from "@/components/yandex-map"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -52,9 +52,9 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [imageUrls, setImageUrls] = useState<string[]>([])
-  const [floorPlanUrl, setFloorPlanUrl] = useState<string | null>(null)
-  const [windowViewUrl, setWindowViewUrl] = useState<string | null>(null)  // New state
-  const [interiorFinishUrl, setInteriorFinishUrl] = useState<string | null>(null)  // New state
+  const [floorPlanUrls, setFloorPlanUrls] = useState<string[]>([])
+  const [windowViewUrls, setWindowViewUrls] = useState<string[]>([])
+  const [interiorFinishUrls, setInteriorFinishUrls] = useState<string[]>([])
   const [mapError, setMapError] = useState<string | null>(null)
   const [mapCoordinates, setMapCoordinates] = useState<[number, number] | null>(null)
 
@@ -87,9 +87,9 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
 
     setIsLoading(true)
     console.log("Отправка формы с изображениями:", imageUrls)
-    console.log("Отправка формы с планировкой:", floorPlanUrl)
-    console.log("Отправка формы с видом из окна:", windowViewUrl)
-    console.log("Отправка формы с интерьером:", interiorFinishUrl)
+    console.log("Отправка формы с планировками:", floorPlanUrls)
+    console.log("Отправка формы с видами из окна:", windowViewUrls)
+    console.log("Отправка формы с интерьерами:", interiorFinishUrls)
 
     try {
       // Проверяем, что все изображения загружены
@@ -116,9 +116,9 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
         agent_comment: values.agent_comment || "",
 
         imageUrls,
-        floorPlanUrl, // Планировка
-        window_view_url: windowViewUrl, // Вид из окна
-        interior_finish_url: interiorFinishUrl, // Интерьер
+        floorPlanUrl: floorPlanUrls,
+        windowViewUrl: windowViewUrls,
+        interiorFinishUrl: interiorFinishUrls,
         floor: values.floor,
         totalFloors: values.totalFloors,
         balcony: values.balcony,
@@ -142,9 +142,9 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
         })
         form.reset()
         setImageUrls([])
-        setFloorPlanUrl(null)
-        setWindowViewUrl(null)
-        setInteriorFinishUrl(null)
+        setFloorPlanUrls([])
+        setWindowViewUrls([])
+        setInteriorFinishUrls([])
 
         // Перенаправляем на страницу коллекции после успешного добавления
         router.push(`/dashboard/collections/${collectionId}`)
@@ -166,19 +166,19 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
     setImageUrls(urls)
   }
 
-  const handleFloorPlanChange = (url: string | null) => {
-    console.log("Получен URL планировки:", url)
-    setFloorPlanUrl(url)
+  const handleFloorPlanChange = (urls: string[]) => {
+    console.log("Получены URL планировок:", urls)
+    setFloorPlanUrls(urls)
   }
 
-  const handleWindowViewChange = (url: string | null) => {
-    console.log("Получен URL вида из окна:", url)
-    setWindowViewUrl(url)
+  const handleWindowViewChange = (urls: string[]) => {
+    console.log("Получены URL видов из окна:", urls)
+    setWindowViewUrls(urls)
   }
 
-  const handleInteriorFinishChange = (url: string | null) => {
-    console.log("Получен URL интерьера:", url)
-    setInteriorFinishUrl(url)
+  const handleInteriorFinishChange = (urls: string[]) => {
+    console.log("Получены URL интерьеров:", urls)
+    setInteriorFinishUrls(urls)
   }
 
   const handleAddressSelect = (address: string, coordinates?: [number, number]) => {
@@ -534,7 +534,7 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="space-y-6">
             <div>
               <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Фотографии объекта</FormLabel>
               <ImageUpload onImagesChange={handleImagesChange} />
@@ -551,7 +551,7 @@ export function AddPropertyForm({ collectionId }: AddPropertyFormProps) {
             </div>
 
             <div>
-              <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Отделка</FormLabel>
+              <FormLabel className="block mb-2 font-medium text-luxury-black dark:text-white theme-transition">Интерьер</FormLabel>
               <InteriorFinishUpload onImageChange={handleInteriorFinishChange} />
             </div>
           </div>
