@@ -10,6 +10,7 @@ import { ShareThemeProvider } from "../../components/share-theme-provider"
 import { PropertyHero } from "./property-hero"
 import { SubscriptionChecker } from "../../components/subscription-checker"
 import { TextFolding } from "@/components/ui/text-folding"
+import { getPropertyImagesByCategory, formatPropertyWithImageArrays } from "@/lib/image-utils"
 
 interface PropertyPageProps {
   params: {
@@ -21,8 +22,8 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
   const propertyId = params.id
   const supabase = getServerClient()
 
-  // Получаем данные объекта недвижимости с новыми полями
-  const { data: property, error } = await supabase
+  // Получаем данные объекта недвижимости с обновленными полями для нескольких изображений
+  const { data: propertyRaw, error } = await supabase
     .from("properties")
     .select(`
       id, 
@@ -32,9 +33,15 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
       area, 
       price, 
       description,
-      floor_plan_url,
-      window_view_url,
-      interior_finish_url,
+      floor_plan_url1,
+      floor_plan_url2,
+      floor_plan_url3,
+      window_view_url1,
+      window_view_url2,
+      window_view_url3,
+      interior_finish_url1,
+      interior_finish_url2,
+      interior_finish_url3,
       living_area,
       floor,
       total_floors,
@@ -42,15 +49,18 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
       renovation_type,
       residential_complex,
       agent_comment,
-    property_images (id, image_url),
+      property_images (id, image_url),
       collection_id
     `)
     .eq("id", propertyId)
     .single()
 
-  if (error || !property) {
+  if (error || !propertyRaw) {
     notFound()
   }
+
+  // Format property with image arrays
+  const property = formatPropertyWithImageArrays(propertyRaw)
 
   // Получаем данные о коллекции и агенте
   const { data: collection } = await supabase
@@ -86,12 +96,11 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
   // Формирование заголовка объекта
   const propertyTitle = `${property.residential_complex ? `${property.residential_complex}, ` : ""}${property.rooms ? `${property.rooms}-комн. ` : ""}${propertyTypeLabel.toLowerCase()}, ${property.area} м²`
   
-  // Проверка наличия дополнительных изображений
-  const hasAdditionalImages = Boolean(
-    property.floor_plan_url || 
-    property.window_view_url || 
-    property.interior_finish_url
-  )
+  // Проверка наличия дополнительных изображений по категориям
+  const hasFloorPlanImages = property.floor_plan_images.length > 0
+  const hasWindowViewImages = property.window_view_images.length > 0
+  const hasInteriorFinishImages = property.interior_finish_images.length > 0
+  const hasAdditionalImages = hasFloorPlanImages || hasWindowViewImages || hasInteriorFinishImages
 
   return (
     <ShareThemeProvider>
@@ -222,64 +231,64 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                   </div>
                 </div>
                 
-                {/* Дополнительные изображения с вкладками */}
+                {/* Feature images */}
                 {hasAdditionalImages && (
                   <div className="mb-8">
-                    <ElegantTabs defaultValue={property.floor_plan_url ? "floor-plan" : property.window_view_url ? "window-view" : "interior-finish"}>
-                      <ElegantTabsList className="w-full overflow-x-auto" indicatorClassName="bg-[#CBA135] dark:bg-[#0066CC]">
-                        {property.floor_plan_url && (
-                          <ElegantTabsTrigger value="floor-plan">
+                    <h2 className="text-xl font-serif font-medium mb-4 dark:text-white theme-transition">Дополнительные изображения</h2>
+                    <div className="w-12 h-0.5 bg-[#CBA135] dark:bg-luxury-royalBlue mb-6 theme-transition"></div>
+                    
+                    <Tabs defaultValue={hasFloorPlanImages ? "floor-plan" : hasInteriorFinishImages ? "interior" : "window-view"} className="w-full">
+                      <TabsList className="w-full justify-start mb-4 bg-transparent border-b border-gray-200 dark:border-dark-slate theme-transition p-0 h-auto">
+                        {hasFloorPlanImages && (
+                          <TabsTrigger 
+                            value="floor-plan" 
+                            className="data-[state=active]:border-b-2 data-[state=active]:border-[#CBA135] dark:data-[state=active]:border-luxury-royalBlue rounded-none px-4 py-2 h-auto data-[state=active]:bg-transparent data-[state=active]:text-[#CBA135] dark:data-[state=active]:text-luxury-royalBlue data-[state=active]:shadow-none theme-transition"
+                          >
                             Планировка
-                          </ElegantTabsTrigger>
+                          </TabsTrigger>
                         )}
-                        {property.window_view_url && (
-                          <ElegantTabsTrigger value="window-view">
+                        {hasInteriorFinishImages && (
+                          <TabsTrigger 
+                            value="interior" 
+                            className="data-[state=active]:border-b-2 data-[state=active]:border-[#CBA135] dark:data-[state=active]:border-luxury-royalBlue rounded-none px-4 py-2 h-auto data-[state=active]:bg-transparent data-[state=active]:text-[#CBA135] dark:data-[state=active]:text-luxury-royalBlue data-[state=active]:shadow-none theme-transition"
+                          >
+                            Интерьер
+                          </TabsTrigger>
+                        )}
+                        {hasWindowViewImages && (
+                          <TabsTrigger 
+                            value="window-view" 
+                            className="data-[state=active]:border-b-2 data-[state=active]:border-[#CBA135] dark:data-[state=active]:border-luxury-royalBlue rounded-none px-4 py-2 h-auto data-[state=active]:bg-transparent data-[state=active]:text-[#CBA135] dark:data-[state=active]:text-luxury-royalBlue data-[state=active]:shadow-none theme-transition"
+                          >
                             Вид из окна
-                          </ElegantTabsTrigger>
+                          </TabsTrigger>
                         )}
-                        {property.interior_finish_url && (
-                          <ElegantTabsTrigger value="interior-finish">
-                            Отделка
-                          </ElegantTabsTrigger>
-                        )}
-                      </ElegantTabsList>
-
-                      {property.floor_plan_url && (
-                        <ElegantTabsContent value="floor-plan">
-                          <div className="relative aspect-[4/3] rounded-sm overflow-hidden border border-gray-100 dark:border-dark-slate theme-transition">
-                            <img
-                              src={property.floor_plan_url}
-                              alt="Планировка"
-                              className="w-full h-full object-contain"
-                            />
+                      </TabsList>
+                      
+                      {hasFloorPlanImages && (
+                        <TabsContent value="floor-plan" className="mt-0">
+                          <div className="aspect-[16/9] overflow-hidden rounded-sm border border-gray-100 dark:border-dark-slate theme-transition">
+                            <PropertyCarousel images={property.floor_plan_images} propertyType={`${propertyTypeLabel} - Планировка`} />
                           </div>
-                        </ElegantTabsContent>
+                        </TabsContent>
                       )}
-
-                      {property.window_view_url && (
-                        <ElegantTabsContent value="window-view">
-                          <div className="relative aspect-[4/3] rounded-sm overflow-hidden border border-gray-100 dark:border-dark-slate theme-transition">
-                            <img
-                              src={property.window_view_url}
-                              alt="Вид из окна"
-                              className="w-full h-full object-contain"
-                            />
+                      
+                      {hasInteriorFinishImages && (
+                        <TabsContent value="interior" className="mt-0">
+                          <div className="aspect-[16/9] overflow-hidden rounded-sm border border-gray-100 dark:border-dark-slate theme-transition">
+                            <PropertyCarousel images={property.interior_finish_images} propertyType={`${propertyTypeLabel} - Интерьер`} />
                           </div>
-                        </ElegantTabsContent>
+                        </TabsContent>
                       )}
-
-                      {property.interior_finish_url && (
-                        <ElegantTabsContent value="interior-finish">
-                          <div className="relative aspect-[4/3] rounded-sm overflow-hidden border border-gray-100 dark:border-dark-slate theme-transition">
-                            <img
-                              src={property.interior_finish_url}
-                              alt="Отделка"
-                              className="w-full h-full object-contain"
-                            />
+                      
+                      {hasWindowViewImages && (
+                        <TabsContent value="window-view" className="mt-0">
+                          <div className="aspect-[16/9] overflow-hidden rounded-sm border border-gray-100 dark:border-dark-slate theme-transition">
+                            <PropertyCarousel images={property.window_view_images} propertyType={`${propertyTypeLabel} - Вид из окна`} />
                           </div>
-                        </ElegantTabsContent>
+                        </TabsContent>
                       )}
-                    </ElegantTabs>
+                    </Tabs>
                   </div>
                 )}
               </div>

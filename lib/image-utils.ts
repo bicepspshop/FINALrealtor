@@ -54,4 +54,48 @@ export function formatFileSize(bytes: number): string {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+}
+
+/**
+ * Returns all available image URLs from properties for a specific category
+ * @param property The property object from the database
+ * @param category The image category ('floor_plan', 'interior_finish', or 'window_view')
+ * @returns Array of image URLs for the category
+ */
+export function getPropertyImagesByCategory(
+  property: any,
+  category: 'floor_plan' | 'interior_finish' | 'window_view'
+): string[] {
+  if (!property) return [];
+  
+  const images: string[] = [];
+  
+  // Check each potential URL field and add non-empty ones to the result
+  for (let i = 1; i <= 3; i++) {
+    const fieldName = `${category}_url${i}`;
+    if (property[fieldName]) {
+      images.push(property[fieldName]);
+    }
+  }
+  
+  return images;
+}
+
+/**
+ * Formats property data for API response, combining multiple image URLs into arrays
+ * @param property The property object from the database
+ * @returns The formatted property with image arrays
+ */
+export function formatPropertyWithImageArrays(property: any): any {
+  if (!property) return null;
+  
+  // Create a copy of the property to avoid mutating the original
+  const formattedProperty = { ...property };
+  
+  // Add image arrays for each category
+  formattedProperty.floor_plan_images = getPropertyImagesByCategory(property, 'floor_plan');
+  formattedProperty.interior_finish_images = getPropertyImagesByCategory(property, 'interior_finish');
+  formattedProperty.window_view_images = getPropertyImagesByCategory(property, 'window_view');
+  
+  return formattedProperty;
 } 
