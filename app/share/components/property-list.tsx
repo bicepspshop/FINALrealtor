@@ -21,6 +21,18 @@ interface Property {
   total_floors?: number | null
   bathroom_count?: number | null
   floor_plan_url?: string | null
+  floor_plan_url1?: string | null
+  floor_plan_url2?: string | null
+  floor_plan_url3?: string | null
+  window_view_url1?: string | null
+  window_view_url2?: string | null
+  window_view_url3?: string | null
+  interior_finish_url1?: string | null
+  interior_finish_url2?: string | null
+  interior_finish_url3?: string | null
+  floor_plan_images?: string[]
+  window_view_images?: string[]
+  interior_finish_images?: string[]
   residential_complex?: string | null
 }
 

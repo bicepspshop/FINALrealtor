@@ -12,6 +12,7 @@ import { LuxurySeal, GoldenDust, OrnateFrame, ShimmeringText, LuxuryWatermark } 
 import "@/styles/luxury-experience.css"
 import { SubscriptionChecker } from "../../../components/subscription-checker"
 import { TextFolding } from "@/components/ui/text-folding"
+import { formatPropertyWithImageArrays } from "@/lib/image-utils"
 
 interface PropertyPageProps {
   params: {
@@ -23,8 +24,8 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
   const propertyId = params.id
   const supabase = getServerClient()
 
-  // Получаем данные объекта недвижимости
-  const { data: property, error } = await supabase
+  // Получаем данные объекта недвижимости с обновленными полями для нескольких изображений
+  const { data: propertyRaw, error } = await supabase
     .from("properties")
     .select(`
       id, 
@@ -34,7 +35,15 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
       area, 
       price, 
       description,
-      floor_plan_url,
+      floor_plan_url1,
+      floor_plan_url2,
+      floor_plan_url3,
+      window_view_url1,
+      window_view_url2,
+      window_view_url3,
+      interior_finish_url1,
+      interior_finish_url2,
+      interior_finish_url3,
       living_area,
       floor,
       total_floors,
@@ -47,9 +56,12 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
     .eq("id", propertyId)
     .single()
 
-  if (error || !property) {
+  if (error || !propertyRaw) {
     notFound()
   }
+
+  // Format property with image arrays
+  const property = formatPropertyWithImageArrays(propertyRaw)
 
   // Получаем данные о коллекции и агенте
   const { data: collection } = await supabase
@@ -73,7 +85,7 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
     }[property.property_type as 'apartment' | 'house' | 'land'] || "Объект"
 
   // Получаем изображения объекта
-  const images = property.property_images?.map((img) => img.image_url) || []
+  const images = property.property_images?.map((img: any) => img.image_url) || []
 
   // Формирование заголовка объекта
   const propertyTitle = `${property.residential_complex ? `${property.residential_complex}, ` : ""}${property.rooms ? `${property.rooms}-комн. ` : ""}${propertyTypeLabel.toLowerCase()}, ${property.area} м²`
@@ -363,7 +375,28 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
               </div>
               
               {/* Floor plan with elegant styling */}
-              {property.floor_plan_url && (
+              {property.floor_plan_images && property.floor_plan_images.length > 0 ? (
+                <div className="mb-16 relative">
+                  <h2 className="text-2xl font-serif font-light text-white mb-4 relative inline-block">
+                    Планировка
+                    <span className="absolute -bottom-1 left-0 w-0 h-px bg-gold luxury-title-underline"></span>
+                  </h2>
+                  <div className="w-16 h-px bg-gradient-to-r from-gold/70 to-gold/10 mb-8"></div>
+                  {/* Decorative corner element */}
+                  <div className="absolute -left-4 top-1/4 w-8 h-8">
+                    <div className="w-2 h-2 rounded-full border border-gold/30 absolute"></div>
+                    <div className="w-px h-16 bg-gradient-to-b from-gold/0 via-gold/20 to-gold/0 absolute left-1"></div>
+                  </div>
+                  
+                  {/* Multiple floor plans carousel */}
+                  <div className="relative aspect-[4/3] overflow-hidden border border-gold/10 bg-black/50">
+                    <PropertyCarousel 
+                      images={property.floor_plan_images} 
+                      propertyType="Планировка" 
+                    />
+                  </div>
+                </div>
+              ) : property.floor_plan_url1 ? (
                 <div className="mb-16 relative">
                   <h2 className="text-2xl font-serif font-light text-white mb-4 relative inline-block">
                     Планировка
@@ -377,14 +410,14 @@ export default async function PropertyPageV2({ params }: PropertyPageProps) {
                   </div>
                   <div className="relative aspect-[4/3] overflow-hidden border border-gold/10 bg-black/50">
                     <Image
-                      src={property.floor_plan_url}
+                      src={property.floor_plan_url1}
                       alt="Планировка"
                       fill
                       className="object-contain"
                     />
                   </div>
                 </div>
-              )}
+              ) : null}
             
               {/* Map section with dark theme */}
               <div className="bg-dark-graphite border border-gold/10 p-8 md:p-10 relative group">
