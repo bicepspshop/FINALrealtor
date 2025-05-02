@@ -24,6 +24,18 @@ interface PropertyCardProps {
     agent_comment?: string | null
     property_images: PropertyImage[]
     floor_plan_url?: string | null
+    floor_plan_url1?: string | null
+    floor_plan_url2?: string | null
+    floor_plan_url3?: string | null
+    window_view_url1?: string | null
+    window_view_url2?: string | null
+    window_view_url3?: string | null
+    interior_finish_url1?: string | null
+    interior_finish_url2?: string | null
+    interior_finish_url3?: string | null
+    floor_plan_images?: string[]
+    window_view_images?: string[]
+    interior_finish_images?: string[]
     living_area?: number | null
     floor?: number | null
     total_floors?: number | null
@@ -130,6 +142,10 @@ export function PropertyCard({ property, index, isSelected, onSelect }: Property
     router.push(`/share/property/${property.id}`)
   }
 
+  // Check if property has any floor plan images
+  const hasFloorPlan = property.floor_plan_url || 
+    (property.floor_plan_images && property.floor_plan_images.length > 0);
+
   return (
     <>
       {/* Make entire card clickable */}
@@ -203,6 +219,17 @@ export function PropertyCard({ property, index, isSelected, onSelect }: Property
               >
                 Просмотр галереи
               </button>
+              
+              {/* Floor plan button - only shown if the property has a floor plan */}
+              {hasFloorPlan && (
+                <button
+                  onClick={(e) => openGallery(e, true)}
+                  className="absolute bottom-4 left-32 bg-white/90 dark:bg-dark-charcoal/90 backdrop-blur-sm text-[#2C2C2C] dark:text-white text-xs px-3 py-1.5 
+                    rounded-sm transition-all duration-300 opacity-0 hover:opacity-100 group-hover:opacity-100 shadow-sm z-10 theme-transition hover:bg-white dark:hover:bg-dark-charcoal"
+                >
+                  Планировка
+                </button>
+              )}
             </>
           ) : (
             <div className="w-full h-full bg-gray-100 dark:bg-dark-slate flex items-center justify-center theme-transition">
@@ -304,8 +331,12 @@ export function PropertyCard({ property, index, isSelected, onSelect }: Property
       {/* Gallery Modal */}
       <PropertyGallery
         images={
-          isFloorPlanView && property.floor_plan_url
-            ? [property.floor_plan_url]
+          isFloorPlanView 
+            ? (property.floor_plan_images && property.floor_plan_images.length > 0)
+              ? property.floor_plan_images
+              : property.floor_plan_url
+                ? [property.floor_plan_url]
+                : []
             : property.property_images.map((img) => img.image_url)
         }
         isOpen={isGalleryOpen}

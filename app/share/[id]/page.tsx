@@ -8,6 +8,7 @@ import { ShareThemeProvider } from "../components/share-theme-provider"
 import { ShareHero } from "./share-hero"
 import { CommentProvider, CommentLayer } from "../components/comments"
 import { SubscriptionChecker } from "../components/subscription-checker"
+import { formatPropertyWithImageArrays } from "@/lib/image-utils"
 
 interface SharePageProps {
   params: {
@@ -33,8 +34,8 @@ export default async function SharePage({ params }: SharePageProps) {
   // Get agent info with phone number, description and avatar
   const { data: agent } = await supabase.from("users").select("name, email, phone, description, avatar_url").eq("id", collection.user_id).single()
 
-  // Fetch properties in this collection
-  const { data: properties, error: propertiesError } = await supabase
+  // Fetch properties in this collection with updated field names
+  const { data: propertiesRaw, error: propertiesError } = await supabase
     .from("properties")
     .select(`
       id, 
@@ -48,7 +49,15 @@ export default async function SharePage({ params }: SharePageProps) {
       floor,
       total_floors,
       bathroom_count,
-      floor_plan_url,
+      floor_plan_url1,
+      floor_plan_url2,
+      floor_plan_url3,
+      window_view_url1,
+      window_view_url2,
+      window_view_url3,
+      interior_finish_url1,
+      interior_finish_url2,
+      interior_finish_url3,
       residential_complex,
       agent_comment,
       property_images (id, image_url)
@@ -59,6 +68,9 @@ export default async function SharePage({ params }: SharePageProps) {
   if (propertiesError) {
     notFound()
   }
+
+  // Format properties with image arrays
+  const properties = propertiesRaw.map((property: any) => formatPropertyWithImageArrays(property))
 
   // Extract agent data safely
   const agentName = agent?.name || "Агент недвижимости"
