@@ -22,3 +22,133 @@
   will-change: transform;
   transform: translateZ(0);
 }
+
+/* 3D Transform Styles for Collection Gallery Wall */
+.perspective-\[800px\] {
+  perspective: 800px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-y-\[0deg\] {
+  transform: rotateY(0deg);
+}
+
+.rotate-x-\[15deg\] {
+  transform: rotateX(15deg);
+}
+
+.origin-center {
+  transform-origin: center;
+}
+
+/* Scale transforms for tunnel effect */
+.scale-\[1\] {
+  transform: scale(1);
+}
+
+.scale-\[0.85\] {
+  transform: scale(0.85);
+}
+
+.scale-\[0.7\] {
+  transform: scale(0.7);
+}
+
+.scale-\[0.55\] {
+  transform: scale(0.55);
+}
+
+.scale-\[0.4\] {
+  transform: scale(0.4);
+}
+
+/* Translate Z values for tunnel effect */
+.translate-z-\[50px\] {
+  transform: translateZ(50px);
+}
+
+.translate-z-\[-100px\] {
+  transform: translateZ(-100px);
+}
+
+.translate-z-\[-250px\] {
+  transform: translateZ(-250px);
+}
+
+.translate-z-\[-400px\] {
+  transform: translateZ(-400px);
+}
+
+.translate-z-\[-550px\] {
+  transform: translateZ(-550px);
+}
+
+/* Hover transforms */
+.hover\:translate-z-\[70px\]:hover {
+  transform: translateZ(70px);
+}
+
+.hover\:translate-z-\[-80px\]:hover {
+  transform: translateZ(-80px);
+}
+
+.hover\:translate-z-\[-230px\]:hover {
+  transform: translateZ(-230px);
+}
+
+.hover\:translate-z-\[-380px\]:hover {
+  transform: translateZ(-380px);
+}
+
+.hover\:translate-z-\[-530px\]:hover {
+  transform: translateZ(-530px);
+}
+
+/* Combined transforms for the cards in tunnel */
+.absolute.transform-style-3d.translate-z-\[50px\].scale-\[1\] {
+  transform: translateZ(50px) scale(1);
+}
+
+.absolute.transform-style-3d.translate-z-\[-100px\].scale-\[0.85\] {
+  transform: translateZ(-100px) scale(0.85);
+}
+
+.absolute.transform-style-3d.translate-z-\[-250px\].scale-\[0.7\] {
+  transform: translateZ(-250px) scale(0.7);
+}
+
+.absolute.transform-style-3d.translate-z-\[-400px\].scale-\[0.55\] {
+  transform: translateZ(-400px) scale(0.55);
+}
+
+.absolute.transform-style-3d.translate-z-\[-550px\].scale-\[0.4\] {
+  transform: translateZ(-550px) scale(0.4);
+}
+
+/* Hover effects */
+.absolute.transform-style-3d.translate-z-\[50px\].scale-\[1\]:hover {
+  transform: translateZ(70px) scale(1);
+}
+
+.absolute.transform-style-3d.translate-z-\[-100px\].scale-\[0.85\]:hover {
+  transform: translateZ(-80px) scale(0.85);
+}
+
+.absolute.transform-style-3d.translate-z-\[-250px\].scale-\[0.7\]:hover {
+  transform: translateZ(-230px) scale(0.7);
+}
+
+.absolute.transform-style-3d.translate-z-\[-400px\].scale-\[0.55\]:hover {
+  transform: translateZ(-380px) scale(0.55);
+}
+
+.absolute.transform-style-3d.translate-z-\[-550px\].scale-\[0.4\]:hover {
+  transform: translateZ(-530px) scale(0.4);
+}

@@ -455,4 +455,98 @@ h1, h2, h3, h4, h5, h6,
   .rose-mask-hover {
     background-size: 200% 200% !important;
   }
+
+  /* 3D Transform Utilities */
+  .perspective-\[1200px\] {
+    perspective: 1200px;
+  }
+
+  .transform-style-preserve-3d {
+    transform-style: preserve-3d;
+  }
+
+  /* Combined 3D transforms */
+  .hover\:\[transform\:rotateY\(\-15deg\)_translateZ\(60px\)\]:hover {
+    transform: rotateY(-15deg) translateZ(60px);
+  }
+
+  .hover\:\[transform\:rotateY\(15deg\)_translateZ\(60px\)\]:hover {
+    transform: rotateY(15deg) translateZ(60px);
+  }
+
+  .hover\:\[transform\:translateZ\(40px\)\]:hover {
+    transform: translateZ(40px);
+  }
+
+  /* Theme transition */
+  .theme-transition {
+    transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+
+  /* Container for luxury design */
+  .container-luxury {
+    width: 100%;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  @media (min-width: 640px) {
+    .container-luxury {
+      max-width: 640px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container-luxury {
+      max-width: 768px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-luxury {
+      max-width: 1024px;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-luxury {
+      max-width: 1280px;
+    }
+  }
+
+  @media (min-width: 1536px) {
+    .container-luxury {
+      max-width: 1400px;
+    }
+  }
+
+  /* Custom Animation */
+  @keyframes shine {
+    0% { left: -100%; }
+    100% { left: 200%; }
+  }
+
+  @keyframes width {
+    0% { width: 40%; }
+    100% { width: 65%; }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 1s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }

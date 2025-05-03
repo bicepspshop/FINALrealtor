@@ -131,6 +131,17 @@ function ClientCard({ client, formatDate, isTrialActive, onClientDeleted }: Clie
     'contract': 'Оформление договора',
     'closed': 'Сделка закрыта'
   };
+
+  // Status names mapping
+  const statusName: Record<string, string> = {
+    'active': 'Активно',
+    'pending': 'В ожидании',
+    'paused': 'Приостановлено',
+    'showing': 'Показ',
+    'closed': 'Закрыто',
+    'rejected': 'Отказ',
+    'completed': 'Завершено'
+  };
   
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -327,7 +338,10 @@ function ClientCard({ client, formatDate, isTrialActive, onClientDeleted }: Clie
                     dealStage.status === 'paused' ? 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' :
                     'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
                   } theme-transition`}>
-                    {stageName[dealStage.stage || ''] || dealStage.stage}
+                    {/* Show the translated status name if in list view or the stage name on detailed view */}
+                    {dealStage.status === 'showing' 
+                      ? statusName['showing'] || 'Показ'
+                      : (dealStage.status && statusName[dealStage.status]) || stageName[dealStage.stage || ''] || dealStage.stage}
                   </div>
                 </div>
               )}
