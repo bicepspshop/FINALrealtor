@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "upload-faq": "node scripts/upload-faq-images.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "latest",
