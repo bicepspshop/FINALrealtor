@@ -366,7 +366,12 @@ export default async function DashboardPage() {
               <h2 className="text-xl font-serif text-white mr-2 theme-transition">РиелторПро</h2>
               <span className="text-sm dark:text-white/60 theme-transition">• Платформа для риелторов</span>
             </div>
-            <p className="dark:text-white/60 theme-transition">&copy; {new Date().getFullYear()} Все права защищены</p>
+            <div className="flex items-center gap-4">
+              <Link href="/requisites" className="text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">
+                Реквизиты
+              </Link>
+              <p className="dark:text-white/60 theme-transition">&copy; {new Date().getFullYear()} Все права защищены</p>
+            </div>
           </div>
         </footer>
       </div>
