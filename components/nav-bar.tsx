@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "./client-auth-provider"
-import { WifiOff, User, ChevronDown, LogOut, Settings, Home, Users, Menu } from "lucide-react"
+import { WifiOff, User, ChevronDown, LogOut, Settings, Home, Users, Menu, HelpCircle } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme/theme-toggle"
 import { useEffect, useCallback, useState } from "react"
 import { useSubscription } from "./subscription-status-checker"
@@ -40,6 +40,7 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
   
   const isDashboardActive = pathname === "/dashboard" || pathname.startsWith("/dashboard/collections")
   const isClientsActive = pathname.startsWith("/dashboard/clients")
+  const isHelpActive = pathname === "/help"
   const isSubscriptionPage = pathname.startsWith('/dashboard/subscription')
 
   // Add a negative offset when on the clients tab
@@ -111,6 +112,12 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
     }
   }, [isClientsActive, router])
   
+  const handleHelpHover = useCallback(() => {
+    if (!isHelpActive) {
+      router.prefetch('/help')
+    }
+  }, [isHelpActive, router])
+  
   const handleProfileHover = useCallback(() => {
     router.prefetch('/profile')
   }, [router])
@@ -151,6 +158,19 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
           >
             <Users size={18} />
             Клиенты
+          </Link>
+          
+          <Link 
+            href="/help" 
+            className={`transition-colors duration-300 font-medium flex items-center gap-2 theme-transition ${
+              isHelpActive 
+                ? "text-luxury-gold dark:text-luxury-royalBlue" 
+                : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
+            }`}
+            onMouseEnter={handleHelpHover}
+          >
+            <HelpCircle size={18} />
+            Помощь
           </Link>
         </nav>
 
@@ -201,6 +221,18 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
                 >
                   <Users size={18} />
                   Клиенты
+                </Link>
+                
+                <Link 
+                  href="/help" 
+                  className={`transition-colors duration-300 font-medium flex items-center gap-2 theme-transition py-2 ${
+                    isHelpActive 
+                      ? "text-luxury-gold dark:text-luxury-royalBlue" 
+                      : "text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
+                  }`}
+                >
+                  <HelpCircle size={18} />
+                  Помощь
                 </Link>
                 
                 <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>

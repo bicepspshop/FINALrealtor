@@ -6,6 +6,7 @@ import { ClientAuthProvider } from "@/components/client-auth-provider"
 import { OfflineAlert } from "@/components/offline-alert"
 import { ThemeScript } from "@/components/theme-script"
 import { initializeStorage } from "@/lib/storage"
+import { initializeFaqStorage } from "@/lib/faq-storage"
 
 export const metadata = {
   title: "РиелторПро",
@@ -13,8 +14,9 @@ export const metadata = {
     generator: 'v0.dev'
 }
 
-// Initialize storage bucket
+// Initialize storage buckets
 initializeStorage().catch(console.error)
+initializeFaqStorage().catch(console.error)
 
 export default function RootLayout({
   children,
