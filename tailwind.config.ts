@@ -174,6 +174,12 @@ const config: Config = {
         "spin-slow": "spin 8s linear infinite",
         "ping-slow": "ping 3s cubic-bezier(0, 0, 0.2, 1) infinite",
         "pulse-highlight": "pulse-highlight 2s ease-in-out",
+        // Property carousel animations
+        "slide-out-left": "slide-out-left 0.3s ease-out forwards",
+        "slide-to-left": "slide-to-left 0.3s ease-out forwards",
+        "slide-to-center": "slide-to-center 0.3s ease-out forwards",
+        "slide-to-right": "slide-to-right 0.3s ease-out forwards",
+        "slide-out-right": "slide-out-right 0.3s ease-out forwards",
       },
       keyframes: {
         "accordion-down": {
@@ -203,6 +209,27 @@ const config: Config = {
         "slide-in-left": {
           '0%': { transform: 'translateX(-20px)', opacity: '0' },
           '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        // Property carousel keyframes
+        "slide-out-left": {
+          '0%': { transform: 'translateX(-120%) scale(0.77)', opacity: '0.9', zIndex: '10' },
+          '100%': { transform: 'translateX(-180%) scale(0.5)', opacity: '0', zIndex: '0' }
+        },
+        "slide-to-left": {
+          '0%': { transform: 'translateX(0) scale(1)', zIndex: '30' },
+          '100%': { transform: 'translateX(-120%) scale(0.77)', opacity: '0.9', zIndex: '10' }
+        },
+        "slide-to-center": {
+          '0%': { transform: 'translateX(120%) scale(0.77)', opacity: '0.9', zIndex: '10' },
+          '100%': { transform: 'translateX(0) scale(1)', zIndex: '30' }
+        },
+        "slide-to-right": {
+          '0%': { transform: 'translateX(0) scale(1)', zIndex: '30' },
+          '100%': { transform: 'translateX(120%) scale(0.77)', opacity: '0.9', zIndex: '10' }
+        },
+        "slide-out-right": {
+          '0%': { transform: 'translateX(120%) scale(0.77)', opacity: '0.9', zIndex: '10' },
+          '100%': { transform: 'translateX(180%) scale(0.5)', opacity: '0', zIndex: '0' }
         },
         "golden-pulse": {
           '0%, 100%': { boxShadow: '0 0 0 rgba(212, 175, 55, 0)' },
