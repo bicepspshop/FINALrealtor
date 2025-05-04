@@ -7,10 +7,275 @@ import { ThemeToggle } from "@/components/ui/theme/theme-toggle"
 import { ThemeImage } from "@/components/ui/theme/theme-image"
 import { GallerySlider } from "@/components/ui/gallery-slider"
 import "../styles/hero-section.css"
-import { Suspense } from "react"
+import { Suspense, useEffect } from "react"
 import { UserNavButton } from "./user-nav-button"
 
 export default function Home() {
+  useEffect(() => {
+    // Mobile collection cards interaction
+    const mobileCards = document.getElementById('mobile-collection-cards');
+    const topCard = document.getElementById('mobile-card-top');
+    const bottomCard = document.getElementById('mobile-card-bottom');
+    const instructionText = document.getElementById('mobile-cards-instruction');
+    
+    let isExpanded = false;
+
+    const toggleCards = () => {
+      if (!topCard || !bottomCard || !instructionText) return;
+      
+      if (!isExpanded) {
+        // Expand cards
+        topCard.style.transform = 'translateY(-120px)';
+        bottomCard.style.transform = 'translateY(100px)';
+        instructionText.textContent = 'Коснитесь, чтобы вернуть';
+        isExpanded = true;
+      } else {
+        // Collapse cards
+        topCard.style.transform = 'translateY(-30px)';
+        bottomCard.style.transform = 'translateY(30px)';
+        instructionText.textContent = 'Коснитесь, чтобы увидеть все карточки';
+        isExpanded = false;
+      }
+    };
+
+    mobileCards?.addEventListener('click', toggleCards);
+    mobileCards?.addEventListener('touchend', toggleCards);
+
+    // Property Cards Carousel functionality
+    const carousel = document.getElementById('mobile-property-carousel');
+    const leftCard = document.getElementById('property-card-left');
+    const centerCard = document.getElementById('property-card-center');
+    const rightCard = document.getElementById('property-card-right');
+    const indicators = [
+      document.getElementById('indicator-0'),
+      document.getElementById('indicator-1'),
+      document.getElementById('indicator-2'),
+    ];
+
+    if (!carousel || !leftCard || !centerCard || !rightCard) return;
+
+    // Cards data array for easy rotation
+    const cards = [
+      {
+        title: 'ЖК Престиж, 2-комн.',
+        price: '8 500 000 ₽',
+        address: 'Ленинский пр-т, 136',
+        locationTag: 'ЖК Престиж',
+        image: '/images/house3.png',
+        details: [
+          { label: 'Площадь', value: '65 м²' },
+          { label: 'Комнат', value: '2' },
+          { label: 'Этаж', value: '7/12' },
+          { label: 'Санузлы', value: '1' }
+        ]
+      },
+      {
+        title: 'ЖК Олимп, 3-комн.',
+        price: '15 000 000 ₽',
+        address: 'Ленина 43к3',
+        locationTag: 'ЖК Олимп',
+        image: '/images/flat1.png',
+        details: [
+          { label: 'Площадь', value: '85 м²' },
+          { label: 'Комнат', value: '3' },
+          { label: 'Этаж', value: '5/9' },
+          { label: 'Санузлы', value: '2' }
+        ]
+      },
+      {
+        title: 'Дом, Зеленый сад',
+        price: '23 400 000 ₽',
+        address: 'Сосновая ул., 12',
+        locationTag: 'Коттедж',
+        image: '/images/house7.png',
+        details: [
+          { label: 'Площадь', value: '95 м²' },
+          { label: 'Комнат', value: '6' },
+          { label: 'Этажей', value: '2' },
+          { label: 'Санузлы', value: '3' }
+        ]
+      }
+    ];
+
+    // Current position in the cards array
+    let currentIndex = 1; // Start with the center card (index 1)
+
+    // Update indicators to show current slide
+    const updateIndicators = () => {
+      indicators.forEach((indicator, index) => {
+        if (indicator) {
+          indicator.className = index === currentIndex 
+            ? 'w-2 h-2 rounded-full bg-luxury-gold focus:outline-none' 
+            : 'w-2 h-2 rounded-full bg-gray-400 focus:outline-none';
+        }
+      });
+    };
+
+    // Touch handling variables
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const minSwipeDistance = 50; // Minimum distance to consider a swipe
+
+    // Function to handle swipe left (next slide)
+    const swipeLeft = () => {
+      if (currentIndex < cards.length - 1) {
+        // Add sliding animation classes
+        leftCard?.classList.add('animate-slide-out-left');
+        centerCard?.classList.add('animate-slide-to-left');
+        rightCard?.classList.add('animate-slide-to-center');
+        
+        // Update current index after a short delay
+        setTimeout(() => {
+          currentIndex++;
+          updateCarousel();
+          
+          // Remove animation classes
+          leftCard?.classList.remove('animate-slide-out-left');
+          centerCard?.classList.remove('animate-slide-to-left');
+          rightCard?.classList.remove('animate-slide-to-center');
+        }, 300);
+      }
+    };
+
+    // Function to handle swipe right (previous slide)
+    const swipeRight = () => {
+      if (currentIndex > 0) {
+        // Add sliding animation classes
+        leftCard?.classList.add('animate-slide-to-center');
+        centerCard?.classList.add('animate-slide-to-right');
+        rightCard?.classList.add('animate-slide-out-right');
+        
+        // Update current index after a short delay
+        setTimeout(() => {
+          currentIndex--;
+          updateCarousel();
+          
+          // Remove animation classes
+          leftCard?.classList.remove('animate-slide-to-center');
+          centerCard?.classList.remove('animate-slide-to-right');
+          rightCard?.classList.remove('animate-slide-out-right');
+        }, 300);
+      }
+    };
+
+    // Simulated function to update DOM elements based on current indexes
+    // In a real app you might use React state and refs instead
+    const updateCarousel = () => {
+      // Calculate the indexes for left, center, and right cards
+      const leftIndex = (currentIndex - 1 + cards.length) % cards.length;
+      const centerIndex = currentIndex;
+      const rightIndex = (currentIndex + 1) % cards.length;
+
+      // Update the carousel display
+      updateCardContents(leftCard, cards[leftIndex]);
+      updateCardContents(centerCard, cards[centerIndex]);  
+      updateCardContents(rightCard, cards[rightIndex]);
+
+      // Update indicator dots
+      updateIndicators();
+    };
+
+    // Helper function to update a card's contents
+    const updateCardContents = (cardElement: HTMLElement | null, cardData: any) => {
+      if (!cardElement) return;
+
+      // Update image
+      const imageElement = cardElement.querySelector('.relative.h-\\[160px\\] img') as HTMLImageElement;
+      if (imageElement) {
+        imageElement.setAttribute('src', cardData.image);
+        imageElement.setAttribute('alt', cardData.title);
+      }
+
+      // Update location tag
+      const locationTag = cardElement.querySelector('.absolute.top-4.left-4');
+      if (locationTag) {
+        locationTag.textContent = cardData.locationTag;
+      }
+
+      // Update title and price
+      const titleElement = cardElement.querySelector('.text-lg.font-medium.text-white');
+      const priceElement = cardElement.querySelector('.text-luxury-gold.text-lg');
+      if (titleElement) titleElement.textContent = cardData.title;
+      if (priceElement) priceElement.textContent = cardData.price;
+
+      // Update address
+      const addressElement = cardElement.querySelector('.text-sm.text-gray-300.mb-4');
+      if (addressElement) addressElement.textContent = cardData.address;
+
+      // Update details
+      const detailElements = cardElement.querySelectorAll('.grid.grid-cols-2 .flex.items-center.text-sm');
+      if (detailElements && detailElements.length === 4) {
+        detailElements.forEach((element: Element, index: number) => {
+          const detail = cardData.details[index];
+          const textNode = element.childNodes[1]; // Text node after the span
+          if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+            element.innerHTML = `
+              <span class="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+              ${detail.label}: ${detail.value}
+            `;
+          }
+        });
+      }
+    };
+
+    // Touch event handlers
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      touchEndX = e.touches[0].clientX;
+    };
+
+    const handleTouchEnd = () => {
+      const swipeDistance = touchEndX - touchStartX;
+      
+      if (Math.abs(swipeDistance) > minSwipeDistance) {
+        if (swipeDistance > 0) {
+          // Swiped right (previous)
+          swipeRight();
+        } else {
+          // Swiped left (next)
+          swipeLeft();
+        }
+      }
+    };
+
+    // Indicator click handlers
+    indicators.forEach((indicator, index) => {
+      indicator?.addEventListener('click', () => {
+        currentIndex = index;
+        updateCarousel();
+      });
+    });
+
+    // Add touch event listeners to the carousel
+    carousel.addEventListener('touchstart', handleTouchStart);
+    carousel.addEventListener('touchmove', handleTouchMove);
+    carousel.addEventListener('touchend', handleTouchEnd);
+
+    // Initialize
+    updateIndicators();
+
+    return () => {
+      mobileCards?.removeEventListener('click', toggleCards);
+      mobileCards?.removeEventListener('touchend', toggleCards);
+      
+      // Remove carousel event listeners
+      carousel.removeEventListener('touchstart', handleTouchStart);
+      carousel.removeEventListener('touchmove', handleTouchMove);
+      carousel.removeEventListener('touchend', handleTouchEnd);
+      
+      // Remove indicator click handlers
+      indicators.forEach((indicator, index) => {
+        indicator?.removeEventListener('click', () => {
+          currentIndex = index;
+          updateCarousel();
+        });
+      });
+    };
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen theme-transition">
       {/* Navbar with transparent background */}
@@ -220,8 +485,8 @@ export default function Home() {
                     {/* Removed background pattern and gradient overlays for monolithic color */}
                     
                     <div className="relative w-full h-full flex flex-col items-center justify-center overflow-visible">
-                      {/* Perspective Stack of Collection Cards */}
-                      <div className="relative w-full h-full group/gallery hover:scale-105 transition-all duration-700 mt-[-120px] ml-[10px]">
+                      {/* Perspective Stack of Collection Cards - Desktop View */}
+                      <div className="relative w-full h-full group/gallery hover:scale-105 transition-all duration-700 mt-[-120px] ml-[10px] hidden md:block">
                         {/* Collection Cards Stack */}
                         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full transition-all duration-700">
                           {/* Card 1 - Top Right (Criplex) */}
@@ -234,7 +499,7 @@ export default function Home() {
                                   Есть ссылка
                                 </span>
                               </div>
-                              <p className="text-xs text-gray-300">Новостройка</p>
+                              <p className="text-xs text-gray-300">Новостройка - 5 объектов</p>
                             </div>
                             <div className="w-full h-[120px] relative group/card">
                               <Image 
@@ -276,7 +541,7 @@ export default function Home() {
                                   Есть ссылка
                                 </span>
                               </div>
-                              <p className="text-xs text-gray-300">Элитный ЖК</p>
+                              <p className="text-xs text-gray-300">Элитный ЖК - 8 объектов</p>
                             </div>
                             <div className="w-full h-[120px] relative group/card">
                               <Image 
@@ -318,7 +583,7 @@ export default function Home() {
                                   Есть ссылка
                                 </span>
                               </div>
-                              <p className="text-xs text-gray-300">Премиум класс</p>
+                              <p className="text-xs text-gray-300">Премиум класс - 3 объекта</p>
                             </div>
                             <div className="w-full h-[120px] relative group/card">
                               <Image 
@@ -349,6 +614,103 @@ export default function Home() {
                               </div>
                             </div>
                           </div>
+                        </div>
+                      </div>
+                      
+                      {/* Mobile View Collection Cards - 2 cards half-stacked */}
+                      <div className="md:hidden relative w-full h-[400px] flex items-center justify-center mt-10 perspective-[1200px]" id="mobile-collection-cards">
+                        {/* Top card (Criplex) */}
+                        <div 
+                          className="absolute w-[85%] max-w-[280px] rounded-sm overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.3)] dark:shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-20 transform transition-all duration-500 ease-out translate-y-[-30px]"
+                          id="mobile-card-top"
+                        >
+                          <div className="bg-dark-graphite text-white p-3 rounded-t-sm border border-dark-slate">
+                            <div className="flex justify-between items-center mb-1">
+                              <h4 className="font-medium text-sm">Criplex</h4>
+                              <span className="text-green-400 text-xs flex items-center gap-1">
+                                <span className="inline-block w-2 h-2 rounded-full bg-green-400"></span>
+                                Есть ссылка
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-300">Новостройка - 5 объектов</p>
+                          </div>
+                          <div className="w-full h-[140px] relative">
+                            <Image 
+                              src="/images/flat1.png"
+                              alt="Коллекция новостроек"
+                              fill
+                              className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+                            
+                            <div className="absolute bottom-3 left-0 right-0 px-3 flex justify-between">
+                              <div className="h-7 px-3 flex items-center gap-1 bg-dark-graphite/60 backdrop-blur-sm rounded-full text-white/90 text-xs border border-luxury-gold/30">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                Объекты
+                              </div>
+                              
+                              <div className="h-7 px-3 flex items-center gap-1 bg-luxury-gold/80 text-luxury-black backdrop-blur-sm rounded-full text-xs border border-luxury-gold/30">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M5 12h14M19 12l-7-7M19 12l-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                Перейти
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Bottom card (Avangard) */}
+                        <div 
+                          className="absolute w-[85%] max-w-[280px] rounded-sm overflow-hidden shadow-[0_10px_25px_rgba(0,0,0,0.2)] dark:shadow-[0_10px_25px_rgba(0,0,0,0.4)] z-10 transform transition-all duration-500 ease-out translate-y-[30px]"
+                          id="mobile-card-bottom"
+                        >
+                          <div className="bg-dark-graphite text-white p-3 rounded-t-sm border border-dark-slate">
+                            <div className="flex justify-between items-center mb-1">
+                              <h4 className="font-medium text-sm">Avangard</h4>
+                              <span className="text-green-400 text-xs flex items-center gap-1">
+                                <span className="inline-block w-2 h-2 rounded-full bg-green-400"></span>
+                                Есть ссылка
+                              </span>
+                            </div>
+                            <p className="text-xs text-gray-300">Элитный ЖК - 8 объектов</p>
+                          </div>
+                          <div className="w-full h-[140px] relative">
+                            <Image 
+                              src="/images/house2.png"
+                              alt="Элитная недвижимость"
+                              fill
+                              className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"></div>
+                            
+                            <div className="absolute bottom-3 left-0 right-0 px-3 flex justify-between">
+                              <div className="h-7 px-3 flex items-center gap-1 bg-dark-graphite/60 backdrop-blur-sm rounded-full text-white/90 text-xs border border-luxury-gold/30">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                  <path d="M9 22V12h6v10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                Объекты
+                              </div>
+                              
+                              <div className="h-7 px-3 flex items-center gap-1 bg-luxury-gold/80 text-luxury-black backdrop-blur-sm rounded-full text-xs border border-luxury-gold/30">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M5 12h14M19 12l-7-7M19 12l-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                Перейти
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Instructions indicator */}
+                        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center text-xs text-gray-500 dark:text-gray-400 w-full px-4 animate-pulse flex items-center justify-center">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
+                            <path d="M7 10l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          <p id="mobile-cards-instruction">Коснитесь, чтобы увидеть все карточки</p>
                         </div>
                       </div>
                       
@@ -427,8 +789,8 @@ export default function Home() {
                   
                   {/* Right Content Section with gray background */}
                   <div className="w-full md:w-1/2 relative overflow-visible bg-gray-50 dark:bg-dark-slate theme-transition p-8 flex items-center justify-center">
-                    {/* Property Cards Stack */}
-                    <div className="relative w-full h-full pt-20 pb-40 group mt-[-240px] perspective-[1200px]">
+                    {/* Desktop Property Cards Stack - Hidden on Mobile */}
+                    <div className="relative w-full h-full pt-20 pb-40 group mt-[-240px] perspective-[1200px] hidden md:block">
                       {/* First Property Card - Left */}
                       <div className="absolute z-10 top-36 -left-16 transform transition-all duration-500 group-hover:-translate-x-12 group-hover:translate-y-0 hover:z-30 transform-style-preserve-3d">
                         <div className="w-[280px] bg-dark-graphite text-white rounded-sm border border-dark-slate overflow-hidden shadow-elegant-dark transition-all duration-500 transform-style-preserve-3d hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] hover:[transform:rotateY(15deg)_translateZ(60px)]">
@@ -440,10 +802,10 @@ export default function Home() {
                               fill
                               className="object-cover"
                             />
-                            <div className="absolute top-4 left-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-sm text-white text-xs">
+                            <div className="absolute top-4 left-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-sm text-white text-xs md:block hidden">
                               ЖК Престиж
                             </div>
-                            <div className="absolute top-4 right-4 px-2 py-1 bg-dark-graphite/80 backdrop-blur-sm rounded-sm text-white text-xs border border-luxury-gold/30">
+                            <div className="absolute top-4 right-4 px-2 py-1 bg-dark-graphite/80 backdrop-blur-sm rounded-sm text-white text-xs border border-luxury-gold/30 md:block hidden">
                               1/3
                             </div>
                           </div>
@@ -506,10 +868,10 @@ export default function Home() {
                               fill
                               className="object-cover"
                             />
-                            <div className="absolute top-4 left-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-sm text-white text-xs">
+                            <div className="absolute top-4 left-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-sm text-white text-xs md:block hidden">
                               ЖК Олимп
                             </div>
-                            <div className="absolute top-4 right-4 px-2 py-1 bg-dark-graphite/80 backdrop-blur-sm rounded-sm text-white text-xs border border-luxury-gold/30">
+                            <div className="absolute top-4 right-4 px-2 py-1 bg-dark-graphite/80 backdrop-blur-sm rounded-sm text-white text-xs border border-luxury-gold/30 md:block hidden">
                               1/2
                             </div>
                           </div>
@@ -572,10 +934,10 @@ export default function Home() {
                               fill
                               className="object-cover"
                             />
-                            <div className="absolute top-4 left-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-sm text-white text-xs">
+                            <div className="absolute top-4 left-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-sm text-white text-xs md:block hidden">
                               Коттедж
                             </div>
-                            <div className="absolute top-4 right-4 px-2 py-1 bg-dark-graphite/80 backdrop-blur-sm rounded-sm text-white text-xs border border-luxury-gold/30">
+                            <div className="absolute top-4 right-4 px-2 py-1 bg-dark-graphite/80 backdrop-blur-sm rounded-sm text-white text-xs border border-luxury-gold/30 md:block hidden">
                               1/5
                             </div>
                           </div>
@@ -627,12 +989,216 @@ export default function Home() {
                         </div>
                       </div>
                     </div>
+
+                    {/* Mobile Property Cards Carousel - Visible only on Mobile */}
+                    <div className="md:hidden relative w-full h-[500px] flex items-center justify-center mt-0" id="mobile-property-carousel">
+                      <div className="relative w-full h-full flex items-center justify-center perspective-[1200px]">
+                        {/* Property Cards Container */}
+                        <div className="relative w-full h-[420px] flex items-center justify-center">
+                          {/* Cards will be positioned absolutely within this container */}
+                          {/* Left Card (initially hidden to the left) */}
+                          <div 
+                            id="property-card-left" 
+                            className="absolute transform transition-all duration-500 ease-out -translate-x-[120%] scale-[0.77] z-10 opacity-90"
+                          >
+                            <div className="w-[280px] bg-dark-graphite text-white rounded-sm border border-dark-slate overflow-hidden shadow-elegant-dark transition-all duration-500">
+                              {/* Property Image */}
+                              <div className="relative h-[160px] overflow-hidden">
+                                <Image 
+                                  src="/images/house3.png"
+                                  alt="Современный жилой комплекс"
+                                  fill
+                                  className="object-cover"
+                                />
+                                <div className="absolute top-4 left-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-sm text-white text-xs md:block hidden">
+                                  ЖК Престиж
+                                </div>
+                                <div className="absolute top-4 right-4 px-2 py-1 bg-dark-graphite/80 backdrop-blur-sm rounded-sm text-white text-xs border border-luxury-gold/30 md:block hidden">
+                                  1/3
+                                </div>
+                              </div>
+                              
+                              {/* Property Info */}
+                              <div className="p-4">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h4 className="text-lg font-medium text-white">ЖК Престиж, 2-комн.</h4>
+                                  <span className="text-luxury-gold text-lg font-semibold">8 500 000 ₽</span>
+                                </div>
+                                <p className="text-sm text-gray-300 mb-4">Ленинский пр-т, 136</p>
+                                
+                                {/* Property Details */}
+                                <div className="grid grid-cols-2 gap-y-2 gap-x-4 mb-4">
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Площадь: 65 м²
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Комнат: 2
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Этаж: 7/12
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Санузлы: 1
+                                  </div>
+                                </div>
+                                
+                                {/* Action Button */}
+                                <button className="w-full py-2.5 bg-transparent border border-luxury-gold/30 text-luxury-gold text-sm rounded-sm flex items-center justify-center space-x-2 hover:bg-luxury-gold/10 transition-colors duration-300">
+                                  <span>Подробнее об объекте</span>
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 12h14M19 12l-7-7M19 12l-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Center Card (initially in focus) */}
+                          <div 
+                            id="property-card-center" 
+                            className="absolute transform transition-all duration-500 ease-out z-30"
+                          >
+                            <div className="w-[280px] bg-dark-graphite text-white rounded-sm border border-dark-slate overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.3)] transition-all duration-500">
+                              {/* Property Image */}
+                              <div className="relative h-[160px] overflow-hidden">
+                                <Image 
+                                  src="/images/flat1.png"
+                                  alt="Элитная квартира"
+                                  fill
+                                  className="object-cover"
+                                />
+                                <div className="absolute top-4 left-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-sm text-white text-xs md:block hidden">
+                                  ЖК Олимп
+                                </div>
+                                <div className="absolute top-4 right-4 px-2 py-1 bg-dark-graphite/80 backdrop-blur-sm rounded-sm text-white text-xs border border-luxury-gold/30 md:block hidden">
+                                  1/2
+                                </div>
+                              </div>
+                              
+                              {/* Property Info */}
+                              <div className="p-4">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h4 className="text-lg font-medium text-white">ЖК Олимп, 3-комн.</h4>
+                                  <span className="text-luxury-gold text-lg font-semibold">15 000 000 ₽</span>
+                                </div>
+                                <p className="text-sm text-gray-300 mb-4">Ленина 43к3</p>
+                                
+                                {/* Property Details */}
+                                <div className="grid grid-cols-2 gap-y-2 gap-x-4 mb-4">
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Площадь: 85 м²
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Комнат: 3
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Этаж: 5/9
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Санузлы: 2
+                                  </div>
+                                </div>
+                                
+                                {/* Action Button */}
+                                <button className="w-full py-2.5 bg-transparent border border-luxury-gold/30 text-luxury-gold text-sm rounded-sm flex items-center justify-center space-x-2 hover:bg-luxury-gold/10 transition-colors duration-300">
+                                  <span>Подробнее об объекте</span>
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 12h14M19 12l-7-7M19 12l-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right Card (initially to the right) */}
+                          <div 
+                            id="property-card-right" 
+                            className="absolute transform transition-all duration-500 ease-out translate-x-[120%] scale-[0.77] z-10 opacity-90"
+                          >
+                            <div className="w-[280px] bg-dark-graphite text-white rounded-sm border border-dark-slate overflow-hidden shadow-elegant-dark transition-all duration-500">
+                              {/* Property Image */}
+                              <div className="relative h-[160px] overflow-hidden">
+                                <Image 
+                                  src="/images/house7.png"
+                                  alt="Загородный дом"
+                                  fill
+                                  className="object-cover"
+                                />
+                                <div className="absolute top-4 left-4 px-3 py-1 bg-black/70 backdrop-blur-sm rounded-sm text-white text-xs md:block hidden">
+                                  Коттедж
+                                </div>
+                                <div className="absolute top-4 right-4 px-2 py-1 bg-dark-graphite/80 backdrop-blur-sm rounded-sm text-white text-xs border border-luxury-gold/30 md:block hidden">
+                                  1/5
+                                </div>
+                              </div>
+                              
+                              {/* Property Info */}
+                              <div className="p-4">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h4 className="text-lg font-medium text-white">Дом, Зеленый сад</h4>
+                                  <span className="text-luxury-gold text-lg font-semibold">23 400 000 ₽</span>
+                                </div>
+                                <p className="text-sm text-gray-300 mb-4">Сосновая ул., 12</p>
+                                
+                                {/* Property Details */}
+                                <div className="grid grid-cols-2 gap-y-2 gap-x-4 mb-4">
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Площадь: 95 м²
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Комнат: 6
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Этажей: 2
+                                  </div>
+                                  <div className="flex items-center text-sm text-gray-300">
+                                    <span className="w-2 h-2 rounded-full bg-blue-500 mr-2"></span>
+                                    Санузлы: 3
+                                  </div>
+                                </div>
+                                
+                                {/* Action Button */}
+                                <button className="w-full py-2.5 bg-transparent border border-luxury-gold/30 text-luxury-gold text-sm rounded-sm flex items-center justify-center space-x-2 hover:bg-luxury-gold/10 transition-colors duration-300">
+                                  <span>Подробнее об объекте</span>
+                                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 12h14M19 12l-7-7M19 12l-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Carousel Indicators */}
+                        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-2">
+                          <button className="w-2 h-2 rounded-full bg-gray-400 focus:outline-none" id="indicator-0"></button>
+                          <button className="w-2 h-2 rounded-full bg-luxury-gold focus:outline-none" id="indicator-1"></button>
+                          <button className="w-2 h-2 rounded-full bg-gray-400 focus:outline-none" id="indicator-2"></button>
+                        </div>
+
+                        {/* Slide Instructions */}
+                        <div className="absolute bottom-10 left-0 right-0 text-center text-xs text-gray-500">
+                          <p>Проведите влево или вправо для просмотра</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
               
               {/* Client Management Section */}
-              <div className="relative group animate-fade-in-up w-full max-w-4xl mx-auto" style={{animationDelay: '200ms'}}>
+              <div className="relative group animate-fade-in-up w-full max-w-4xl mx-auto md:mt-0 mt-[0px]" style={{animationDelay: '200ms'}}>
                 <div className="absolute inset-[-2px] bg-gradient-to-br from-luxury-gold/20 via-luxury-gold/5 to-transparent dark:from-luxury-royalBlue/20 dark:via-luxury-royalBlue/5 dark:to-transparent rounded-sm blur-[5px] opacity-0 group-hover:opacity-100 transition-all duration-700 z-0"></div>
                 <div className="p-0 relative z-10 h-full flex flex-col md:flex-row rounded-sm border border-gray-100 dark:border-dark-slate group-hover:border-luxury-gold/30 dark:group-hover:border-luxury-royalBlue/30 transition-all duration-500 theme-transition overflow-visible">
                   
@@ -703,7 +1269,7 @@ export default function Home() {
                       {/* Removed background pattern and gradient overlays for monolithic color */}
                       
                       {/* Client Cards */}
-                      <div className="relative w-full max-w-xs pt-20 pb-40 group z-50 mt-[-250px]">
+                      <div className="relative w-full max-w-xs pt-20 pb-40 group z-50 md:mt-[-250px] mt-[-50px]">
                         {/* First Client Card */}
                         <div className="absolute z-10 -left-16 transform -rotate-12 transition-all duration-300 group-hover:-translate-x-12 group-hover:-rotate-24 group-hover:translate-y-2 hover:z-30">
                           <div className="w-[280px] bg-white dark:bg-dark-graphite shadow-elegant dark:shadow-elegant-dark rounded-sm border border-gray-100 dark:border-dark-slate p-5 theme-transition">
