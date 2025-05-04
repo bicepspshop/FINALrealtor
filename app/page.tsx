@@ -291,7 +291,7 @@ export default function Home() {
               <Link href="#features" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
                 Возможности
               </Link>
-              <Link href="#about" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
+              <Link href="/about" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
                 О платформе
               </Link>
               <Link href="#contact" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
@@ -1758,14 +1758,18 @@ export default function Home() {
               <h4 className="font-medium mb-6 text-white dark:text-white theme-transition">Навигация</h4>
               <ul className="space-y-3">
                 <li><Link href="#features" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">Возможности</Link></li>
-                <li><Link href="#about" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">О платформе</Link></li>
+                <li><Link href="/about" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">О платформе</Link></li>
                 <li><Link href="#contact" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">Контакты</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-medium mb-6 text-white dark:text-white theme-transition">Правовая информация</h4>
               <ul className="space-y-3">
-                <li><Link href="#" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">Условия использования</Link></li>
+                <li>
+                  <Link href="/agreement" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">
+                    Пользовательское соглашение
+                  </Link>
+                </li>
                 <li><Link href="#" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">Политика конфиденциальности</Link></li>
               </ul>
             </div>
@@ -1780,14 +1784,25 @@ export default function Home() {
                     <path d="M17.5 17V13C17.5 12.6 17.6 12.3 17.8 12C18 11.7 18.2 11.5 18.6 11.5C19 11.5 19.2 11.7 19.4 12C19.6 12.3 19.7 12.6 19.7 13V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M17.5 13C17.5 13 17.5 12 18.5 12C19.5 12 19.5 13 19.5 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span className="text-white/90 dark:text-white/80 theme-transition">support@rieltorpro.ru</span>
+                  <span className="text-white/90 dark:text-white/80 theme-transition">rieltorprorf@mail.ru</span>
                 </li>
                 <li className="flex items-center gap-3">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-luxury-gold dark:text-luxury-royalBlue theme-transition">
                     <path d="M3 5C3 3.89543 3.89543 3 5 3H8.27924C8.70967 3 9.09181 3.27543 9.22792 3.68377L10.7257 8.17721C10.8831 8.64932 10.6694 9.16531 10.2243 9.38787L7.96701 10.5165C9.06925 12.9612 11.0388 14.9308 13.4835 16.033L14.6121 13.7757C14.8347 13.3306 15.3507 13.1169 15.8228 13.2743L20.3162 14.7721C20.7246 14.9082 21 15.2903 21 15.7208V19C21 20.1046 20.1046 21 19 21H18C9.71573 21 3 14.2843 3 6V5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                  <span className="text-white/90 dark:text-white/80 theme-transition">+7 (495) 123-45-67</span>
+                  <span className="text-white/90 dark:text-white/80 theme-transition">+79991378919</span>
                 </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-medium mb-6 text-white dark:text-white theme-transition">
+                <Link href="/requisites" className="hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300">
+                  Реквизиты
+                </Link>
+              </h4>
+              <ul className="space-y-3">
+                <li className="text-white/90 dark:text-white/80 theme-transition">Анисимов Константин Александрович</li>
+                <li className="text-white/90 dark:text-white/80 theme-transition">ИНН: 526319437963</li>
               </ul>
             </div>
           </div>
