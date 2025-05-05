@@ -16,7 +16,7 @@ import { NavBar } from "@/components/nav-bar"
 import { useToast } from "@/hooks/use-toast"
 import { updateProfile, getProfile } from "./actions"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle, Check, User, ArrowLeft, Upload, X } from "lucide-react"
+import { AlertCircle, Check, User, ArrowLeft, Upload, X, CreditCard } from "lucide-react"
 import { getBrowserClient } from "@/lib/supabase"
 import { uploadAvatar } from "@/lib/upload"
 
@@ -278,12 +278,24 @@ export default function ProfilePage() {
             <div className="w-20 h-0.5 bg-luxury-gold dark:bg-luxury-royalBlue mt-2 mb-3 theme-transition"></div>
             <p className="text-luxury-black/60 dark:text-white/60 theme-transition">Управление личной информацией</p>
           </div>
-          <Link href="/dashboard">
-            <Button variant="outline" className="border-luxury-black/20 dark:border-luxury-royalBlue/40 hover:bg-luxury-black/5 dark:hover:bg-luxury-royalBlue/10 hover:border-luxury-black/30 dark:hover:border-luxury-royalBlue/60 rounded-sm flex items-center gap-2 dark:text-white theme-transition" animation="scale">
-              <ArrowLeft size={16} />
-              Назад к коллекциям
-            </Button>
-          </Link>
+          <div className="flex flex-col sm:items-end gap-3">
+            <Link href="/dashboard">
+              <Button variant="outline" className="border-luxury-black/20 dark:border-luxury-royalBlue/40 hover:bg-luxury-black/5 dark:hover:bg-luxury-royalBlue/10 hover:border-luxury-black/30 dark:hover:border-luxury-royalBlue/60 rounded-sm flex items-center gap-2 dark:text-white theme-transition" animation="scale">
+                <ArrowLeft size={16} />
+                Назад к коллекциям
+              </Button>
+            </Link>
+            <Link href="/dashboard/subscription">
+              <Button 
+                variant="outline" 
+                className="border-luxury-gold/30 dark:border-luxury-royalBlue/50 text-luxury-gold dark:text-luxury-royalBlue hover:bg-luxury-gold/5 dark:hover:bg-luxury-royalBlue/10 hover:border-luxury-gold/60 dark:hover:border-luxury-royalBlue/70 rounded-sm flex items-center gap-2 theme-transition"
+                animation="scale"
+              >
+                <CreditCard size={16} />
+                Управление подпиской
+              </Button>
+            </Link>
+          </div>
         </div>
         
         {initialLoadError && (

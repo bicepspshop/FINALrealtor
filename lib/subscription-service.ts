@@ -21,6 +21,13 @@ interface UserTrialData {
  */
 export class SubscriptionService {
   /**
+   * Get the server-side Supabase client
+   */
+  static getSupabaseClient() {
+    return getServerClient();
+  }
+
+  /**
    * Get the subscription status for a user by ID directly from the database
    * with no caching to ensure we always have the latest status.
    */
@@ -161,31 +168,6 @@ export class SubscriptionService {
     } catch (error) {
       console.error("Error updating expired trials:", error);
       return { updated: 0, errors: [error] };
-    }
-  }
-  
-  /**
-   * Get the current user ID from cookies
-   */
-  static getCurrentUserId(): string | null {
-    try {
-      // Using try/catch because cookies() is a Server Component API
-      // and might not be available in all contexts
-      const cookieStore = cookies();
-      
-      // Handle both synchronous and asynchronous cookie store
-      if (cookieStore instanceof Promise) {
-        // This is async, but since we can't make this function async without
-        // changing its signature, we'll need to return null for this case
-        console.warn("Cookie store is asynchronous, can't get user ID synchronously");
-        return null;
-      }
-      
-      const cookie = cookieStore.get('auth-token');
-      return cookie ? cookie.value : null;
-    } catch (error) {
-      console.error("Error getting current user ID:", error);
-      return null;
     }
   }
   
