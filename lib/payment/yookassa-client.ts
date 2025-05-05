@@ -22,5 +22,5 @@ export function getYooKassaClient() {
 // Subscription plan prices
 export const SUBSCRIPTION_PRICES = {
   monthly: 1, // 2000 RUB per month
-  yearly: 16800  // 16800 RUB per year
+  yearly: 16801  // 16800 RUB per year
 }; 
