@@ -94,3 +94,61 @@ CREATE TABLE IF NOT EXISTS property_images (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ```
+
+## Payment System
+
+### Payments Table Structure
+
+The application's payment system uses the following database structure:
+
+#### Payments Table
+
+The `payments` table has the following columns:
+- `id` - Primary key (UUID)
+- `user_id` - Foreign key references users(id)
+- `payment_id` - YooKassa payment identifier (VARCHAR)
+- `amount` - Payment amount (NUMERIC)
+- `currency` - Payment currency, default 'RUB' (VARCHAR)
+- `plan_type` - Subscription plan type: 'monthly' or 'yearly' (VARCHAR)
+- `payment_date` - When payment was processed (TIMESTAMPTZ)
+- `payment_method` - Payment processor, e.g., 'yookassa' (VARCHAR)
+- `status` - Payment status: 'succeeded', 'canceled', 'pending' (VARCHAR)
+- `metadata` - Additional payment data (JSONB)
+
+#### User Subscription Fields
+
+The `users` table has the following subscription-related columns:
+- `subscription_status` - 'trial', 'active', 'expired', or 'cancelled' (VARCHAR)
+- `subscription_plan` - 'monthly' or 'yearly' (VARCHAR)
+- `subscription_start_date` - When current subscription started (TIMESTAMPTZ)
+- `subscription_end_date` - When current subscription will end (TIMESTAMPTZ)
+- `last_payment_id` - ID of the last successful payment (VARCHAR)
+- `trial_start_time` - When user's trial started (TIMESTAMPTZ)
+- `trial_duration_minutes` - Duration of trial period in minutes (INTEGER)
+
+### Database Functions
+
+The system includes these helper functions:
+- `is_subscription_active(user_id)` - Checks if a user's subscription is active
+
+### Setting Up the Payment System
+
+If the payment system tables are not yet set up, you can apply the migration:
+
+1. First, set an administrator user:
+
+```sql
+UPDATE users SET is_admin = true WHERE email = 'your-admin-email@example.com';
+```
+
+2. Then navigate to `/dashboard/admin/migration` in the application and apply the migrations.
+
+Alternatively, run these SQL commands directly:
+
+```sql
+-- First, set up the run_sql function
+\i db/migrations/setup_run_sql_function.sql
+
+-- Then, set up the payments table
+\i db/migrations/setup_payments_table.sql
+```

@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button"
 import { Clock, CreditCard, CheckCircle, AlertTriangle } from "lucide-react"
 import { SubscriptionService } from "@/lib/subscription-service"
 
+// Add client component for payment functionality
+import { SubscriptionActions } from "./components/subscription-actions"
+
 export default async function SubscriptionPage() {
   // Get user session with auth check
   const session = await requireAuth()
@@ -87,7 +90,7 @@ export default async function SubscriptionPage() {
                   </div>
                 )}
                 
-                {/* Paid Subscription Info (placeholder) */}
+                {/* Paid Subscription Info */}
                 {subscriptionStatus.status === 'active' && (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-2">
@@ -119,18 +122,11 @@ export default async function SubscriptionPage() {
                   </Alert>
                 )}
                 
-                <Button 
-                  className="w-full bg-luxury-gold hover:bg-luxury-goldMuted dark:bg-luxury-royalBlue dark:hover:bg-luxury-royalBlueMuted text-luxury-black dark:text-white py-6 theme-transition"
-                  disabled
-                >
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  {subscriptionStatus.status === 'active'
-                    ? 'Управление платежами'
-                    : 'Оформить подписку'}
-                </Button>
-                <p className="text-xs text-center mt-4 text-luxury-black/60 dark:text-white/60 theme-transition">
-                  Функция оплаты подписки будет доступна в ближайшее время
-                </p>
+                {/* Replace with client component for payment functionality */}
+                <SubscriptionActions 
+                  userId={session.id}
+                  subscriptionStatus={subscriptionStatus.status} 
+                />
               </div>
             </CardFooter>
           </Card>
