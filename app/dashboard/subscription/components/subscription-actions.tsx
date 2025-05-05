@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { CreditCard, Loader2 } from 'lucide-react'
 import { 
@@ -26,6 +26,24 @@ export function SubscriptionActions({ userId, subscriptionStatus }: Subscription
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Listen for plan selection events
+  useEffect(() => {
+    const handlePlanSelect = (event: CustomEvent) => {
+      const planType = event.detail;
+      if (planType === 'monthly' || planType === 'yearly') {
+        setSelectedPlan(planType);
+        setIsOpen(true);
+      }
+    };
+
+    document.addEventListener('select-plan', handlePlanSelect as EventListener);
+    
+    // Cleanup
+    return () => {
+      document.removeEventListener('select-plan', handlePlanSelect as EventListener);
+    };
+  }, []);
 
   // Handler for subscribing
   const handleSubscription = async () => {
