@@ -6,9 +6,12 @@ import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
-    // Clone the request to read the body text twice (once for verification, once for processing)
-    const clonedReq = req.clone();
-    const bodyText = await clonedReq.text();
+    // Get the raw body as ArrayBuffer to ensure we have the exact bytes for signature verification
+    const rawBodyBuffer = await req.arrayBuffer();
+    const rawBody = new Uint8Array(rawBodyBuffer);
+    
+    // Convert to string for JSON parsing and logging
+    const bodyText = new TextDecoder('utf-8').decode(rawBody);
     
     // Log the entire request for debugging
     console.log('Webhook received - Headers:', Object.fromEntries([...req.headers.entries()]));
@@ -23,33 +26,56 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
     
-    // Check signature from YooKassa - but make it optional for test mode
+    // Check signature from YooKassa
     const signature = req.headers.get('Me-Signature');
-    const isTestMode = eventData.object?.test || false; // Check if this is a test payment
+    
+    // Try both signature verification methods to identify which works
+    let signatureVerified = false;
     
     if (process.env.YOOKASSA_SECRET_KEY && signature) {
-      // Verify signature if provided
-      const hmac = crypto.createHmac('sha256', process.env.YOOKASSA_SECRET_KEY);
-      hmac.update(bodyText);
-      const calculatedSignature = hmac.digest('base64');
+      // Method 1: Verify signature using the raw body bytes
+      const hmac1 = crypto.createHmac('sha256', process.env.YOOKASSA_SECRET_KEY);
+      hmac1.update(Buffer.from(rawBody));
+      const calculatedSignature1 = hmac1.digest('base64');
       
-      console.log('Signature verification:', {
+      // Method 2: Verify signature using the UTF-8 decoded text
+      const hmac2 = crypto.createHmac('sha256', process.env.YOOKASSA_SECRET_KEY);
+      hmac2.update(bodyText);
+      const calculatedSignature2 = hmac2.digest('base64');
+      
+      // Log all signature information for debugging
+      const debugInfo = {
         received: signature,
-        calculated: calculatedSignature,
-        match: signature === calculatedSignature
-      });
+        calculatedFromRawBytes: calculatedSignature1,
+        calculatedFromText: calculatedSignature2,
+        method1Match: signature === calculatedSignature1,
+        method2Match: signature === calculatedSignature2,
+        bodySize: rawBody.length
+      };
       
-      if (signature !== calculatedSignature) {
-        console.error('Webhook error: Invalid signature');
+      console.log('Signature verification attempts:', debugInfo);
+      
+      // Check if either method worked
+      signatureVerified = signature === calculatedSignature1 || signature === calculatedSignature2;
+      
+      if (!signatureVerified) {
+        console.error('Webhook error: Invalid signature - verification failed');
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      } else {
+        console.log('✓ Signature verified successfully using ' + 
+                  (signature === calculatedSignature1 ? 'raw bytes method' : 'text method'));
       }
     } else {
-      // Allow unsigned requests in test mode, but log a warning
-      console.warn('⚠️ Processing unsigned webhook - this should only happen in test mode', {
-        isTestMode,
+      // If no signature or secret key, we can't verify - reject the request
+      console.error('Cannot verify webhook signature', {
         hasSignature: !!signature,
         hasSecretKey: !!process.env.YOOKASSA_SECRET_KEY
       });
+      
+      return NextResponse.json(
+        { error: signature ? 'Missing secret key' : 'Missing signature header' },
+        { status: 401 }
+      );
     }
     
     // Log the webhook receipt
