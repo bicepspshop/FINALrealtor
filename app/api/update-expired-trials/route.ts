@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SubscriptionService } from '@/lib/subscription-service'
+import { getServerClient } from '@/lib/supabase'
+import { updateExpiredTrials } from '@/lib/subscription'
 
 export async function GET(req: NextRequest) {
   try {
@@ -30,5 +32,43 @@ export async function GET(req: NextRequest) {
       { error: 'Failed to update expired trials', details: error },
       { status: 500 }
     )
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    // Get request body
+    const body = await request.json();
+    const { admin_id } = body;
+    
+    // Verify the user making the request is an admin
+    const supabase = getServerClient();
+    const { data: adminCheck, error: adminError } = await supabase
+      .from('users')
+      .select('is_admin')
+      .eq('id', admin_id)
+      .single();
+    
+    if (adminError || !adminCheck || !adminCheck.is_admin) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Admin privileges required' },
+        { status: 403 }
+      );
+    }
+    
+    // Execute the update of expired trials
+    const result = await updateExpiredTrials();
+    
+    // Return the results
+    return NextResponse.json({
+      success: true,
+      ...result
+    });
+  } catch (error) {
+    console.error('Error updating expired trials:', error);
+    return NextResponse.json(
+      { error: 'Failed to update expired trials' },
+      { status: 500 }
+    );
   }
 } 
