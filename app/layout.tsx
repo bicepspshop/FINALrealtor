@@ -6,6 +6,7 @@ import { ClientAuthProvider } from "@/components/client-auth-provider"
 import { OfflineAlert } from "@/components/offline-alert"
 import { ThemeScript } from "@/components/theme-script"
 import { initializeStorage } from "@/lib/storage"
+import AdminProvider from "@/components/admin/AdminProvider"
 
 export const metadata = {
   title: "РиелторПро",
@@ -47,10 +48,12 @@ export default function RootLayout({
       <body className="min-h-screen w-full overflow-x-hidden">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <ClientAuthProvider>
-            <ThemeScript />
-            {children}
-            <Toaster />
-            <OfflineAlert />
+            <AdminProvider>
+              <ThemeScript />
+              {children}
+              <Toaster />
+              <OfflineAlert />
+            </AdminProvider>
           </ClientAuthProvider>
         </ThemeProvider>
       </body>

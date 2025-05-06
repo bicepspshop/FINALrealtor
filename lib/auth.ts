@@ -155,3 +155,26 @@ export function setAuthCookie(userId: string) {
 export function clearAuthCookie() {
   cookies().delete("auth-token")
 }
+
+export async function checkIsAdmin(userId: string): Promise<boolean> {
+  if (!userId) return false;
+  
+  try {
+    const supabase = getServerClient();
+    const { data, error } = await supabase
+      .from('users')
+      .select('is_admin')
+      .eq('id', userId)
+      .single();
+    
+    if (error || !data) {
+      console.error('Error checking admin status:', error);
+      return false;
+    }
+    
+    return data.is_admin === true;
+  } catch (error) {
+    console.error('Unexpected error checking admin status:', error);
+    return false;
+  }
+}
