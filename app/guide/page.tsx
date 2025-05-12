@@ -1,8 +1,5 @@
-import { NavBar } from "@/components/nav-bar"
-import { getSession } from "@/lib/auth"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
 import { ArrowLeft, UserCircle, FolderPlus, Home, MessageSquare, Users, CreditCard, CheckCircle, Calendar } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
@@ -10,50 +7,35 @@ import { GuideSectionImage } from "./guide-section-image"
 
 export const dynamic = 'force-dynamic'
 
-export default async function GuidePage() {
-  let user = null
-  let isOfflineMode = false
-  
-  try {
-    const session = await getSession()
-    user = session
-    isOfflineMode = user && "isOfflineMode" in user && user.isOfflineMode === true
-  } catch (error) {
-    // Если произошла ошибка при получении сессии, продолжаем без пользователя
-    console.log('Guide page: No user session found, continuing without auth')
-  }
-
+export default function GuidePage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-gray-100 dark:from-dark-charcoal dark:to-dark-slate transition-colors duration-300">
-      {user ? (
-        <NavBar userName={user.name} isOfflineMode={isOfflineMode} />
-      ) : (
-        <header className="bg-white dark:bg-dark-graphite border-b border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark py-3 sticky top-0 z-50 theme-transition">
-          <div className="container-luxury flex justify-between items-center">
-            <Link href="/" className="flex items-center">
-              <h1 className="text-2xl font-serif font-medium tracking-tight text-luxury-black dark:text-white dark:gold-accent theme-transition">
-                РиелторПро
-              </h1>
+      {/* Simple header for public access */}
+      <header className="bg-white dark:bg-dark-graphite border-b border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark py-3 sticky top-0 z-50 theme-transition">
+        <div className="container-luxury flex justify-between items-center">
+          <Link href="/" className="flex items-center">
+            <h1 className="text-2xl font-serif font-medium tracking-tight text-luxury-black dark:text-white dark:gold-accent theme-transition">
+              РиелторПро
+            </h1>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/login">
+              <Button variant="outline" className="border-luxury-black/20 dark:border-luxury-royalBlue/30 hover:bg-luxury-black/5 dark:hover:bg-luxury-royalBlue/10">
+                Войти
+              </Button>
             </Link>
-            <div className="flex items-center gap-4">
-              <Link href="/login">
-                <Button variant="outline" className="border-luxury-black/20 dark:border-luxury-royalBlue/30 hover:bg-luxury-black/5 dark:hover:bg-luxury-royalBlue/10">
-                  Войти
-                </Button>
-              </Link>
-              <Link href="/register">
-                <Button className="bg-luxury-black dark:bg-luxury-royalBlue hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white">
-                  Зарегистрироваться
-                </Button>
-              </Link>
-            </div>
+            <Link href="/register">
+              <Button className="bg-luxury-black dark:bg-luxury-royalBlue hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white">
+                Зарегистрироваться
+              </Button>
+            </Link>
           </div>
-        </header>
-      )}
+        </div>
+      </header>
       
       <main className="flex-1 container-luxury py-8">
         {/* Кнопка назад */}
-        <Link href={user ? "/dashboard" : "/"}>
+        <Link href="/">
           <Button variant="outline" className="mb-6 gap-2 border-luxury-black/20 dark:border-luxury-royalBlue/30 hover:bg-luxury-black/5 dark:hover:bg-luxury-royalBlue/10">
             <ArrowLeft className="h-4 w-4" />
             Назад
@@ -206,13 +188,11 @@ export default async function GuidePage() {
               <h3 className="text-xl font-display font-medium text-luxury-black dark:text-white mb-3">
                 Надеемся, что это руководство поможет вам быстро освоить площадку РиелторПро. Удачных сделок!
               </h3>
-              {user && (
-                <Link href="/dashboard">
-                  <Button className="bg-luxury-black dark:bg-luxury-royalBlue hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white mt-4">
-                    Перейти к работе
-                  </Button>
-                </Link>
-              )}
+              <Link href="/dashboard">
+                <Button className="bg-luxury-black dark:bg-luxury-royalBlue hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white mt-4">
+                  Перейти к работе
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>
