@@ -11,21 +11,27 @@ export default function GuidePage() {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-gray-100 dark:from-dark-charcoal dark:to-dark-slate transition-colors duration-300">
       {/* Simple header for public access */}
-      <header className="bg-white dark:bg-dark-graphite border-b border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark py-3 sticky top-0 z-50 theme-transition">
+      <header className="bg-white/95 dark:bg-dark-graphite/95 backdrop-blur-sm border-b border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark py-3 sticky top-0 z-50 theme-transition">
         <div className="container-luxury flex justify-between items-center">
           <Link href="/" className="flex items-center">
-            <h1 className="text-2xl font-serif font-medium tracking-tight text-luxury-black dark:text-white dark:gold-accent theme-transition">
+            <h1 className="text-2xl font-serif font-medium tracking-tight text-luxury-black dark:text-white theme-transition drop-shadow-md">
               РиелторПро
             </h1>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/login">
-              <Button variant="outline" className="border-luxury-black/20 dark:border-luxury-royalBlue/30 hover:bg-luxury-black/5 dark:hover:bg-luxury-royalBlue/10">
+              <Button 
+                variant="outline" 
+                className="border-2 border-luxury-black dark:border-white text-luxury-black dark:text-white hover:bg-luxury-black hover:text-white dark:hover:bg-white dark:hover:text-luxury-black font-semibold transition-all duration-300 px-5 py-2"
+              >
                 Войти
               </Button>
             </Link>
             <Link href="/register">
-              <Button className="bg-luxury-black dark:bg-luxury-royalBlue hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white">
+              <Button 
+                variant="luxury"
+                className="shadow-md hover:shadow-lg transition-all duration-300 font-semibold px-6 py-2"
+              >
                 Зарегистрироваться
               </Button>
             </Link>
@@ -36,7 +42,10 @@ export default function GuidePage() {
       <main className="flex-1 container-luxury py-8">
         {/* Кнопка назад */}
         <Link href="/">
-          <Button variant="outline" className="mb-6 gap-2 border-luxury-black/20 dark:border-luxury-royalBlue/30 hover:bg-luxury-black/5 dark:hover:bg-luxury-royalBlue/10">
+          <Button 
+            variant="outline" 
+            className="mb-6 gap-2 border-2 border-luxury-black dark:border-white text-luxury-black dark:text-white hover:bg-luxury-black hover:text-white dark:hover:bg-white dark:hover:text-luxury-black font-semibold transition-all duration-300"
+          >
             <ArrowLeft className="h-4 w-4" />
             Назад
           </Button>
@@ -66,7 +75,7 @@ export default function GuidePage() {
               "В поле «О себе» добавьте краткое описание (2–3 предложения).",
               "Нажмите «Сохранить изменения». Ваши данные отобразятся в карточке агента на подборках."
             ]}
-            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/screenshots/profile-edit.png"
+            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/public/images/profile-edit.png"
             imageAlt="Окно редактирования профиля"
           />
 
@@ -82,7 +91,7 @@ export default function GuidePage() {
               "Загрузите обложку (видно в личном кабинете).",
               "Кликните «Создать» — карточка подборки появится в списке."
             ]}
-            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/screenshots/create-collection.png"
+            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/public/images/create-collection.png"
             imageAlt="Форма создания подборки"
           />
 
@@ -98,7 +107,7 @@ export default function GuidePage() {
               "Сохраните — объект появится в подборке.",
               "Для просмотра обратной связи перейдите во вкладку «Комментарии»."
             ]}
-            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/screenshots/add-property.png"
+            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/public/images/add-property.png"
             imageAlt="Меню объектов и форма добавления"
           />
 
@@ -112,7 +121,7 @@ export default function GuidePage() {
               "Проверьте оформление: заголовок, объекты, карточка агента.",
               "Все контакты (звонок, WhatsApp) кликабельны для ваших клиентов."
             ]}
-            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/screenshots/client-view.png"
+            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/public/images/client-view.png"
             imageAlt="Вид для клиента"
           />
 
@@ -128,7 +137,7 @@ export default function GuidePage() {
               "• Источник (как узнал о вас)",
               "Сохраните карточку клиента."
             ]}
-            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/screenshots/add-client.png"
+            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/public/images/add-client.png"
             imageAlt="Форма добавления клиента"
           />
 
@@ -146,7 +155,7 @@ export default function GuidePage() {
               "• Способ оплаты",
               "Перейдите к «Прогресс сделки» и переключайте этапы (Потребность → Закрыто)."
             ]}
-            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/screenshots/client-request.png"
+            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/public/images/client-request.png"
             imageAlt="Вкладки «Запрос на недвижимость» и «Прогресс сделки»"
           />
 
@@ -160,7 +169,7 @@ export default function GuidePage() {
               "Добавьте новые заметки или создайте задачи с планируемыми датами.",
               "Отмечайте выполнение задач и фиксируйте важные детали."
             ]}
-            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/screenshots/notes-tasks.png"
+            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/public/images/notes-tasks.png"
             imageAlt="Блок заметок и задач"
           />
 
@@ -173,7 +182,7 @@ export default function GuidePage() {
               "Индикатор пробного периода отображается в верхней части экрана.",
               "Для оформления подписки нажмите «Оформить подписку» и выберите тариф (2 000 ₽/мес или 16 800 ₽/год)."
             ]}
-            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/screenshots/subscription.png"
+            imageUrl="https://raw.githubusercontent.com/bicepspshop/FINALrealtor/main/public/images/subscription.png"
             imageAlt="Индикатор подписки и кнопка оформления"
           />
 
@@ -254,9 +263,9 @@ function GuideSection({
         </div>
 
         {/* Placeholder для скриншота */}
-        <div className="pl-14">
+        <div className="mt-6">
           <div className="bg-gray-100 dark:bg-dark-slate rounded-sm p-4 border border-gray-200 dark:border-dark-slate">
-            <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-2">{imageAlt}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">{imageAlt}</p>
             <GuideSectionImage imageUrl={imageUrl} imageAlt={imageAlt} />
           </div>
         </div>
