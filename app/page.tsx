@@ -294,6 +294,9 @@ export default function Home() {
               <Link href="/about" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
                 О платформе
               </Link>
+              <Link href="/guide" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
+                Руководство
+              </Link>
               <Link href="#contact" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
                 Контакты
               </Link>

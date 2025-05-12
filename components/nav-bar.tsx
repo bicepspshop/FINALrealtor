@@ -152,6 +152,14 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
             <Users size={18} />
             Клиенты
           </Link>
+          
+          <Link 
+            href="/guide" 
+            className="transition-colors duration-300 font-medium flex items-center gap-2 theme-transition text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
+          >
+            <Settings size={18} />
+            Руководство
+          </Link>
         </nav>
 
         <div className="flex items-center gap-4">
@@ -201,6 +209,14 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
                 >
                   <Users size={18} />
                   Клиенты
+                </Link>
+                
+                <Link 
+                  href="/guide" 
+                  className="transition-colors duration-300 font-medium flex items-center gap-2 theme-transition py-2 text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
+                >
+                  <Settings size={18} />
+                  Руководство
                 </Link>
                 
                 <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>
