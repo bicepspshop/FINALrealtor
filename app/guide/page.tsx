@@ -7,6 +7,8 @@ import { ArrowLeft, UserCircle, FolderPlus, Home, MessageSquare, Users, CreditCa
 import Link from "next/link"
 import Image from "next/image"
 
+export const dynamic = 'force-dynamic'
+
 export default async function GuidePage() {
   const session = await getSession()
   const user = session
