@@ -21,7 +21,7 @@ export interface SessionWithSubscription {
 export async function getSession(): Promise<SessionWithSubscription | null> {
   try {
     // Используем cookies() только в серверном контексте
-    const cookieStore = cookies()
+    const cookieStore = await cookies()
     const token = cookieStore.get("auth-token")?.value
 
     if (!token) {
@@ -62,14 +62,16 @@ export async function getSession(): Promise<SessionWithSubscription | null> {
         }
 
         // Для других типов ошибок очищаем токен
-        cookies().delete("auth-token")
+        const cookieStore = await cookies()
+        cookieStore.delete("auth-token")
         return null
       }
 
       if (!data) {
         console.error("getSession: Пользователь не найден в базе данных")
         // Очищаем невалидный токен
-        cookies().delete("auth-token")
+        const cookieStore = await cookies()
+        cookieStore.delete("auth-token")
         return null
       }
 
@@ -110,7 +112,8 @@ export async function getSession(): Promise<SessionWithSubscription | null> {
       }
 
       // Для других ошибок очищаем токен
-      cookies().delete("auth-token")
+      const cookieStore = await cookies()
+      cookieStore.delete("auth-token")
       return null
     }
   } catch (error) {
@@ -139,8 +142,9 @@ export async function comparePasswords(password: string, hashedPassword: string)
 }
 
 // Функция для установки cookie с токеном авторизации
-export function setAuthCookie(userId: string) {
-  cookies().set({
+export async function setAuthCookie(userId: string) {
+  const cookieStore = await cookies()
+  cookieStore.set({
     name: "auth-token",
     value: userId,
     httpOnly: true,
@@ -152,8 +156,9 @@ export function setAuthCookie(userId: string) {
 }
 
 // Функция для удаления cookie с токеном авторизации
-export function clearAuthCookie() {
-  cookies().delete("auth-token")
+export async function clearAuthCookie() {
+  const cookieStore = await cookies()
+  cookieStore.delete("auth-token")
 }
 
 export async function checkIsAdmin(userId: string): Promise<boolean> {

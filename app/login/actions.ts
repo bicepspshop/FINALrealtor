@@ -35,10 +35,11 @@ export async function loginUser(data: LoginData) {
     }
 
     // Очистить существующие cookie перед установкой новых
-    cookies().delete("auth-token")
+    const cookieStore = await cookies()
+    cookieStore.delete("auth-token")
 
     // Установить новый cookie с улучшенными параметрами
-    cookies().set({
+    cookieStore.set({
       name: "auth-token",
       value: user.id,
       path: "/",
