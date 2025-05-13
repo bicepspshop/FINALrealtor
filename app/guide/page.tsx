@@ -4,47 +4,44 @@ import { ArrowLeft, UserCircle, FolderPlus, Home, MessageSquare, Users, CreditCa
 import Link from "next/link"
 import Image from "next/image"
 import { GuideSectionImage } from "./guide-section-image"
+import { GuideUserNavButton } from "./guide-user-nav-button"
+import { Suspense } from "react"
+import { GuideBottomButton } from "./guide-bottom-button"
+import { ThemeToggle } from "@/components/ui/theme/theme-toggle"
 
 export const dynamic = 'force-dynamic'
 
 export default function GuidePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-gray-100 dark:from-dark-charcoal dark:to-dark-slate transition-colors duration-300">
-      {/* Simple header for public access */}
-      <header className="bg-white/95 dark:bg-dark-graphite/95 backdrop-blur-sm border-b border-gray-100 dark:border-dark-slate shadow-subtle dark:shadow-elegant-dark py-3 sticky top-0 z-50 theme-transition">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-gray-100 dark:from-dark-charcoal dark:to-dark-slate transition-colors duration-300 relative">
+      {/* Background with overlay */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-luxury-black/40 to-luxury-black/60 dark:from-luxury-black/60 dark:to-luxury-black/80 z-10"></div>
+      </div>
+      
+      {/* Header with transparent background */}
+      <header className="absolute top-0 left-0 right-0 z-20 py-6">
         <div className="container-luxury flex justify-between items-center">
           <Link href="/" className="flex items-center">
-            <h1 className="text-2xl font-serif font-medium tracking-tight text-luxury-black dark:text-white theme-transition drop-shadow-md">
+            <h1 className="text-2xl font-serif font-medium tracking-tight text-white dark:text-white text-shadow-md theme-transition">
               РиелторПро
             </h1>
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/login">
-              <Button 
-                variant="outline" 
-                className="border-2 border-luxury-black dark:border-white text-luxury-black dark:text-white hover:bg-luxury-black hover:text-white dark:hover:bg-white dark:hover:text-luxury-black font-semibold transition-all duration-300 px-5 py-2"
-              >
-                Войти
-              </Button>
-            </Link>
-            <Link href="/register">
-              <Button 
-                variant="luxury"
-                className="shadow-md hover:shadow-lg transition-all duration-300 font-semibold px-6 py-2"
-              >
-                Зарегистрироваться
-              </Button>
-            </Link>
+            <ThemeToggle />
+            <Suspense fallback={null}>
+              <GuideUserNavButton />
+            </Suspense>
           </div>
         </div>
       </header>
       
-      <main className="flex-1 container-luxury py-8">
+      <main className="flex-1 container-luxury py-8 pt-24 relative z-10">
         {/* Кнопка назад */}
         <Link href="/">
           <Button 
             variant="outline" 
-            className="mb-6 gap-2 border-2 border-luxury-black dark:border-white text-luxury-black dark:text-white hover:bg-luxury-black hover:text-white dark:hover:bg-white dark:hover:text-luxury-black font-semibold transition-all duration-300"
+            className="mb-6 gap-2 border border-white/40 text-white hover:bg-white/10 transition-colors duration-300"
           >
             <ArrowLeft className="h-4 w-4" />
             Назад
@@ -53,11 +50,11 @@ export default function GuidePage() {
 
         {/* Заголовок страницы */}
         <div className="mb-10 text-center animate-fade-in-up">
-          <h1 className="text-3xl md:text-4xl font-serif font-medium text-luxury-black dark:text-white mb-3 transition-colors duration-300">
+          <h1 className="text-3xl md:text-4xl font-serif font-medium text-white mb-3 transition-colors duration-300">
             Руководство по работе на платформе «РиелторПро»
           </h1>
           <div className="w-20 h-0.5 bg-luxury-gold dark:bg-luxury-royalBlue mx-auto mb-4"></div>
-          <p className="text-luxury-black/70 dark:text-white/70 max-w-2xl mx-auto">
+          <p className="text-white/80 max-w-2xl mx-auto">
             Добро пожаловать! В этом руководстве описан основной функционал сервиса для агентов: как настроить профиль, создавать подборки, работать с объектами и клиентами.
           </p>
         </div>
@@ -197,21 +194,17 @@ export default function GuidePage() {
               <h3 className="text-xl font-display font-medium text-luxury-black dark:text-white mb-3">
                 Надеемся, что это руководство поможет вам быстро освоить площадку РиелторПро. Удачных сделок!
               </h3>
-              <Link href="/dashboard">
-                <Button className="bg-luxury-black dark:bg-luxury-royalBlue hover:bg-black dark:hover:bg-luxury-royalBlueMuted text-white mt-4">
-                  Перейти к работе
-                </Button>
-              </Link>
+              <GuideBottomButton />
             </CardContent>
           </Card>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-luxury-black dark:bg-dark-charcoal py-10 text-white/60 mt-20 border-t border-white/5 dark:border-dark-slate">
+      <footer className="bg-luxury-black dark:bg-dark-charcoal py-10 text-white/60 mt-20 border-t border-white/5 dark:border-dark-slate relative z-10">
         <div className="container-luxury flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center">
-            <h2 className="text-xl font-serif text-white mr-2">РиелторПро</h2>
+            <h2 className="text-xl font-display text-white mr-2">РиелторПро</h2>
             <span className="text-sm">• Платформа для риелторов</span>
           </div>
           <p>&copy; {new Date().getFullYear()} Все права защищены</p>
