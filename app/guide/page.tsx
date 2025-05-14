@@ -13,17 +13,17 @@ export const dynamic = 'force-dynamic'
 
 export default function GuidePage() {
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-gray-100 dark:from-dark-charcoal dark:to-dark-slate transition-colors duration-300 relative">
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-white to-white dark:from-dark-charcoal dark:to-dark-slate transition-colors duration-300 relative">
       {/* Background with overlay */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-luxury-black/40 to-luxury-black/60 dark:from-luxury-black/60 dark:to-luxury-black/80 z-10"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-white to-white dark:from-luxury-black/60 dark:to-luxury-black/80 z-10"></div>
       </div>
       
       {/* Header with transparent background */}
       <header className="absolute top-0 left-0 right-0 z-20 py-6">
         <div className="container-luxury flex justify-between items-center">
           <Link href="/" className="flex items-center">
-            <h1 className="text-2xl font-serif font-medium tracking-tight text-white dark:text-white text-shadow-md theme-transition">
+            <h1 className="text-2xl font-serif font-medium tracking-tight text-luxury-black dark:text-white text-shadow-md theme-transition">
               РиелторПро
             </h1>
           </Link>
@@ -38,10 +38,10 @@ export default function GuidePage() {
       
       <main className="flex-1 container-luxury py-8 pt-24 relative z-10">
         {/* Кнопка назад */}
-        <Link href="/">
+        <Link href="/navigation">
           <Button 
             variant="outline" 
-            className="mb-6 gap-2 border border-white/40 text-white hover:bg-white/10 transition-colors duration-300"
+            className="mb-6 gap-2 border border-luxury-black/20 text-luxury-black dark:border-white/40 dark:text-white hover:bg-luxury-black/5 dark:hover:bg-white/10 transition-colors duration-300"
           >
             <ArrowLeft className="h-4 w-4" />
             Назад
@@ -50,11 +50,11 @@ export default function GuidePage() {
 
         {/* Заголовок страницы */}
         <div className="mb-10 text-center animate-fade-in-up">
-          <h1 className="text-3xl md:text-4xl font-serif font-medium text-white mb-3 transition-colors duration-300">
+          <h1 className="text-3xl md:text-4xl font-serif font-medium text-luxury-black dark:text-white mb-3 transition-colors duration-300">
             Руководство по работе на платформе «РиелторПро»
           </h1>
           <div className="w-20 h-0.5 bg-luxury-gold dark:bg-luxury-royalBlue mx-auto mb-4"></div>
-          <p className="text-white/80 max-w-2xl mx-auto">
+          <p className="text-luxury-black/80 dark:text-white/80 max-w-2xl mx-auto">
             Добро пожаловать! В этом руководстве описан основной функционал сервиса для агентов: как настроить профиль, создавать подборки, работать с объектами и клиентами.
           </p>
         </div>
@@ -257,7 +257,7 @@ function GuideSection({
 
         {/* Placeholder для скриншота */}
         <div className="mt-6">
-          <div className="bg-gray-100 dark:bg-dark-slate rounded-sm p-4 border border-gray-200 dark:border-dark-slate">
+          <div className="bg-white dark:bg-dark-slate rounded-sm p-4 border border-gray-200 dark:border-dark-slate">
             <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-4">{imageAlt}</p>
             <GuideSectionImage imageUrl={imageUrl} imageAlt={imageAlt} />
           </div>

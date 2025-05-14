@@ -154,7 +154,7 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
           </Link>
           
           <Link 
-            href="/guide" 
+            href="/navigation" 
             className="transition-colors duration-300 font-medium flex items-center gap-2 theme-transition text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
           >
             <Settings size={18} />
@@ -212,7 +212,7 @@ export function NavBar({ userName, isOfflineMode = false }: NavBarProps) {
                 </Link>
                 
                 <Link 
-                  href="/guide" 
+                  href="/navigation" 
                   className="transition-colors duration-300 font-medium flex items-center gap-2 theme-transition py-2 text-luxury-black/80 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue"
                 >
                   <Settings size={18} />

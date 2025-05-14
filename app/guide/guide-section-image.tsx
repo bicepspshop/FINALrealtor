@@ -54,7 +54,7 @@ export function GuideSectionImage({ imageUrl, imageAlt }: GuideSectionImageProps
   return (
     <>
       <div 
-        className="relative aspect-[16/10] bg-gray-200 dark:bg-dark-charcoal rounded-sm overflow-hidden cursor-zoom-in" 
+        className="relative aspect-[16/10] bg-white dark:bg-dark-charcoal rounded-sm overflow-hidden cursor-zoom-in" 
         onClick={openFullscreen}
       >
         {loading && (

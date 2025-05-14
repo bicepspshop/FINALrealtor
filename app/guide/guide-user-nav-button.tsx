@@ -60,7 +60,7 @@ export function GuideUserNavButton() {
       <Link href="/login">
         <Button 
           variant="outline" 
-          className="border border-white/40 text-white hover:bg-white/10 transition-colors duration-300"
+          className="border border-luxury-black/20 text-luxury-black dark:border-white/40 dark:text-white hover:bg-luxury-black/5 dark:hover:bg-white/10 transition-colors duration-300"
         >
           Войти
         </Button>

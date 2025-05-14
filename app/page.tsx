@@ -294,7 +294,7 @@ export default function Home() {
               <Link href="/about" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
                 О платформе
               </Link>
-              <Link href="/guide" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
+              <Link href="/navigation" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
                 Руководство
               </Link>
               <Link href="#contact" className="text-white dark:text-moonstone hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 font-medium theme-transition">
@@ -1762,6 +1762,7 @@ export default function Home() {
               <ul className="space-y-3">
                 <li><Link href="#features" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">Возможности</Link></li>
                 <li><Link href="/about" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">О платформе</Link></li>
+                <li><Link href="/navigation" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">Руководство</Link></li>
                 <li><Link href="#contact" className="text-white/90 dark:text-white/80 hover:text-luxury-gold dark:hover:text-luxury-royalBlue transition-colors duration-300 theme-transition">Контакты</Link></li>
               </ul>
             </div>
